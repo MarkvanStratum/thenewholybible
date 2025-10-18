@@ -180,7 +180,7 @@ app.get('/', (req, res) => {
       <div class="orn max-w-3xl mx-auto my-6"></div>
       <div class="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <a class="group block p-6 rounded-2xl border border-gold-300 bg-white hover:shadow-lg transition" href="https://youtube.com/" target="_blank">YouTube Channel →</a>
-        <a class="group block p-6 rounded-2xl border border-gold-300 bg-white hover:shadow-lg transition" href="https://instagram.com/" target="_blank">Instagram →</a>
+        <a class="group block p-6 rounded-2xl border border-gold-300 bg-white hover:shadow-lg transition" href="https://www.instagram.com/thechurchofaxiem" target="_blank">Instagram →</a>
         <a class="group block p-6 rounded-2xl border border-gold-300 bg-white hover:shadow-lg transition" href="#" target="_blank">Read The Book of Axiom (PDF) →</a>
       </div>
     </div>
