@@ -97,7 +97,7 @@ app.get('/', (req, res) => {
 <svg xmlns="http://www.w3.org/2000/svg" width="320" height="16" viewBox="0 0 320 16">\
 <g fill="none" stroke="%23d4af37" stroke-width="1.2" stroke-linecap="round">\
 <path d="M2 8h130"/><path d="M188 8h130"/><path d="M160 2l4 6-4 6-4-6 4-6z" fill="%23d4af37"/></g></svg>');height:16px;opacity:.95}
-    /* --- Added: fluid hero text for mobile --- */
+    /* Mobile banner fix */
     .hero-quote{font-size:clamp(20px,5.5vw,28px);line-height:1.2;text-wrap:balance}
     .hero-sub{font-size:clamp(13px,3.8vw,16px);line-height:1.45;text-wrap:balance}
   </style>
@@ -107,9 +107,8 @@ app.get('/', (req, res) => {
   <!-- existing slim black ribbon -->
   <div class="bg-ink text-white text-xs tracking-wide text-center py-2">The Church of Axiom — Clarity, Compassion, Truth</div>
 
-  <!-- NEW: 100px red banner (text left, smiling child right) -->
+  <!-- Red banner -->
   <div class="w-full bg-red-800 text-white">
-    <!-- Changed: remove fixed height; allow wrap on mobile; add small padding -->
     <div class="max-w-6xl mx-auto px-6 flex flex-wrap items-center gap-4 sm:gap-6 py-3 sm:py-0 sm:flex-nowrap">
       <div class="flex-1 min-w-[260px]">
         <div class="holy font-semibold leading-snug hero-quote">
@@ -127,7 +126,7 @@ app.get('/', (req, res) => {
     <div class="max-w-6xl mx-auto px-6 py-8 flex items-center justify-between">
       <a href="/" class="flex items-center gap-4">
         <span class="grid place-items-center h-12 w-12 rounded-full bg-white border border-gold-500 shadow-halo">
-          <svg class="h-6 w-6 text-gold-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l7 6v12a2 2 0 0 1-2 2h-4v-7H11v7H7a2 2 0 0 1-2-2V8l7-6z"/></svg>
+          <svg class="h-6 w-6 text-gold-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l7 6v12a2 2 0 0 1-2 2h-4v-7H11v7H7a 2 2 0 0 1-2-2V8l7-6z"/></svg>
         </span>
         <div>
           <div class="holy text-2xl font-semibold">The New Holy Bible</div>
@@ -142,7 +141,7 @@ app.get('/', (req, res) => {
       </nav>
     </div>
 
-    <!-- your original hero layout unchanged -->
+    <!-- hero -->
     <section class="max-w-6xl mx-auto px-6 pb-12 md:pb-20 grid md:grid-cols-2 gap-12 items-center">
       <div>
         <h1 class="holy text-5xl md:text-6xl font-semibold leading-tight">
@@ -159,7 +158,6 @@ app.get('/', (req, res) => {
         </div>
       </div>
 
-      <!-- keep only TWO images side-by-side; the smiling child is now in the banner -->
       <div class="grid grid-cols-2 gap-4">
         <img src="/static/1.png" alt="Teacher high-fives student" class="rounded-2xl border border-gold-300 object-cover w-full h-56 sm:h-64">
         <img src="/static/2.png" alt="Student raises hand in class" class="rounded-2xl border border-gold-300 object-cover w-full h-56 sm:h-64">
@@ -266,7 +264,7 @@ app.post('/create-checkout-session', async (req, res) => {
         {
           price_data: {
             currency: 'usd',
-            product_data: { name: 'Donation to The New Holy Bible (Aciomatism)' },
+            product_data: { name: 'Donation to The New Holy Bible (Axiomatism)' },
             unit_amount: amountCents,
           },
           quantity: 1,
@@ -330,7 +328,7 @@ app.get('/success', async (req, res) => {
 <body class="bg-slate-50 text-slate-800">
 <main class="max-w-2xl mx-auto px-6 py-24 text-center">
 <h1 class="text-4xl font-extrabold">Thank You</h1>
-<p class="mt-4 text-lg">Your support (\${amountText}) sustains our mission of education, charity, and the spread of the Word of God.</p>
+<p class="mt-4 text-lg">Your support (${amountText}) sustains our mission of education, charity, and the spread of the Word of God.</p>
 <a href="/" class="inline-block mt-8 px-5 py-3 rounded-xl bg-slate-900 text-white font-semibold">Return Home</a>
 </main></body></html>`);
 });
@@ -339,4 +337,4 @@ app.get('/success', async (req, res) => {
 // Start Server
 // ----------------------
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(\`The New Holy Bible server running on port \${port}\`));
+app.listen(port, () => console.log(`The New Holy Bible server running on port ${port}`));
