@@ -1,5 +1,5 @@
 // server.js
-// Simple single‑page site for thenewholybible.com, deployable on Render, with Stripe Checkout
+// Simple single-page site for thenewholybible.com, deployable on Render, with Stripe Checkout
 // Features:
 //  - One clean landing page (served from this server)
 //  - Preset donations ($25, $50, $100) + custom amount
@@ -23,7 +23,12 @@ const path = require('path');
 const app = express();
 
 // --- Configuration & Stripe ---
-const DOMAIN = process.env.DOMAIN || 'http://localhost:3000';
+// Ensure DOMAIN has an explicit scheme for Stripe success/cancel URLs.
+const _RAW_DOMAIN = process.env.DOMAIN || 'http://localhost:3000';
+const DOMAIN = _RAW_DOMAIN.startsWith('http://') || _RAW_DOMAIN.startsWith('https://')
+  ? _RAW_DOMAIN
+  : `https://${_RAW_DOMAIN}`;
+
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const STRIPE_PRICE_MONTHLY_5 = process.env.STRIPE_PRICE_MONTHLY_5; // e.g., price_abc123
 
@@ -108,8 +113,8 @@ app.get('/', (req, res) => {
         </div>
         <div class="glass rounded-3xl p-8 shadow-xl">
           <blockquote class="text-slate-700">
-            <p class="text-xl font-semibold">“If the Word of God has stirred within you, and you wish to help it reach others, visit the Temple of Exum. Every offering sustains the work of clarity, reason, and compassion. For as God gives to all, so may each give according to truth.”</p>
-            <footer class="mt-4 text-sm text-slate-500">— The Book of Exum, Benediction</footer>
+            <p class="text-xl font-semibold">“If the Word of God has stirred within you, and you wish to help it reach others, visit the Temple of Axiom. Every offering sustains the work of clarity, reason, and compassion. For as God gives to all, so may each give according to truth.”</p>
+            <footer class="mt-4 text-sm text-slate-500">— The Book of Axiom, Benediction</footer>
           </blockquote>
         </div>
       </div>
@@ -236,7 +241,7 @@ app.get('/', (req, res) => {
 </html>`);
 });
 
-// Create a Stripe Checkout Session for a one‑time donation
+// Create a Stripe Checkout Session for a one-time donation
 app.post('/create-checkout-session', async (req, res) => {
   try {
     const amountCents = sanitizeAmountUsdToCents(req.body.amountUsd);
@@ -304,7 +309,7 @@ app.get('/success', async (req, res) => {
   try {
     if (session_id && STRIPE_SECRET_KEY) {
       const session = await stripe.checkout.sessions.retrieve(session_id);
-      amountTotal = session.amount_total; // cents for one‑time payments; null for subs
+      amountTotal = session.amount_total; // cents for one-time payments; null for subs
       isSubscription = session.mode === 'subscription';
     }
   } catch (e) {
