@@ -12,7 +12,11 @@ const path = require('path');
 const stripeLib = require('stripe');
 
 const app = express();
+
+// serve /public AND also this folder (so 1.png,2.png,3.png next to server.js work)
 app.use(express.static('public'));
+app.use('/assets', express.static(__dirname));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -119,28 +123,40 @@ app.get('/', (req, res) => {
       </nav>
     </div>
 
-    <section class="max-w-6xl mx-auto px-6 pb-12 md:pb-20 grid md:grid-cols-2 gap-12 items-center">
-      <div>
-        <h1 class="holy text-5xl md:text-6xl font-semibold leading-tight">
-          “The Word is Clarity. <span class="text-gold-600">The Work is Compassion.</span>”
-        </h1>
-        <p class="mt-6 text-lg text-slate-700">
-          The <strong>Church of Axiom</strong> is a Christian movement devoted to spreading knowledge and the Word of God
-          throughout the world—especially where it is most needed. We teach, found schools, and serve in charity so that
-          wisdom is known through kindness and truth.
-        </p>
-        <div class="mt-8 flex flex-wrap gap-3">
-          <a href="#donate" class="inline-block px-5 py-3 rounded-xl btn-gold font-semibold shadow">Support the Mission</a>
-          <a href="#scripture" class="inline-block px-5 py-3 rounded-xl bg-white/90 border border-gold-500 font-semibold hover:bg-white">Read the Scripture</a>
+    <!-- NEW: Big red giving banner with smiling child (3.png) -->
+    <section class="max-w-6xl mx-auto px-6 pb-10">
+      <div class="rounded-3xl overflow-hidden border border-red-200 bg-gradient-to-br from-red-800 via-red-700 to-red-800">
+        <div class="grid md:grid-cols-2">
+          <div class="p-8 md:p-12 text-white">
+            <h1 class="holy text-4xl md:text-5xl font-semibold leading-tight">
+              “Let the little ones learn, and the nations be lifted by truth.”
+            </h1>
+            <p class="mt-4 text-red-100 text-lg">
+              The <span class="font-semibold">Church of Axiom</span> is a Christian movement spreading knowledge and the Word of God,
+              especially where it is most needed. Your gift helps build schools, share Scripture, and serve in charity.
+            </p>
+            <div class="mt-6 flex flex-wrap gap-3">
+              <a href="#donate" class="inline-block px-5 py-3 rounded-xl btn-gold font-semibold shadow">Give Now</a>
+              <a href="#scripture" class="inline-block px-5 py-3 rounded-xl bg-white/10 ring-1 ring-white/30 font-semibold hover:bg-white/15">Read the Scripture</a>
+            </div>
+          </div>
+          <div class="relative">
+            <img src="/assets/3.png" alt="Smiling child" class="w-full h-full object-cover md:rounded-l-3xl md:rounded-none">
+            <!-- subtle gold glow -->
+            <div class="absolute inset-0 pointer-events-none" style="box-shadow: inset 0 0 120px rgba(212,175,55,.18)"></div>
+          </div>
         </div>
       </div>
+    </section>
 
+    <!-- Two photos side-by-side (1.png & 2.png) -->
+    <section class="max-w-6xl mx-auto px-6 pb-12 md:pb-20">
       <div class="grid grid-cols-2 gap-4">
-        <img src="/images/children-1.jpg" alt="Teacher high-fives student" class="rounded-2xl border border-gold-300 object-cover w-full h-56 sm:h-64">
-        <img src="/images/children-2.jpg" alt="Student raises hand in class" class="rounded-2xl border border-gold-300 object-cover w-full h-56 sm:h-64">
-        <img src="/images/children-3.jpg" alt="Smiling child" class="rounded-2xl border border-gold-300 object-cover w-full h-56 sm:h-64 col-span-2">
+        <img src="/assets/1.png" alt="Teacher high-fives student" class="rounded-2xl border border-gold-300 object-cover w-full h-56 sm:h-64">
+        <img src="/assets/2.png" alt="Student raises hand in class" class="rounded-2xl border border-gold-300 object-cover w-full h-56 sm:h-64">
       </div>
     </section>
+
     <div class="orn max-w-3xl mx-auto mb-10"></div>
   </header>
 
