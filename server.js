@@ -66,8 +66,8 @@ app.get('/', (req, res) => {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The New Holy Bible — Exumatism</title>
-  <meta name="description" content="Exumatism — The Book of Axiom. God is Logic. A movement for reason, compassion, and education." />
+  <title>The New Holy Bible — Aciomatism</title>
+  <meta name="description" content="Aciomatism — The Book of Axiom. A movement for reason, compassion, and education." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -83,7 +83,7 @@ app.get('/', (req, res) => {
       <div class="h-10 w-10 rounded-full bg-slate-900"></div>
       <div>
         <div class="text-xl font-extrabold tracking-tight">The New Holy Bible</div>
-        <div class="text-sm text-slate-500">Exumatism · The Book of Axiom</div>
+        <div class="text-sm text-slate-500">Aciomatism · The Book of Axiom</div>
       </div>
     </div>
     <nav class="hidden md:flex items-center gap-6 text-sm">
@@ -99,8 +99,8 @@ app.get('/', (req, res) => {
     <section class="max-w-5xl mx-auto px-6 py-16 md:py-24">
       <div class="grid md:grid-cols-2 gap-10 items-center">
         <div>
-          <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">God is Logic. The Word is Clarity. The Work is Compassion.</h1>
-          <p class="mt-5 text-lg text-slate-600">Exumatism calls us to reason and mercy: to teach, to build schools, to serve in charity, and to spread the Word of Logic set forth in <em>The Book of Axiom</em>.</p>
+          <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">The Word is Clarity. The Work is Compassion.</h1>
+          <p class="mt-5 text-lg text-slate-600">Aciomatism calls us to reason and mercy: to teach, to build schools, to serve in charity, and to spread the Word of God set forth in <em>The Book of Axiom</em>.</p>
           <div class="mt-7 flex flex-wrap gap-3">
             <a href="#donate" class="inline-block px-5 py-3 rounded-xl bg-slate-900 text-white font-semibold shadow hover:opacity-90">Support the Mission</a>
             <a href="#scripture" class="inline-block px-5 py-3 rounded-xl bg-white border border-slate-300 font-semibold hover:bg-slate-50">Read the Scripture</a>
@@ -108,7 +108,7 @@ app.get('/', (req, res) => {
         </div>
         <div class="glass rounded-3xl p-8 shadow-xl">
           <blockquote class="text-slate-700">
-            <p class="text-xl font-semibold">“If the Word of Logic has stirred within you, and you wish to help it reach others, visit the Temple of Exum. Every offering sustains the work of clarity, reason, and compassion. For as Logic gives to all, so may each give according to truth.”</p>
+            <p class="text-xl font-semibold">“If the Word of God has stirred within you, and you wish to help it reach others, visit the Temple of Exum. Every offering sustains the work of clarity, reason, and compassion. For as God gives to all, so may each give according to truth.”</p>
             <footer class="mt-4 text-sm text-slate-500">— The Book of Exum, Benediction</footer>
           </blockquote>
         </div>
@@ -119,7 +119,7 @@ app.get('/', (req, res) => {
     <section id="mission" class="bg-white/70 py-16">
       <div class="max-w-5xl mx-auto px-6">
         <h2 class="text-2xl md:text-3xl font-extrabold">Our Mission</h2>
-        <p class="mt-4 text-slate-700 leading-relaxed">To build where ignorance once stood: to spread the Word of Logic, to found a church where truth is worship, to raise schools where knowledge and compassion grow together, and to labor in charity so that wisdom is known through kindness as well as knowledge.</p>
+        <p class="mt-4 text-slate-700 leading-relaxed">To build where ignorance once stood: to spread the Word of God, to found a church where truth is worship, to raise schools where knowledge and compassion grow together, and to labor in charity so that wisdom is known through kindness as well as knowledge.</p>
       </div>
     </section>
 
@@ -127,7 +127,7 @@ app.get('/', (req, res) => {
     <section id="scripture" class="py-16">
       <div class="max-w-5xl mx-auto px-6">
         <h2 class="text-2xl md:text-3xl font-extrabold">Scripture & Channels</h2>
-        <p class="mt-4 text-slate-700">Explore <em>The Book of Axiom</em> and follow our channels to share the Word of Logic.</p>
+        <p class="mt-4 text-slate-700">Explore <em>The Book of Axiom</em> and follow our channels to share the Word of God.</p>
         <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <a class="block p-5 border rounded-xl bg-white hover:bg-slate-50" href="https://youtube.com/" target="_blank" rel="noopener">YouTube Channel →</a>
           <a class="block p-5 border rounded-xl bg-white hover:bg-slate-50" href="https://instagram.com/" target="_blank" rel="noopener">Instagram →</a>
@@ -176,7 +176,7 @@ app.get('/', (req, res) => {
   </main>
 
   <footer class="py-10 text-center text-sm text-slate-500">
-    <p>© <span id="year"></span> The New Holy Bible · Exumatism</p>
+    <p>© <span id="year"></span> The New Holy Bible · Aciomatism</p>
   </footer>
 
   <script>
@@ -252,8 +252,8 @@ app.post('/create-checkout-session', async (req, res) => {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: 'Donation to The New Holy Bible (Exumatism)',
-              description: 'Charity, education, and the spread of the Word of Logic',
+              name: 'Donation to The New Holy Bible (Aciomatism)',
+              description: 'Charity, education, and the spread of the Word of God',
             },
             unit_amount: amountCents,
           },
@@ -324,7 +324,7 @@ app.get('/success', async (req, res) => {
 <body class="bg-slate-50 text-slate-800">
   <main class="max-w-2xl mx-auto px-6 py-24 text-center">
     <h1 class="text-4xl font-extrabold">Thank You</h1>
-    <p class="mt-4 text-lg">Your support (${amountText}) sustains our mission of education, charity, and the spread of the Word of Logic.</p>
+    <p class="mt-4 text-lg">Your support (${amountText}) sustains our mission of education, charity, and the spread of the Word of God.</p>
     <a href="/" class="inline-block mt-8 px-5 py-3 rounded-xl bg-slate-900 text-white font-semibold">Return Home</a>
   </main>
 </body>
