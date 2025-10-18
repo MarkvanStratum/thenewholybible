@@ -97,6 +97,9 @@ app.get('/', (req, res) => {
 <svg xmlns="http://www.w3.org/2000/svg" width="320" height="16" viewBox="0 0 320 16">\
 <g fill="none" stroke="%23d4af37" stroke-width="1.2" stroke-linecap="round">\
 <path d="M2 8h130"/><path d="M188 8h130"/><path d="M160 2l4 6-4 6-4-6 4-6z" fill="%23d4af37"/></g></svg>');height:16px;opacity:.95}
+    /* --- Added: fluid hero text for mobile --- */
+    .hero-quote{font-size:clamp(20px,5.5vw,28px);line-height:1.2;text-wrap:balance}
+    .hero-sub{font-size:clamp(13px,3.8vw,16px);line-height:1.45;text-wrap:balance}
   </style>
 </head>
 <body class="min-h-screen bg-parchment text-ink">
@@ -106,16 +109,17 @@ app.get('/', (req, res) => {
 
   <!-- NEW: 100px red banner (text left, smiling child right) -->
   <div class="w-full bg-red-800 text-white">
-    <div class="max-w-6xl mx-auto px-6 flex items-center gap-6" style="height:100px;">
-      <div class="flex-1">
-        <div class="holy text-xl md:text-2xl font-semibold leading-snug">
+    <!-- Changed: remove fixed height; allow wrap on mobile; add small padding -->
+    <div class="max-w-6xl mx-auto px-6 flex flex-wrap items-center gap-4 sm:gap-6 py-3 sm:py-0 sm:flex-nowrap">
+      <div class="flex-1 min-w-[260px]">
+        <div class="holy font-semibold leading-snug hero-quote">
           “Let the little ones learn, and the nations be lifted by truth.”
         </div>
-        <div class="text-red-100 text-sm md:text-base">
+        <div class="text-red-100 hero-sub">
           Your gift helps us spread knowledge and the Word of God—founding schools, sharing Scripture, and serving in charity.
         </div>
       </div>
-      <img src="/static/3.png" alt="Smiling child" class="h-20 w-20 md:h-24 md:w-24 object-cover rounded-xl ring-2 ring-white/40 shadow" />
+      <img src="/static/3.png" alt="Smiling child" class="h-16 w-16 sm:h-24 sm:w-24 object-cover rounded-xl ring-2 ring-white/40 shadow" />
     </div>
   </div>
 
@@ -326,7 +330,7 @@ app.get('/success', async (req, res) => {
 <body class="bg-slate-50 text-slate-800">
 <main class="max-w-2xl mx-auto px-6 py-24 text-center">
 <h1 class="text-4xl font-extrabold">Thank You</h1>
-<p class="mt-4 text-lg">Your support (${amountText}) sustains our mission of education, charity, and the spread of the Word of God.</p>
+<p class="mt-4 text-lg">Your support (\${amountText}) sustains our mission of education, charity, and the spread of the Word of God.</p>
 <a href="/" class="inline-block mt-8 px-5 py-3 rounded-xl bg-slate-900 text-white font-semibold">Return Home</a>
 </main></body></html>`);
 });
@@ -335,4 +339,4 @@ app.get('/success', async (req, res) => {
 // Start Server
 // ----------------------
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`The New Holy Bible server running on port ${port}`));
+app.listen(port, () => console.log(\`The New Holy Bible server running on port \${port}\`));
