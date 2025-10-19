@@ -334,24 +334,24 @@ app.get('/success', async (req, res) => {
     }
   } catch (e) {}
   const amountText = amountTotal
-    ? \`$\${(amountTotal / 100).toFixed(2)}\`
+    ? `$${(amountTotal / 100).toFixed(2)}`
     : isSubscription
     ? '$5.00 / month'
     : 'your gift';
 
-  res.type('html').send(\`<!DOCTYPE html>
+  res.type('html').send(`<!DOCTYPE html>
 <html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Thank You — The New Holy Bible</title><script src="https://cdn.tailwindcss.com"></script></head>
 <body class="bg-slate-50 text-slate-800">
 <main class="max-w-2xl mx-auto px-6 py-24 text-center">
 <h1 class="text-4xl font-extrabold">Thank You</h1>
-<p class="mt-4 text-lg">Your support (\${amountText}) sustains our mission of education, charity, and the spread of the Word of God.</p>
+<p class="mt-4 text-lg">Your support (${amountText}) sustains our mission of education, charity, and the spread of the Word of God.</p>
 <a href="/" class="inline-block mt-8 px-5 py-3 rounded-xl bg-slate-900 text-white font-semibold">Return Home</a>
-</main></body></html>\`);
+</main></body></html>`);
 });
 
 // ----------------------
 // Start Server
 // ----------------------
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(\`The New Holy Bible server running on port \${port}\`));
+app.listen(port, () => console.log(`The New Holy Bible server running on port ${port}`));
