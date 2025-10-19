@@ -189,10 +189,13 @@ app.get('/', (req, res) => {
   <section id="donate" class="py-16 text-center max-w-4xl mx-auto px-6">
     <h2 class="holy text-3xl font-semibold">Offerings & Support</h2>
     <div class="orn max-w-2xl mx-auto my-6"></div>
-    <p class="text-slate-700">
-      We depend on the generosity of our followers to continue the Lord’s work—spreading His knowledge and goodness.
-      Your offering sustains our schools, scripture outreach, and charitable service.
-    </p>
+
+    <!-- NEW: Persuasive intro placed ABOVE the donation controls -->
+    <div class="space-y-4 text-slate-700 leading-relaxed">
+      <div class="holy text-xl font-semibold">Give With Purpose. Grow in Spirit. Transform Lives.</div>
+      <p>Your generosity is more than a contribution—it is an act of spiritual clarity and moral logic. When we give, we release selfishness, strengthen compassion, and open our lives to blessings in return. Just as Scripture teaches and reason confirms, what we pour out into the world returns to us in greater form. What goes around truly comes around: generosity cleanses the soul, elevates the mind, and sets goodness in motion.</p>
+      <p>Your offering directly builds and sustains God’s work in tangible, life-changing ways. Through your support, we are able to:</p>
+    </div>
 
     <div class="mt-8 flex flex-wrap justify-center gap-3">
       <button data-amount="25" class="preset px-4 py-2 rounded-xl bg-white border border-gold-300 hover:shadow">$25</button>
@@ -208,9 +211,23 @@ app.get('/', (req, res) => {
 
     <div class="mt-12">
       <h3 class="holy text-2xl font-semibold">Join the Daily Prayer — $5/month</h3>
-      <p class="mt-2 text-slate-700">Receive a daily prayer or sermon by email. Cancel anytime.</p>
+      <!-- Short explanation of what it is and how life improves -->
+      <p class="mt-2 text-slate-700">Receive a brief daily prayer and reflection by email—centering your day in Scripture, nurturing peace, and guiding wise action. A simple rhythm that strengthens faith and clarity.</p>
       <button id="subscribe-button" class="mt-4 px-5 py-2 rounded-xl bg-white border border-gold-300 font-semibold hover:shadow">Subscribe $5/mo</button>
       <p class="mt-3 text-xs text-slate-500">Processed securely by Stripe Checkout.</p>
+
+      <!-- The rest of the message placed UNDER the daily prayer section -->
+      <div class="orn max-w-xl mx-auto my-8"></div>
+      <div class="text-slate-700 leading-relaxed space-y-4">
+        <p class="font-semibold">Your offering directly builds and sustains God’s work in tangible, life-changing ways. Through your support, we are able to:</p>
+        <ul class="text-left inline-block list-disc pl-6 space-y-2">
+          <li><strong>Build and restore churches</strong> where communities worship, heal, and find hope</li>
+          <li><strong>Develop schools and educational programs</strong> that nurture future generations in faith and wisdom</li>
+          <li><strong>Spread the Word of God</strong> through teaching, outreach, and scripture distribution across our communities</li>
+        </ul>
+        <p>We invite you to partner with us in this sacred mission. When you give, you plant seeds of love, truth, and renewal—not only for others, but also for your own soul. Together, we create a legacy of faith that will continue to grow and return blessings for years to come.</p>
+        <p class="font-semibold">Give today, and take part in the work that changes hearts, builds communities, and honors God.</p>
+      </div>
     </div>
   </section>
 
@@ -317,24 +334,24 @@ app.get('/success', async (req, res) => {
     }
   } catch (e) {}
   const amountText = amountTotal
-    ? `$${(amountTotal / 100).toFixed(2)}`
+    ? \`$\${(amountTotal / 100).toFixed(2)}\`
     : isSubscription
     ? '$5.00 / month'
     : 'your gift';
 
-  res.type('html').send(`<!DOCTYPE html>
+  res.type('html').send(\`<!DOCTYPE html>
 <html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Thank You — The New Holy Bible</title><script src="https://cdn.tailwindcss.com"></script></head>
 <body class="bg-slate-50 text-slate-800">
 <main class="max-w-2xl mx-auto px-6 py-24 text-center">
 <h1 class="text-4xl font-extrabold">Thank You</h1>
-<p class="mt-4 text-lg">Your support (${amountText}) sustains our mission of education, charity, and the spread of the Word of God.</p>
+<p class="mt-4 text-lg">Your support (\${amountText}) sustains our mission of education, charity, and the spread of the Word of God.</p>
 <a href="/" class="inline-block mt-8 px-5 py-3 rounded-xl bg-slate-900 text-white font-semibold">Return Home</a>
-</main></body></html>`);
+</main></body></html>\`);
 });
 
 // ----------------------
 // Start Server
 // ----------------------
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`The New Holy Bible server running on port ${port}`));
+app.listen(port, () => console.log(\`The New Holy Bible server running on port \${port}\`));
