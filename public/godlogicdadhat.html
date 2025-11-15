@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GOD = LOGIC Dad Hat | The New Holy Bible</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --accent: #f97316;
+      --accent-dark: #ea580c;
+      --accent-soft: rgba(249, 115, 22, 0.08);
+      --bg: #f5f5f7;
+      --card-bg: #ffffff;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --radius-lg: 18px;
+      --shadow-soft: 0 16px 40px rgba(15, 23, 42, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+
+    .page-wrap {
+      width: 100%;
+      max-width: 1040px;
+    }
+
+    .logo-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      color: var(--text-main);
+    }
+
+    .logo-bar h1 {
+      font-size: 1.05rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .logo-bar span {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .product-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: 30px;
+      padding: 26px;
+      border: 1px solid var(--border);
+    }
+
+    @media (max-width: 900px) {
+      .product-card {
+        grid-template-columns: 1fr;
+        padding: 20px;
+      }
+      .logo-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+    }
+
+    .product-media {
+      border-radius: 16px;
+      background: linear-gradient(135deg, #e5e7eb, #ffffff);
+      border: 1px solid var(--border);
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .product-media img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .product-info h2 {
+      font-size: 2rem;
+      margin-bottom: 4px;
+    }
+
+    .product-info h3 {
+      font-size: 0.9rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent-dark);
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .price-main {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .price-tag {
+      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      border: 1px solid rgba(249, 115, 22, 0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .description {
+      font-size: 0.96rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin: 16px 0 18px;
+    }
+
+    .highlight {
+      color: var(--accent-dark);
+      font-weight: 600;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      background: #f9fafb;
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .field-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .field-group label {
+      min-width: 70px;
+    }
+
+    .qty-input {
+      width: 80px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: var(--text-main);
+      font-size: 0.95rem;
+    }
+
+    .qty-input:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    .total-line {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+
+    .total-line strong {
+      color: var(--text-main);
+    }
+
+    .actions {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      border: none;
+      border-radius: 999px;
+      padding: 13px 22px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: #f9fafb;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.08s ease, box-shadow 0.08s ease,
+        filter 0.08s ease;
+      box-shadow: 0 14px 30px rgba(249, 115, 22, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.04);
+      box-shadow: 0 18px 40px rgba(249, 115, 22, 0.45);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 20px rgba(249, 115, 22, 0.38);
+    }
+
+    .btn-primary svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .error {
+      margin-top: 6px;
+      font-size: 0.85rem;
+      color: #b91c1c;
+      display: none;
+    }
+  </style>
+
+  <script>
+    const PRODUCT_TITLE = 'GOD = LOGIC Dad Hat';
+    const PRODUCT_IMAGE_URL = 'https://www.shop.thenewholybible.com/godlogicdadhat.png';
+    const UNIT_PRICE = 25.00; // PRICE SET TO 25 GBP
+
+    function updateTotal() {
+      const qtyInput = document.getElementById('quantity');
+      const totalSpan = document.getElementById('total');
+      let qty = parseInt(qtyInput.value, 10);
+      if (isNaN(qty) || qty < 1) qty = 1;
+      qtyInput.value = qty;
+      const total = (UNIT_PRICE * qty).toFixed(2);
+      totalSpan.textContent = `£${total} GBP`;
+    }
+
+    function orderNow() {
+      const errorBox = document.getElementById('error');
+      errorBox.style.display = 'none';
+      errorBox.textContent = '';
+
+      const qty = parseInt(document.getElementById('quantity').value, 10) || 1;
+
+      try {
+        const baseUrl = 'https://www.thenewholybible.com/atlas2.html';
+
+        const params = new URLSearchParams({
+          ref: 'bcxf576',
+          sub_id: 'clickid',
+          source: 'source_id',
+          subsource: 'sub_source_id',
+          sub1: PRODUCT_TITLE,
+          sub2: PRODUCT_IMAGE_URL
+        });
+
+        window.location.href = `${baseUrl}?${params.toString()}`;
+      } catch (err) {
+        console.error(err);
+        errorBox.textContent = 'Could not redirect to payment page. Please try again.';
+        errorBox.style.display = 'block';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', updateTotal);
+  </script>
+</head>
+
+<body>
+  <div class="page-wrap">
+    <header class="logo-bar">
+      <h1>THE NEW HOLY BIBLE</h1>
+      <span>Support the ministry with every purchase</span>
+    </header>
+
+    <main class="product-card">
+      <section class="product-media">
+        <img src="/godlogicdadhat.png" alt="GOD = LOGIC embroidered dad hat">
+      </section>
+
+      <section class="product-info">
+        <h3>Faith + Streetwear</h3>
+        <h2>GOD = LOGIC Dad Hat</h2>
+        <p class="subtitle">Clean, minimal, and bold — a conversation starter you can wear.</p>
+
+        <div class="price-row">
+          <div class="price-main">£25 GBP</div>
+          <div class="price-tag">Limited edition • Embroidered</div>
+        </div>
+
+        <p class="description">
+          This classic white dad hat features the
+          <span class="highlight">GOD = LOGIC</span> design with
+          “The New Holy Bible – The Book of Axiom” stitched beneath.
+          Soft, comfortable, and adjustable — perfect for everyday wear, outreach,
+          or as a meaningful gift.
+        </p>
+
+        <div class="badge-row">
+          <span class="badge">Embroidered design</span>
+          <span class="badge">One size fits most</span>
+          <span class="badge">Adjustable strap</span>
+          <span class="badge">Print-on-demand</span>
+        </div>
+
+        <div class="controls">
+          <div class="field-group">
+            <label for="quantity">Quantity</label>
+            <input
+              id="quantity"
+              class="qty-input"
+              type="number"
+              min="1"
+              value="1"
+              onchange="updateTotal()"
+            />
+          </div>
+
+          <div class="total-line">
+            Total: <strong id="total"></strong>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" onclick="orderNow()">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="currentColor"
+                    d="M7 4h-.75A2.25 2.25 0 0 0 4.02 5.93L3.1 9.71A2.25 2.25 0 0 0 5.34 12h.68l1.18 6.29A2.25 2.25 0 0 0 9.4 20h8.35a2.25 2.25 0 0 0 2.21-1.79l1.2-6A2.25 2.25 0 0 0 18.94 8H8.53l-.29-2.03A2.25 2.25 0 0 0 7 4Zm2.5 15.25a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Zm9.5 0a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Z" />
+            </svg>
+            Order Now
+          </button>
+          <p class="note">
+            You’ll be redirected to our secure payment page.<br>
+            Orders are fulfilled and shipped by Printful.
+          </p>
+          <p id="error" class="error"></p>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
