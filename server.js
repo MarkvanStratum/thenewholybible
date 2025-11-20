@@ -1,74 +1,65 @@
-// Minimal Stripe PaymentIntent Server
+// Minimal Stripe Payment Server
 // The New Holy Bible — Church of Axiom
 
-import express from "express";
-import Stripe from "stripe";
-import cors from "cors";
+const express = require("express");
+const cors = require("cors");
+const stripeLib = require("stripe");
 
 const app = express();
-app.use(cors());
 app.use(express.json());
+app.use(cors());
 
-// -------------------------
-// CONFIG
-// -------------------------
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const DOMAIN = process.env.DOMAIN || "https://thenewholybible.com";
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 
-const stripe = new Stripe(STRIPE_SECRET_KEY);
-
-// helper for cents
-function usd(n) {
-  return Math.round(n * 100);
+if (!STRIPE_SECRET_KEY) {
+  console.error("❌ ERROR: STRIPE_SECRET_KEY is missing!");
 }
 
-// ==========================================
-//  ✔ ENDPOINT: charge $23.95 via PaymentIntent
-// ==========================================
+const stripe = stripeLib(STRIPE_SECRET_KEY);
+
+// Helper
+function usd(amount) {
+  return Math.round(amount * 100);
+}
+
+// Endpoint — $23.95
 app.post("/api/stripe/pay-2395", async (req, res) => {
   try {
-    const { paymentMethodId, email, name, phone, address } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    // 1) Create customer (no email required, but available)
-    const customer = await stripe.customers.create({
-      email: email || undefined,
-      name: name || undefined,
-      phone: phone || undefined,
-      address: address || undefined,
-      description: "The New Holy Bible – Order"
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: { name: "The New Holy Bible - Order" },
+            unit_amount: usd(23.95),
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: `${DOMAIN}/success`,
+      cancel_url: `${DOMAIN}/cancel`
     });
 
-    // 2) Create PaymentIntent
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: usd(23.95),
-      currency: "usd",
-      customer: customer.id,
-      payment_method: paymentMethodId,
-      confirmation_method: "manual",
-      confirm: true,
-      description: "The New Holy Bible – Order",
-      metadata: {
-        product: "The New Holy Bible – Order",
-        amount: "23.95"
-      }
-    });
-
-    return res.json({
-      clientSecret: paymentIntent.client_secret
-    });
-
+    return res.json({ url: session.url });
   } catch (err) {
     console.error("Stripe error:", err);
-    res.status(400).json({ error: err.message || "Payment failed" });
+    return res.status(500).json({ error: "Unable to create payment session" });
   }
 });
 
-// ---------------------------------------
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("Payment server running on port " + PORT);
+// Success Page
+app.get("/success", (req, res) => {
+  res.send("<h1>Payment Successful</h1>");
 });
+
+// Cancel Page
+app.get("/cancel", (req, res) => {
+  res.send("<h1>Payment Canceled</h1>");
+});
+
+// Server
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Server running on port ${port}`));
