@@ -1,96 +1,74 @@
-// Minimal Stripe Payment Server
+// Minimal Stripe PaymentIntent Server
 // The New Holy Bible — Church of Axiom
 
-const express = require("express");
-const stripeLib = require("stripe");
+import express from "express";
+import Stripe from "stripe";
+import cors from "cors";
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
-const DOMAIN = process.env.DOMAIN || "http://localhost:3000";
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || "sk_test_placeholder";
+// -------------------------
+// CONFIG
+// -------------------------
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+const DOMAIN = process.env.DOMAIN || "https://thenewholybible.com";
 
-const stripe = stripeLib(STRIPE_SECRET_KEY);
+const stripe = new Stripe(STRIPE_SECRET_KEY);
 
-// ---------------------------
-// Helper: make amount in cents
-// ---------------------------
-function usd(amount) {
-  return Math.round(amount * 100);
+// helper for cents
+function usd(n) {
+  return Math.round(n * 100);
 }
 
-// ---------------------------
-// ✔ Endpoint #1 — charge $23.95
-// ---------------------------
-app.post("/pay-23", async (req, res) => {
+// ==========================================
+//  ✔ ENDPOINT: charge $23.95 via PaymentIntent
+// ==========================================
+app.post("/api/stripe/pay-2395", async (req, res) => {
   try {
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: { name: "Payment — $23.95" },
-            unit_amount: usd(23.95),
-          },
-          quantity: 1,
-        },
-      ],
-      success_url: `${DOMAIN}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${DOMAIN}/cancel`,
+    const { paymentMethodId, email, name, phone, address } = req.body;
+
+    if (!paymentMethodId) {
+      return res.status(400).json({ error: "Missing paymentMethodId" });
+    }
+
+    // 1) Create customer (no email required, but available)
+    const customer = await stripe.customers.create({
+      email: email || undefined,
+      name: name || undefined,
+      phone: phone || undefined,
+      address: address || undefined,
+      description: "The New Holy Bible – Order"
     });
 
-    return res.json({ url: session.url });
+    // 2) Create PaymentIntent
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: usd(23.95),
+      currency: "usd",
+      customer: customer.id,
+      payment_method: paymentMethodId,
+      confirmation_method: "manual",
+      confirm: true,
+      description: "The New Holy Bible – Order",
+      metadata: {
+        product: "The New Holy Bible – Order",
+        amount: "23.95"
+      }
+    });
+
+    return res.json({
+      clientSecret: paymentIntent.client_secret
+    });
+
   } catch (err) {
     console.error("Stripe error:", err);
-    return res.status(500).json({ error: "Unable to create payment session" });
+    res.status(400).json({ error: err.message || "Payment failed" });
   }
 });
 
-// ---------------------------
-// ✔ Endpoint #2 — charge $33.95
-// ---------------------------
-app.post("/pay-33", async (req, res) => {
-  try {
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: { name: "Payment — $33.95" },
-            unit_amount: usd(33.95),
-          },
-          quantity: 1,
-        },
-      ],
-      success_url: `${DOMAIN}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${DOMAIN}/cancel`,
-    });
-
-    return res.json({ url: session.url });
-  } catch (err) {
-    console.error("Stripe error:", err);
-    return res.status(500).json({ error: "Unable to create payment session" });
-  }
+// ---------------------------------------
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("Payment server running on port " + PORT);
 });
-
-// ---------------------------
-// ✔ Simple success page
-// ---------------------------
-app.get("/success", (req, res) => {
-  res.send("<h1>Payment Successful</h1>");
-});
-
-// ✔ Optional cancel page
-app.get("/cancel", (req, res) => {
-  res.send("<h1>Payment Canceled</h1>");
-});
-
-// ---------------------------
-// Start server
-// ---------------------------
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Server running on port ${port}`));
