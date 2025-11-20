@@ -299,6 +299,9 @@
   <script src="https://js.stripe.com/v3"></script>
   <script>
     window.addEventListener('DOMContentLoaded', () => {
+// Capture FB pixel from URL
+const mainQS = new URLSearchParams(window.location.search);
+const fbPixel = mainQS.get('pixel') || "";
       // ----- DOM -----
       const step1 = document.getElementById('step1');
       const step2 = document.getElementById('step2');
