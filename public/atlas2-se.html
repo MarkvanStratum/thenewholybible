@@ -603,6 +603,15 @@ const fbPixel = mainQS.get('pixel') || "";
             const TRACKER_URL = 'https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7';
             const pid = (conf && conf.paymentIntent && conf.paymentIntent.id) || data.paymentIntentId || '';
             const qp = new URLSearchParams(pid ? { v: pid } : { t: String(Date.now()) });
+// Get pixel= from the current page URL
+const urlParams = new URLSearchParams(window.location.search);
+const pixel = urlParams.get("pixel");
+
+// If pixel exists, pass it into the BeMob link
+if (pixel) {
+  qp.set("pixel", pixel);
+}
+
             try{
               const ck = document.cookie.match(/(?:^|; )aff_sub_id=([^;]*)/);
               const sub = ck ? decodeURIComponent(ck[1]) : (localStorage.getItem('aff_sub_id') || '');
