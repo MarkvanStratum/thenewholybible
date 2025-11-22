@@ -599,34 +599,25 @@ const fbPixel = mainQS.get('pixel') || "";
           if(!(conf.paymentIntent && conf.paymentIntent.status==='succeeded')) throw new Error('Betalningen slutfördes inte');
 
           // Success → thank you via BeMob tracker (no split)
-          ((function(){
-  const TRACKER_URL = 'https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7';
-  const pid = (conf && conf.paymentIntent && conf.paymentIntent.id) || data.paymentIntentId || '';
-  const qp = new URLSearchParams(pid ? { v: pid } : { t: String(Date.now()) });
-
-  // ⭐ ADD THIS — Pass affiliate pixel to thank-you page
-  if (fbPixel) {
-    qp.set("pixel", fbPixel);
-  }
-
-  // (Existing affiliate sub ID logic — KEEP)
-  try{
-    const ck = document.cookie.match(/(?:^|; )aff_sub_id=([^;]*)/);
-    const sub = ck ? decodeURIComponent(ck[1]) : (localStorage.getItem('aff_sub_id') || '');
-    if (sub) {
-      qp.set('sub_id',  sub);
-      qp.set('subid',   sub);
-      qp.set('aff_sub', sub);
-      qp.set('click_id',sub);
-      qp.set('cid',     sub);
-      qp.set('tid',     sub);
-    }
-  }catch(e){}
-
-  const sep = TRACKER_URL.includes('?') ? '&' : '?';
-  window.location.href = TRACKER_URL + sep + qp.toString();
-})();
-
+          (function(){
+            const TRACKER_URL = 'https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7';
+            const pid = (conf && conf.paymentIntent && conf.paymentIntent.id) || data.paymentIntentId || '';
+            const qp = new URLSearchParams(pid ? { v: pid } : { t: String(Date.now()) });
+            try{
+              const ck = document.cookie.match(/(?:^|; )aff_sub_id=([^;]*)/);
+              const sub = ck ? decodeURIComponent(ck[1]) : (localStorage.getItem('aff_sub_id') || '');
+              if (sub) {
+                qp.set('sub_id',  sub);
+                qp.set('subid',   sub);
+                qp.set('aff_sub', sub);
+                qp.set('click_id',sub);
+                qp.set('cid',     sub);
+                qp.set('tid',     sub);
+              }
+            }catch(e){}
+            const sep = TRACKER_URL.includes('?') ? '&' : '?';
+            window.location.href = TRACKER_URL + sep + qp.toString();
+          })();
 
         }catch(err){
           if(errBox){ errBox.textContent = err.message || 'Något gick fel.'; errBox.setAttribute('aria-hidden','false'); }
