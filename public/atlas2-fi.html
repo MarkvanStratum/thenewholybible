@@ -366,13 +366,9 @@
         if (showHero) hero.style.display = 'flex';
       })();
 
-      // ===== Maa choices + calling codes =====
-      const COUNTRY_CHOICES = {
-        US:'United States', CA:'Canada', AU:'Australia', NZ:'New Zealand'
-      };
-      const CALLING_CODES = {
-        US:'+1', CA:'+1', AU:'+61', NZ:'+64'
-      };
+      const COUNTRY_CHOICES = { FI: 'Suomi' };
+const CALLING_CODES   = { FI: '+358' };
+
       function populatePrefixOptions(){
         phonePrefix.innerHTML = '';
         const priority = ['US','CA','AU','NZ'];
