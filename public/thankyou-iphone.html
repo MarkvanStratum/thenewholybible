@@ -185,6 +185,24 @@
       } catch(e) { console.error('[TikTok] Error firing Purchase', e); }
     })();
   </script>
+<!-- Meta Pixels (all 3) -->
+<script>
+  fbq('init', '782671778158941');   // Pixel 1
+  fbq('init', '822761953938842');   // Pixel 2
+  fbq('init', '2079815809511322');  // Pixel 3
+
+  fbq('track', 'Lead');             // Fire Lead to ALL 3
+</script>
+
+<noscript>
+  <img height="1" width="1" style="display:none"
+       src="https://www.facebook.com/tr?id=782671778158941&ev=Lead&noscript=1" />
+  <img height="1" width="1" style="display:none"
+       src="https://www.facebook.com/tr?id=822761953938842&ev=Lead&noscript=1" />
+  <img height="1" width="1" style="display:none"
+       src="https://www.facebook.com/tr?id=2079815809511322&ev=Lead&noscript=1" />
+</noscript>
+<!-- End Meta Pixels -->
 
 </body>
 </html>
