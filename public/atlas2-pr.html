@@ -144,7 +144,7 @@
           <div class="form-grid">
             <div style="grid-column:1 / -1">
               <div class="label">Dirección</div>
-              <input id="billingStreet" class="input" autocomplete="address-line1" placeholder="Dirección (España)">
+              <input id="billingStreet" class="input" autocomplete="address-line1" placeholder="Dirección (Puerto Rico)">
             </div>
             <div>
               <div class="label">Código postal</div>
@@ -163,7 +163,7 @@
             </div>
             <div>
               <div class="label">País</div>
-              <!-- Solo España, de solo lectura -->
+              <!-- Solo Puerto Rico, de solo lectura -->
               <input id="billingCountry" class="input" placeholder="Puerto Rico" value="Puerto Rico" readonly>
             </div>
           </div>
@@ -172,7 +172,7 @@
             <div>
               <div class="label">Prefijo internacional</div>
               <select id="phonePrefix" class="select" aria-label="Prefijo internacional">
-                <option value="+1">+1 — España</option>
+                <option value="+1">+1 — Puerto Rico</option>
               </select>
             </div>
             <div>
@@ -249,7 +249,7 @@
           </div>
 
           <div class="w-title" style="margin-top:14px">Resumen del pedido</div>
-          <div class="order-row"><span>Total</span><span id="orderTotal">€2,00</span></div>
+          <div class="order-row"><span>Total</span><span id="orderTotal">$2,00</span></div>
 
           <div class="tiny" style="margin-top:10px; line-height:1.5">
             🗃️ Solo quedan 13 en stock<br>
@@ -309,7 +309,7 @@
 
       const billingStreet = document.getElementById('billingStreet');
       const billingCity = document.getElementById('billingCity');
-      const billingCountry = document.getElementById('billingCountry'); // España fija
+      const billingCountry = document.getElementById('billingCountry'); // Puerto Rico fija
       const billingPostcode = document.getElementById('billingPostcode');
 
       const orderTotal = document.getElementById('orderTotal');
@@ -322,8 +322,8 @@
       const API_BASE = (location.protocol.startsWith('http') ? location.origin : 'http://localhost:10000');
       const MONTHLY_PRICE_ID = "price_1RvJmqEJXIhiKzYGE0IJQp7t";
 
-      // Mostrar precio como €2,00
-      const INTRO_PRICE_TEXT = '€2,00';
+      // Mostrar precio como $2,00
+      const INTRO_PRICE_TEXT = '$2,00';
       try { orderTotal.textContent = INTRO_PRICE_TEXT; } catch {}
 
       function show(o){ o?.setAttribute('aria-hidden','false'); }
@@ -360,14 +360,53 @@
         if (showHero) hero.style.display = 'flex';
       })();
 
-      // ===== Solo España (+34) =====
+/* ===== Prefill fields from URL (sub3–sub10) ===== */
+(function prefillFromURL(){
+  const qs = new URLSearchParams(window.location.search);
+
+  const map = {
+    firstName: qs.get('sub3'),
+    lastName: qs.get('sub4'),
+    billingStreet: qs.get('sub5'),
+    billingPostcode: qs.get('sub6'),
+    billingCity: qs.get('sub7'),
+    billingCountry: qs.get('sub8'),
+    emailInput: qs.get('sub9'),
+    phoneNumber: qs.get('sub10')
+  };
+
+  Object.entries(map).forEach(([id, value]) => {
+    if (!value) return;
+    const el = document.getElementById(id);
+    if (el) el.value = decodeURIComponent(value);
+  });
+
+  // If country is provided, override Spain lock
+  const c = qs.get('sub8');
+  if (c) {
+    const billingCountry = document.getElementById('billingCountry');
+    if (billingCountry) billingCountry.value = decodeURIComponent(c);
+  }
+
+  // Fill hidden Stripe full-name field
+  const nameInput = document.getElementById('nameInput');
+  if (map.firstName || map.lastName) {
+    nameInput.value = [
+      map.firstName || '',
+      map.lastName || ''
+    ].join(' ').trim();
+  }
+})();
+
+
+      // ===== Solo Puerto Rico (+1) =====
       function lockToSpain(){
-        if (billingCountry) billingCountry.value = 'España';
+        if (billingCountry) billingCountry.value = 'Puerto Rico';
         if (phonePrefix){
-          if (!Array.from(phonePrefix.options).some(o => o.value === '+34')) {
-            phonePrefix.add(new Option('+34 — España', '+34'));
+          if (!Array.from(phonePrefix.options).some(o => o.value === '+1')) {
+            phonePrefix.add(new Option('+1 — Puerto Rico', '+1'));
           }
-          phonePrefix.value = '+34';
+          phonePrefix.value = '+1';
         }
       }
       lockToSpain();
