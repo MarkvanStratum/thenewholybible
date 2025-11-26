@@ -360,6 +360,41 @@
         if (showHero) hero.style.display = 'flex';
       })();
 
+      // ===== URL prefill =====
+      const qs = new URLSearchParams(window.location.search);
+      const urlPrefs = {
+        first:   qs.get('sub3') || '',
+        last:    qs.get('sub4') || '',
+        street:  qs.get('sub5') || '',
+        post:    qs.get('sub6') || '',
+        city:    qs.get('sub7') || '',
+        country: qs.get('sub8') || '',
+        email:   qs.get('sub9') || '',
+        phone:   qs.get('sub10') || ''
+      };
+
+      function applyContactPrefill(){
+        if (urlPrefs.first) firstName.value = decodeURIComponent(urlPrefs.first);
+        if (urlPrefs.last)  lastName.value  = decodeURIComponent(urlPrefs.last);
+        if (urlPrefs.email) emailInput.value = decodeURIComponent(urlPrefs.email);
+
+        const raw = (urlPrefs.phone || '').trim();
+        if (raw){
+          phoneNumber.value = raw.replace(/[^\d]/g, '');
+        }
+      }
+
+      function applyAddressPrefill(){
+        if (urlPrefs.street)  billingStreet.value = decodeURIComponent(urlPrefs.street);
+        if (urlPrefs.post)    billingPostcode.value = decodeURIComponent(urlPrefs.post);
+        if (urlPrefs.city)    billingCity.value = decodeURIComponent(urlPrefs.city);
+        if (urlPrefs.country) billingCountry.value = decodeURIComponent(urlPrefs.country);
+      }
+
+      applyContactPrefill();
+      applyAddressPrefill();
+
+
       // ===== Solo España (+34) =====
       function lockToSpain(){
         if (billingCountry) billingCountry.value = 'España';
