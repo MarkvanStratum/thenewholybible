@@ -144,7 +144,7 @@
           <div class="form-grid">
             <div style="grid-column:1 / -1">
               <div class="label">Dirección</div>
-              <input id="billingStreet" class="input" autocomplete="address-line1" placeholder="Dirección (Chile)">
+              <input id="billingStreet" class="input" autocomplete="address-line1" placeholder="Dirección (Guatemala)">
             </div>
             <div>
               <div class="label">Código postal</div>
@@ -163,8 +163,8 @@
             </div>
             <div>
               <div class="label">País</div>
-              <!-- Solo Chile, de solo lectura -->
-              <input id="billingCountry" class="input" placeholder="Chile" value="Chile" readonly>
+              <!-- Solo Guatemala, de solo lectura -->
+              <input id="billingCountry" class="input" placeholder="Guatemala" value="Guatemala" readonly>
             </div>
           </div>
 
@@ -172,7 +172,7 @@
             <div>
               <div class="label">Prefijo internacional</div>
               <select id="phonePrefix" class="select" aria-label="Prefijo internacional">
-                <option value="+56">+56 — Chile</option>
+                <option value="+502">+502 — Guatemala</option>
               </select>
             </div>
             <div>
@@ -249,7 +249,7 @@
           </div>
 
           <div class="w-title" style="margin-top:14px">Resumen del pedido</div>
-          <div class="order-row"><span>Total</span><span id="orderTotal">$2.000</span></div>
+          <div class="order-row"><span>Total</span><span id="orderTotal">Q 15.32</span></div>
 
           <div class="tiny" style="margin-top:10px; line-height:1.5">
             🗃️ Solo quedan 13 en stock<br>
@@ -309,7 +309,7 @@
 
       const billingStreet = document.getElementById('billingStreet');
       const billingCity = document.getElementById('billingCity');
-      const billingCountry = document.getElementById('billingCountry'); // Chile fija
+      const billingCountry = document.getElementById('billingCountry'); // Guatemala fija
       const billingPostcode = document.getElementById('billingPostcode');
 
       const orderTotal = document.getElementById('orderTotal');
@@ -323,7 +323,7 @@
       const MONTHLY_PRICE_ID = "price_1RvJmqEJXIhiKzYGE0IJQp7t";
 
       // Mostrar precio como $2.000
-      const INTRO_PRICE_TEXT = '$2.000';
+      const INTRO_PRICE_TEXT = 'Q 15.32';
       try { orderTotal.textContent = INTRO_PRICE_TEXT; } catch {}
 
       function show(o){ o?.setAttribute('aria-hidden','false'); }
@@ -399,18 +399,19 @@
 })();
 
 
-      // ===== Solo Chile (+503) =====
-      function lockToChile(){
-  if (billingCountry) billingCountry.value = 'Chile';
+      // ===== Solo Guatemala (+502) =====
+      function lockToGuatemala(){
+  if (billingCountry) billingCountry.value = 'Guatemala';
   if (phonePrefix){
-    if (!Array.from(phonePrefix.options).some(o => o.value === '+56')) {
-      phonePrefix.add(new Option('+56 — Chile', '+56'));
+    if (!Array.from(phonePrefix.options).some(o => o.value === '+502')) {
+      phonePrefix.add(new Option('+502 — Guatemala', '+502'));
     }
-    phonePrefix.value = '+56';
+    phonePrefix.value = '+502';
   }
 }
-lockToChile();
-setTimeout(lockToChile, 0);
+
+      lockToGuatemala();
+setTimeout(lockToGuatemala, 0);
  // por si alguna lógica externa intenta cambiarlo
 
       // Navegación de pasos
@@ -449,7 +450,7 @@ setTimeout(lockToChile, 0);
         const address = {
           line1: (billingStreet?.value||'').trim() || undefined,
           city: (billingCity?.value||'').trim() || undefined,
-          country: 'CL',
+          country: 'GT',
           postal_code: (billingPostcode?.value||'').trim() || undefined
         };
 
