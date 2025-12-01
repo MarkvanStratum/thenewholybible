@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bible Voices – Your Profile</title>
+
+<style>
+:root{
+  --gold:#d5b262;
+  --gold-soft:#ecd9a3;
+  --gold-light:#f8f1d8;
+  --white:#ffffff;
+  --bg:#faf9f4;
+  --text:#3b2f14;
+  --shadow:rgba(213,178,98,0.25);
+}
+
+*{box-sizing:border-box;}
+
+body{
+  font-family:"Georgia", serif;
+  background:var(--bg);
+  margin:0;
+  padding:0;
+  color:var(--text);
+}
+
+/* HEADER */
+header{
+  background-image:url("god.webp");
+  background-size:cover;
+  background-position:center;
+  padding:28px 0 34px;
+  position:relative;
+  text-align:center;
+}
+header::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(255,255,255,0.75);
+  backdrop-filter:blur(4px);
+}
+.header-inner{
+  position:relative;
+  z-index:2;
+}
+
+/* Logo */
+.logo-svg{
+  width:200px;
+  height:auto;
+}
+
+/* Profile card */
+.profile-container{
+  max-width:700px;
+  margin:40px auto;
+  background:var(--white);
+  padding:32px;
+  border-radius:22px;
+  border:1px solid var(--gold-soft);
+  box-shadow:0 15px 40px var(--shadow);
+  text-align:center;
+}
+
+.profile-photo{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  border:3px solid var(--gold);
+  object-fit:cover;
+  margin-bottom:18px;
+}
+
+.username{
+  font-size:1.8rem;
+  font-weight:700;
+  color:#6a5521;
+  margin-bottom:10px;
+}
+
+.info{
+  margin:8px 0;
+  font-size:1.05rem;
+}
+.info b{
+  color:#5b4823;
+}
+
+/* Subscription panel */
+#subscription-panel > div{
+  background:var(--gold-light);
+  border:1px solid var(--gold-soft);
+  box-shadow:0 8px 22px rgba(213,178,98,0.18);
+  border-radius:14px;
+  padding:16px;
+  margin-top:18px;
+}
+
+/* Buttons */
+.buttons{
+  margin-top:24px;
+  display:flex;
+  justify-content:center;
+  gap:12px;
+}
+
+.btn{
+  background:linear-gradient(180deg,var(--gold),#b69548);
+  color:white;
+  border:none;
+  border-radius:12px;
+  padding:12px 20px;
+  font-size:1rem;
+  font-weight:700;
+  cursor:pointer;
+  transition:.15s ease-in-out;
+}
+.btn:hover{
+  filter:brightness(1.08);
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <!-- LOGO -->
+    <svg class="logo-svg" viewBox="0 0 300 80">
+      <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle"
+        font-family="Garamond, serif"
+        font-size="42"
+        fill="#b69548"
+        stroke="#e5d6a4"
+        stroke-width="1.2">
+        Bible Voices
+      </text>
+      <circle cx="150" cy="16" r="12" stroke="#d5b262" stroke-width="2" fill="none"/>
+    </svg>
+  </div>
+</header>
+
+<div class="profile-container">
+  <img id="user-photo" class="profile-photo" src="" alt="User Photo">
+
+  <div id="username" class="username">Loading...</div>
+
+  <div id="email" class="info"><b>Email:</b></div>
+  <div id="credits" class="info"><b>Credits left:</b></div>
+  <div id="lifetime" class="info"><b>Lifetime access:</b></div>
+
+  <!-- Subscription panel -->
+  <div id="subscription-panel"></div>
+
+  <div class="buttons">
+    <button class="btn" id="editProfile">Edit Profile</button>
+    <button class="btn" id="logout">Logout</button>
+  </div>
+</div>
+
+<script>
+/* -------------------------------------------------------------------
+   Profile loading logic (unchanged) – Source: uploaded file
+   ------------------------------------------------------------------- */
+document.addEventListener("DOMContentLoaded", async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    window.location.href = "/login.html";
+    return;
+  }
+  try {
+    const response = await fetch("/api/me", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+    if (!response.ok) throw new Error("Failed to fetch user");
+    const user = await response.json();
+
+    document.getElementById("username").innerText = user.username;
+    document.getElementById("email").innerHTML = "<b>Email:</b> " + user.email;
+    document.getElementById("credits").innerHTML = "<b>Credits left:</b> " + user.credits + " messages";
+    document.getElementById("lifetime").innerHTML =
+      "<b>Lifetime access:</b> " + (user.lifetime ? "Yes" : "No");
+    document.getElementById("user-photo").src = user.photoUrl || "https://via.placeholder.com/100";
+  } catch (e) {
+    console.error(e);
+  }
+
+  /* Subscription system unchanged */
+  const target = document.getElementById('subscription-panel');
+  const labelMap = {
+    free: 'Free',
+    plus: 'Plus (£5/mo)',
+    pro: 'Pro (£20/mo)',
+    ultra: 'Ultra (£99 / 6mo)'
+  };
+
+  function fmt(d) {
+    try { return new Date(d).toLocaleString(); }
+    catch { return d || ''; }
+  }
+
+  async function loadSub() {
+    if (!target) return;
+    target.innerHTML = 'Loading subscription...';
+    try {
+      const r = await fetch('/api/me/subscription', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!r.ok) throw new Error('Failed to load subscription');
+      const sub = await r.json();
+
+      const tierName = labelMap[sub.tier] || sub.tier || 'Free';
+      const isPaid = sub.tier && sub.tier !== 'free' && sub.status !== 'inactive';
+      const willCancel = !!sub.cancelAtPeriodEnd;
+
+      let html = `
+        <div>
+          <div style="font-weight:700;margin-bottom:6px;color:#5b4823">Subscription</div>
+          <div>Plan: <b>${tierName}</b></div>
+          <div>Status: <b>${sub.status}</b></div>
+          ${sub.trialEnd ? `<div>Trial ends: ${fmt(sub.trialEnd)}</div>` : ``}
+          ${sub.currentPeriodEnd ? `<div>Period ends: ${fmt(sub.currentPeriodEnd)}</div>` : ``}
+      `;
+
+      if (isPaid && !willCancel) {
+        html += `
+          <button id="cancelSubBtn" class="btn" style="margin-top:12px;width:100%;">
+            Cancel subscription
+          </button>
+          <div style="font-size:12px;color:#6b7280;margin-top:6px">
+            Cancellation at period end.
+          </div>
+        `;
+      } else if (isPaid && willCancel) {
+        html += `<div style="margin-top:10px;color:#b91c1c">Cancellation scheduled.</div>`;
+      } else {
+        html += `<div style="margin-top:10px;color:#6b7280">No active subscription.</div>`;
+      }
+
+      html += `</div>`;
+      target.innerHTML = html;
+
+      const btn = document.getElementById('cancelSubBtn');
+      if (btn) {
+        btn.onclick = async () => {
+          if (!confirm('Cancel at the period end?')) return;
+          btn.disabled = true;
+          try {
+            const rr = await fetch('/api/stripe/cancel', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+              },
+              body: JSON.stringify({ atPeriodEnd: true })
+            });
+            const data = await rr.json();
+            if (!rr.ok) throw new Error(data?.error || 'Cancel failed');
+            alert('Cancellation scheduled.');
+            loadSub();
+          } catch (e) {
+            alert(e.message || 'Failed to cancel');
+            btn.disabled = false;
+          }
+        };
+      }
+    } catch (e) {
+      target.innerHTML = `<div style="color:#b91c1c">Could not load subscription.</div>`;
+      console.warn(e);
+    }
+  }
+
+  loadSub();
+});
+
+/* Logout */
+document.getElementById("logout").addEventListener("click", () => {
+  localStorage.removeItem("token");
+  window.location.href = "/login.html";
+});
+</script>
+
+</body>
+</html>
