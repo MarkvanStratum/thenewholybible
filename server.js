@@ -48,7 +48,7 @@ const pool = new Pool({
       phone TEXT,
       credits INT DEFAULT 10,
       lifetime BOOLEAN DEFAULT false,
-      access_expires TIMESTAMP,               -- NEW for monthly / quarterly access
+      access_expires TIMESTAMP,
       reset_token TEXT,
       reset_token_expires TIMESTAMP
     );
@@ -192,9 +192,6 @@ const profiles = [
     image: "/pics/20.png",
     description: "Honest about suffering. Offers deep reflection and perseverance."
   }
-];
-
-
 ];
 
 // ------------------------------
@@ -373,8 +370,6 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
 // STRIPE ONE-TIME PAYMENTS
 // ------------------------------
 async function chargeUser({ userId, amount, description }) {
-  const customerId = userId; // simple metadata mapping
-
   const paymentIntent = await stripe.paymentIntents.create({
     amount,
     currency: "usd",
