@@ -69,129 +69,29 @@ const pool = new Pool({
 })();
 
 // ------------------------------
-// 20 BIBLICAL PROFILES (WITH IMAGE FILES)
+// 20 BIBLICAL PROFILES
 // ------------------------------
 const profiles = [
-  {
-    id: 1,
-    name: "God",
-    image: "/pics/1.png",
-    description: "The Almighty. Speaks with ultimate authority, wisdom, and perfect love."
-  },
-  {
-    id: 2,
-    name: "Jesus",
-    image: "/pics/2.png",
-    description: "Compassionate teacher. Speaks with parables, kindness, truth, and mercy."
-  },
-  {
-    id: 3,
-    name: "Moses",
-    image: "/pics/3.png",
-    description: "Firm leader and prophet. Guides with strength, obedience, and perseverance."
-  },
-  {
-    id: 4,
-    name: "Mary",
-    image: "/pics/4.png",
-    description: "Gentle, nurturing, full of grace. Offers comfort and calm insight."
-  },
-  {
-    id: 5,
-    name: "David",
-    image: "/pics/5.png",
-    description: "Poetic king. Encourages with psalm-like emotional depth and courage."
-  },
-  {
-    id: 6,
-    name: "Solomon",
-    image: "/pics/6.png",
-    description: "Master of wisdom. Speaks with clarity, proverbs, and philosophical insight."
-  },
-  {
-    id: 7,
-    name: "Noah",
-    image: "/pics/7.png",
-    description: "Steadfast and faithful. Encourages trust during trials and storms."
-  },
-  {
-    id: 8,
-    name: "Abraham",
-    image: "/pics/8.png",
-    description: "Fatherly and devoted. Speaks of faith, promise, and covenant."
-  },
-  {
-    id: 9,
-    name: "Joseph",
-    image: "/pics/9.png",
-    description: "Forgiving and visionary. Helps interpret purpose behind suffering."
-  },
-  {
-    id: 10,
-    name: "Samuel",
-    image: "/pics/10.png",
-    description: "Prophetic and direct. Offers righteous clarity and discernment."
-  },
-  {
-    id: 11,
-    name: "Elijah",
-    image: "/pics/11.png",
-    description: "Bold prophet. Speaks with intensity, conviction, and spiritual fire."
-  },
-  {
-    id: 12,
-    name: "Isaiah",
-    image: "/pics/12.png",
-    description: "Poetic prophet. Uses imagery of hope, redemption, and restoration."
-  },
-  {
-    id: 13,
-    name: "Jeremiah",
-    image: "/pics/13.png",
-    description: "Honest and emotional. Offers raw truth and compassionate lament."
-  },
-  {
-    id: 14,
-    name: "Ruth",
-    image: "/pics/14.png",
-    description: "Loyal, humble, kind. Speaks with gentleness and steadfast love."
-  },
-  {
-    id: 15,
-    name: "Esther",
-    image: "/pics/15.png",
-    description: "Courageous queen. Encourages bravery, purpose, and divine timing."
-  },
-  {
-    id: 16,
-    name: "Daniel",
-    image: "/pics/16.png",
-    description: "Disciplined and calm. Provides wisdom under pressure and adversity."
-  },
-  {
-    id: 17,
-    name: "Paul",
-    image: "/pics/17.png",
-    description: "Apostolic teacher. Speaks with doctrine, exhortation, and clarity."
-  },
-  {
-    id: 18,
-    name: "Peter",
-    image: "/pics/18.png",
-    description: "Bold and passionate. Encourages repentance, growth, and strength."
-  },
-  {
-    id: 19,
-    name: "John",
-    image: "/pics/19.png",
-    description: "Apostle of love. Reflective, gentle, emphasizing light and truth."
-  },
-  {
-    id: 20,
-    name: "Job",
-    image: "/pics/20.png",
-    description: "Honest about suffering. Offers deep reflection and perseverance."
-  }
+  { id: 1, name: "God", image: "/pics/1.png", description: "The Almighty. Speaks with ultimate authority, wisdom, and perfect love." },
+  { id: 2, name: "Jesus", image: "/pics/2.png", description: "Compassionate teacher. Speaks with parables, kindness, truth, and mercy." },
+  { id: 3, name: "Moses", image: "/pics/3.png", description: "Firm leader and prophet. Guides with strength, obedience, and perseverance." },
+  { id: 4, name: "Mary", image: "/pics/4.png", description: "Gentle, nurturing, full of grace. Offers comfort and calm insight." },
+  { id: 5, name: "David", image: "/pics/5.png", description: "Poetic king. Encourages with psalm-like emotional depth and courage." },
+  { id: 6, name: "Solomon", image: "/pics/6.png", description: "Master of wisdom. Speaks with clarity, proverbs, and philosophical insight." },
+  { id: 7, name: "Noah", image: "/pics/7.png", description: "Steadfast and faithful. Encourages trust during trials and storms." },
+  { id: 8, name: "Abraham", image: "/pics/8.png", description: "Fatherly and devoted. Speaks of faith, promise, and covenant." },
+  { id: 9, name: "Joseph", image: "/pics/9.png", description: "Forgiving and visionary. Helps interpret purpose behind suffering." },
+  { id: 10, name: "Samuel", image: "/pics/10.png", description: "Prophetic and direct. Offers righteous clarity and discernment." },
+  { id: 11, name: "Elijah", image: "/pics/11.png", description: "Bold prophet. Speaks with intensity, conviction, and spiritual fire." },
+  { id: 12, name: "Isaiah", image: "/pics/12.png", description: "Poetic prophet. Uses imagery of hope, redemption, and restoration." },
+  { id: 13, name: "Jeremiah", image: "/pics/13.png", description: "Honest and emotional. Offers raw truth and compassionate lament." },
+  { id: 14, name: "Ruth", image: "/pics/14.png", description: "Loyal, humble, kind. Speaks with gentleness and steadfast love." },
+  { id: 15, name: "Esther", image: "/pics/15.png", description: "Courageous queen. Encourages bravery, purpose, and divine timing." },
+  { id: 16, name: "Daniel", image: "/pics/16.png", description: "Disciplined and calm. Provides wisdom under pressure and adversity." },
+  { id: 17, name: "Paul", image: "/pics/17.png", description: "Apostolic teacher. Speaks with doctrine, exhortation, and clarity." },
+  { id: 18, name: "Peter", image: "/pics/18.png", description: "Bold and passionate. Encourages repentance, growth, and strength." },
+  { id: 19, name: "John", image: "/pics/19.png", description: "Apostle of love. Reflective, gentle, emphasizing light and truth." },
+  { id: 20, name: "Job", image: "/pics/20.png", description: "Honest about suffering. Offers deep reflection and perseverance." }
 ];
 
 // ------------------------------
@@ -214,7 +114,6 @@ function authenticateToken(req, res, next) {
 // ------------------------------
 app.post("/api/register", async (req, res) => {
   let { email, password, gender, lookingFor, phone } = req.body;
-
   if (!email || !password)
     return res.status(400).json({ error: "Email and password required" });
 
@@ -222,9 +121,8 @@ app.post("/api/register", async (req, res) => {
 
   try {
     const exists = await pool.query("SELECT 1 FROM users WHERE email=$1", [email]);
-    if (exists.rows.length) {
+    if (exists.rows.length)
       return res.status(400).json({ error: "User already exists" });
-    }
 
     const hashed = await bcrypt.hash(password, 10);
 
@@ -246,18 +144,20 @@ app.post("/api/register", async (req, res) => {
 // ------------------------------
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
+
   try {
     const r = await pool.query("SELECT * FROM users WHERE email=$1", [email]);
     if (!r.rows.length) return res.status(400).json({ error: "Invalid credentials" });
 
     const user = r.rows[0];
     const match = await bcrypt.compare(password, user.password);
-
     if (!match) return res.status(400).json({ error: "Invalid credentials" });
 
-    const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, {
-      expiresIn: "7d"
-    });
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      SECRET_KEY,
+      { expiresIn: "7d" }
+    );
 
     res.json({ token });
   } catch (e) {
@@ -292,14 +192,14 @@ async function userHasAccess(userId) {
     "SELECT lifetime, access_expires FROM users WHERE id=$1",
     [userId]
   );
+
   if (!r.rows.length) return false;
 
   const u = r.rows[0];
   if (u.lifetime) return true;
 
-  if (u.access_expires && new Date(u.access_expires) > new Date()) {
+  if (u.access_expires && new Date(u.access_expires) > new Date())
     return true;
-  }
 
   return false;
 }
@@ -313,30 +213,25 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
 
   // Access check
   const hasAccess = await userHasAccess(userId);
-  if (!hasAccess) {
+  if (!hasAccess)
     return res.status(403).json({ error: "PAYMENT_REQUIRED" });
-  }
 
   try {
-    // Log user message
     await pool.query(
       `INSERT INTO messages (user_id, profile_id, from_user, text)
        VALUES ($1,$2,true,$3)`,
       [userId, profileId, message]
     );
 
-    // Build chat history
     const history = await pool.query(
-      `SELECT from_user, text FROM messages WHERE user_id=$1 AND profile_id=$2 ORDER BY created_at ASC`,
+      `SELECT from_user, text FROM messages
+       WHERE user_id=$1 AND profile_id=$2 ORDER BY created_at ASC`,
       [userId, profileId]
     );
 
     const messages = [
       { role: "system", content: SYSTEM_PROMPT },
-      {
-        role: "system",
-        content: `You are ${profile.name}. ${profile.description}`
-      }
+      { role: "system", content: `You are ${profile.name}. ${profile.description}` }
     ];
 
     history.rows.forEach(m =>
@@ -383,16 +278,16 @@ async function chargeUser({ userId, amount, description }) {
 app.post("/api/pay/month", authenticateToken, async (req, res) => {
   const userId = req.user.id;
 
-  const amount = 2000; // $20
   const pi = await chargeUser({
     userId,
-    amount,
+    amount: 2000,
     description: "1 month access"
   });
 
-  // Set 30 days expiration
   await pool.query(
-    `UPDATE users SET access_expires = NOW() + INTERVAL '30 days' WHERE id=$1`,
+    `UPDATE users
+     SET access_expires = NOW() + INTERVAL '30 days'
+     WHERE id=$1`,
     [userId]
   );
 
@@ -403,15 +298,16 @@ app.post("/api/pay/month", authenticateToken, async (req, res) => {
 app.post("/api/pay/quarter", authenticateToken, async (req, res) => {
   const userId = req.user.id;
 
-  const amount = 3500; // $35
   const pi = await chargeUser({
     userId,
-    amount,
+    amount: 3500,
     description: "3 month access"
   });
 
   await pool.query(
-    `UPDATE users SET access_expires = NOW() + INTERVAL '90 days' WHERE id=$1`,
+    `UPDATE users
+     SET access_expires = NOW() + INTERVAL '90 days'
+     WHERE id=$1`,
     [userId]
   );
 
@@ -422,14 +318,16 @@ app.post("/api/pay/quarter", authenticateToken, async (req, res) => {
 app.post("/api/pay/lifetime", authenticateToken, async (req, res) => {
   const userId = req.user.id;
 
-  const amount = 5000; // $50
   const pi = await chargeUser({
     userId,
-    amount,
+    amount: 5000,
     description: "Lifetime access"
   });
 
-  await pool.query(`UPDATE users SET lifetime=true WHERE id=$1`, [userId]);
+  await pool.query(
+    `UPDATE users SET lifetime=true WHERE id=$1`,
+    [userId]
+  );
 
   res.json({ clientSecret: pi });
 });
