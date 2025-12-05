@@ -9,14 +9,14 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Enable __dirname in ES modules
+// Enable __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Serve static HTML/CSS/JS/images from /public
+// Serve static site
 app.use(express.static(path.join(__dirname, "public")));
 
-// Stripe initialization
+// Stripe init
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
 });
@@ -39,19 +39,22 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
     const intent = await stripe.paymentIntents.create({
       amount: Math.round(23.95 * 100),
       currency: "usd",
+
       payment_method: paymentMethodId,
       confirmation_method: "manual",
       confirm: true,
 
-      // ✅ Fix for redirect warning
-      automatic_payment_methods: {
-        enabled: true,
-        allow_redirects: "never"
+      // ⭐ FIX — no more automatic_payment_methods
+      payment_method_options: {
+        card: {
+          request_three_d_secure: "automatic",
+        }
       },
 
       receipt_email: sanitize(email),
       description: "One-time purchase: $23.95",
       metadata: { customer_name: sanitize(name), customer_phone: sanitize(phone) },
+
       shipping: {
         name: sanitize(name),
         phone: sanitize(phone),
@@ -83,19 +86,22 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
     const intent = await stripe.paymentIntents.create({
       amount: Math.round(33.95 * 100),
       currency: "usd",
+
       payment_method: paymentMethodId,
       confirmation_method: "manual",
       confirm: true,
 
-      // ✅ Fix for redirect warning
-      automatic_payment_methods: {
-        enabled: true,
-        allow_redirects: "never"
+      // ⭐ FIX here too
+      payment_method_options: {
+        card: {
+          request_three_d_secure: "automatic",
+        }
       },
 
       receipt_email: sanitize(email),
       description: "One-time purchase: $33.95",
       metadata: { customer_name: sanitize(name), customer_phone: sanitize(phone) },
+
       shipping: {
         name: sanitize(name),
         phone: sanitize(phone),
@@ -114,15 +120,11 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
   }
 });
 
-// ================================
-// HEALTH CHECK
-// ================================
+// Health check
 app.get("/health", (req, res) => {
   res.json({ status: "Stripe payment server running" });
 });
 
-// ================================
-// START SERVER
-// ================================
+// Start
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
