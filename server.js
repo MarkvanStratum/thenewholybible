@@ -2,12 +2,21 @@
 import express from "express";
 import Stripe from "stripe";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// IMPORTANT: Insert your REAL Stripe secret key here
+// Enable __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ✅ Serve static HTML/CSS/JS/images from /public
+app.use(express.static(path.join(__dirname, "public")));
+
+// Stripe initialization
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
 });
@@ -34,7 +43,7 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
       confirmation_method: "manual",
       confirm: true,
 
-      // ✅ FIX ADDED
+      // ✅ Fix for redirect warning
       automatic_payment_methods: {
         enabled: true,
         allow_redirects: "never"
@@ -78,7 +87,7 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
       confirmation_method: "manual",
       confirm: true,
 
-      // ✅ FIX ADDED
+      // ✅ Fix for redirect warning
       automatic_payment_methods: {
         enabled: true,
         allow_redirects: "never"
@@ -108,7 +117,7 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
 // ================================
 // HEALTH CHECK
 // ================================
-app.get("/", (req, res) => {
+app.get("/health", (req, res) => {
   res.json({ status: "Stripe payment server running" });
 });
 
