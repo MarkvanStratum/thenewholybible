@@ -37,16 +37,13 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
       amount: Math.round(23.95 * 100),
       currency: "usd",
 
-      automatic_payment_methods: { enabled: false },
-confirmation_method: "automatic",
-confirm: false,
-
+      // IMPORTANT — DO NOT SET confirmation_method or confirm
 
       receipt_email: sanitize(email),
       description: "One-time purchase: $23.95",
       metadata: {
         customer_name: sanitize(name),
-        customer_phone: sanitize(phone)
+        customer_phone: sanitize(phone),
       },
 
       shipping: {
@@ -56,9 +53,9 @@ confirm: false,
           line1: sanitize(address?.line1),
           postal_code: sanitize(address?.postal_code),
           city: sanitize(address?.city),
-          country: sanitize(address?.country)
-        }
-      }
+          country: sanitize(address?.country),
+        },
+      },
     });
 
     res.json({ clientSecret: intent.client_secret });
@@ -78,16 +75,13 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
       amount: Math.round(33.95 * 100),
       currency: "usd",
 
-      automatic_payment_methods: { enabled: false },
-confirmation_method: "automatic",
-confirm: false,
-
+      // IMPORTANT — DO NOT SET confirmation_method or confirm
 
       receipt_email: sanitize(email),
       description: "One-time purchase: $33.95",
       metadata: {
         customer_name: sanitize(name),
-        customer_phone: sanitize(phone)
+        customer_phone: sanitize(phone),
       },
 
       shipping: {
@@ -97,9 +91,9 @@ confirm: false,
           line1: sanitize(address?.line1),
           postal_code: sanitize(address?.postal_code),
           city: sanitize(address?.city),
-          country: sanitize(address?.country)
-        }
-      }
+          country: sanitize(address?.country),
+        },
+      },
     });
 
     res.json({ clientSecret: intent.client_secret });
