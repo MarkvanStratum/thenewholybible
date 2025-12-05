@@ -45,7 +45,7 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
 
       payment_method: paymentMethodId,
       confirmation_method: "manual",
-      confirm: true,
+      confirm: false,
 
       receipt_email: sanitize(email),
       description: "One-time purchase: $23.95",
