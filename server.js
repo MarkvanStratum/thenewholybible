@@ -37,8 +37,10 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
       amount: Math.round(23.95 * 100),
       currency: "usd",
 
-      confirmation_method: "manual",
-      confirm: false, // Frontend will confirm
+      automatic_payment_methods: { enabled: false },
+confirmation_method: "automatic",
+confirm: false,
+
 
       receipt_email: sanitize(email),
       description: "One-time purchase: $23.95",
@@ -76,8 +78,10 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
       amount: Math.round(33.95 * 100),
       currency: "usd",
 
-      confirmation_method: "manual",
-      confirm: false, // IMPORTANT — frontend confirms
+      automatic_payment_methods: { enabled: false },
+confirmation_method: "automatic",
+confirm: false,
+
 
       receipt_email: sanitize(email),
       description: "One-time purchase: $33.95",
