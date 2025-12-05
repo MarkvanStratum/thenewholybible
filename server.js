@@ -2,12 +2,21 @@
 import express from "express";
 import Stripe from "stripe";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// IMPORTANT: Insert your REAL Stripe secret key here
+// Enable __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ✅ Serve static files from /public
+app.use(express.static(path.join(__dirname, "public")));
+
+// IMPORTANT: Insert your REAL Stripe secret key in Render env variables
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
 });
@@ -94,7 +103,7 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
 // ================================
 // HEALTH CHECK
 // ================================
-app.get("/", (req, res) => {
+app.get("/health", (req, res) => {
   res.json({ status: "Stripe payment server running" });
 });
 
