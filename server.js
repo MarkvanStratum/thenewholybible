@@ -40,20 +40,22 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
       amount: Math.round(23.95 * 100),
       currency: "usd",
 
+      // ⭐ REQUIRED FIX — disable auto methods & redirects
+      automatic_payment_methods: {
+        enabled: false,
+        allow_redirects: "never"
+      },
+
       payment_method: paymentMethodId,
       confirmation_method: "manual",
       confirm: true,
 
-      // ⭐ FIX — no more automatic_payment_methods
-      payment_method_options: {
-        card: {
-          request_three_d_secure: "automatic",
-        }
-      },
-
       receipt_email: sanitize(email),
       description: "One-time purchase: $23.95",
-      metadata: { customer_name: sanitize(name), customer_phone: sanitize(phone) },
+      metadata: { 
+        customer_name: sanitize(name), 
+        customer_phone: sanitize(phone) 
+      },
 
       shipping: {
         name: sanitize(name),
@@ -87,20 +89,22 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
       amount: Math.round(33.95 * 100),
       currency: "usd",
 
+      // ⭐ SAME FIX HERE
+      automatic_payment_methods: {
+        enabled: false,
+        allow_redirects: "never"
+      },
+
       payment_method: paymentMethodId,
       confirmation_method: "manual",
       confirm: true,
 
-      // ⭐ FIX here too
-      payment_method_options: {
-        card: {
-          request_three_d_secure: "automatic",
-        }
-      },
-
       receipt_email: sanitize(email),
       description: "One-time purchase: $33.95",
-      metadata: { customer_name: sanitize(name), customer_phone: sanitize(phone) },
+      metadata: { 
+        customer_name: sanitize(name), 
+        customer_phone: sanitize(phone) 
+      },
 
       shipping: {
         name: sanitize(name),
@@ -125,6 +129,6 @@ app.get("/health", (req, res) => {
   res.json({ status: "Stripe payment server running" });
 });
 
-// Start
+// Start server
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
