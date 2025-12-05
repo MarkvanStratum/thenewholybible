@@ -2,21 +2,12 @@
 import express from "express";
 import Stripe from "stripe";
 import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Enable __dirname in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// ✅ Serve static files from /public
-app.use(express.static(path.join(__dirname, "public")));
-
-// IMPORTANT: Insert your REAL Stripe secret key in Render env variables
+// IMPORTANT: Insert your REAL Stripe secret key here
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
 });
@@ -42,6 +33,13 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
       payment_method: paymentMethodId,
       confirmation_method: "manual",
       confirm: true,
+
+      // ✅ FIX ADDED
+      automatic_payment_methods: {
+        enabled: true,
+        allow_redirects: "never"
+      },
+
       receipt_email: sanitize(email),
       description: "One-time purchase: $23.95",
       metadata: { customer_name: sanitize(name), customer_phone: sanitize(phone) },
@@ -79,6 +77,13 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
       payment_method: paymentMethodId,
       confirmation_method: "manual",
       confirm: true,
+
+      // ✅ FIX ADDED
+      automatic_payment_methods: {
+        enabled: true,
+        allow_redirects: "never"
+      },
+
       receipt_email: sanitize(email),
       description: "One-time purchase: $33.95",
       metadata: { customer_name: sanitize(name), customer_phone: sanitize(phone) },
@@ -103,7 +108,7 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
 // ================================
 // HEALTH CHECK
 // ================================
-app.get("/health", (req, res) => {
+app.get("/", (req, res) => {
   res.json({ status: "Stripe payment server running" });
 });
 
