@@ -37,8 +37,6 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
       amount: Math.round(23.95 * 100),
       currency: "usd",
 
-      automatic_payment_methods: { enabled: false },
-
       confirmation_method: "manual",
       confirm: false, // Frontend will confirm
 
@@ -77,8 +75,6 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
     const intent = await stripe.paymentIntents.create({
       amount: Math.round(33.95 * 100),
       currency: "usd",
-
-      automatic_payment_methods: { enabled: false },
 
       confirmation_method: "manual",
       confirm: false, // IMPORTANT — frontend confirms
