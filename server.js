@@ -40,11 +40,8 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
       amount: Math.round(23.95 * 100),
       currency: "usd",
 
-      // ⭐ REQUIRED FIX — disable auto methods & redirects
-      automatic_payment_methods: {
-        enabled: false,
-        allow_redirects: "never"
-      },
+      // 🔥 REQUIRED FIX — disable Stripe APM auto-add
+      automatic_payment_methods: { enabled: false },
 
       payment_method: paymentMethodId,
       confirmation_method: "manual",
@@ -89,11 +86,8 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
       amount: Math.round(33.95 * 100),
       currency: "usd",
 
-      // ⭐ SAME FIX HERE
-      automatic_payment_methods: {
-        enabled: false,
-        allow_redirects: "never"
-      },
+      // 🔥 SAME FIX HERE
+      automatic_payment_methods: { enabled: false },
 
       payment_method: paymentMethodId,
       confirmation_method: "manual",
