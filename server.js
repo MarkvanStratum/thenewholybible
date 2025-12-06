@@ -37,7 +37,9 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
       amount: Math.round(23.95 * 100),
       currency: "usd",
 
-      // IMPORTANT — DO NOT SET confirmation_method or confirm
+      payment_method: req.body.paymentMethodId,
+      confirmation_method: "manual",
+      confirm: false,
 
       receipt_email: sanitize(email),
       description: "One-time purchase: $23.95",
@@ -75,10 +77,52 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
       amount: Math.round(33.95 * 100),
       currency: "usd",
 
-      // IMPORTANT — DO NOT SET confirmation_method or confirm
-
       receipt_email: sanitize(email),
       description: "One-time purchase: $33.95",
+      metadata: {
+        customer_name: sanitize(name),
+        customer_phone: sanitize(phone),
+      },
+
+      shipping: {
+        name: sanitize(name),
+        phone: sanitize(phone),
+        address: {
+          line1: sanitize(address?.line1),
+          postal_code: sanitize(address?.postal_code),
+          city: sanitize(address?.city),
+          country: sanitize(address?.country),
+        },
+      },
+    });
+
+    res.json({ clientSecret: intent.client_secret });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ================================
+// NEW ENDPOINT: WooCommerce Dynamic Cart Total (ZAR)
+// ================================
+app.post("/api/stripe/charge-cart-total", async (req, res) => {
+  try {
+    const { paymentMethodId, amountZAR, name, email, phone, address } = req.body;
+
+    if (!amountZAR || amountZAR <= 0) {
+      return res.status(400).json({ error: "Invalid amount" });
+    }
+
+    const intent = await stripe.paymentIntents.create({
+      amount: Math.round(amountZAR * 100), // Convert to ZAR cents
+      currency: "zar",
+
+      payment_method: paymentMethodId,
+      confirmation_method: "manual",
+      confirm: false,
+
+      receipt_email: sanitize(email),
+      description: `WooCommerce cart payment: R${amountZAR}`,
       metadata: {
         customer_name: sanitize(name),
         customer_phone: sanitize(phone),
