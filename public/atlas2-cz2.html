@@ -169,7 +169,9 @@
         <div class="form-grid">
           <div>
             <div class="label">Mezinárodní předvolba</div>
-            <select id="phonePrefix" class="select"></select>
+            <select id="phonePrefix" class="select">
+              <option value="+420">+420 — Czechia</option>
+            </select>
           </div>
           <div>
             <div class="label">Telefon</div>
@@ -309,7 +311,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const name = nameInput.value;
     const email = document.getElementById('emailInput').value;
-    const phone = document.getElementById('phoneNumber').value; // simplified
+    const phone = document.getElementById('phoneNumber').value;
     const address = {
       line1: document.getElementById('billingStreet').value,
       city: document.getElementById('billingCity').value,
@@ -318,7 +320,7 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     try {
-      // 1) PM
+      // 1) Create PaymentMethod
       const pmRes = await stripe.createPaymentMethod({
         type: "card",
         card: cardNumber,
@@ -326,7 +328,7 @@ window.addEventListener('DOMContentLoaded', () => {
       });
       if (pmRes.error) throw new Error(pmRes.error.message);
 
-      // 2) Create Intent
+      // 2) Create PaymentIntent via backend
       const resp = await fetch("/api/stripe/one-time-23-95", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
@@ -339,10 +341,15 @@ window.addEventListener('DOMContentLoaded', () => {
       const data = await resp.json();
       if (!data.clientSecret) throw new Error(data.error || "Nepodařilo se zahájit platbu.");
 
-      // 3) Confirm
-      const conf = await stripe.confirmCardPayment(data.clientSecret);
+      // 3) Confirm — FIX APPLIED HERE
+      const conf = await stripe.confirmCardPayment(data.clientSecret, {
+        payment_method: pmRes.paymentMethod.id
+      });
+
       if (conf.error) throw new Error(conf.error.message);
-      if (conf.paymentIntent.status !== "succeeded") throw new Error("Platba nebyla dokončena.");
+      if (!conf.paymentIntent || conf.paymentIntent.status !== "succeeded") {
+        throw new Error("Platba nebyla dokončena.");
+      }
 
       // SUCCESS redirect
       window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
