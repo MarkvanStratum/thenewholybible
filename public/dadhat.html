@@ -311,56 +311,58 @@ h2 {
 
 <script>
 // ----------------------------
-// Countries + Prefixes
+// Countries + Prefixes (ISO FIXED)
 // ----------------------------
 const COUNTRIES = [
-  { name:"United States", code:"+1" },
-  { name:"Canada", code:"+1" },
-  { name:"United Kingdom", code:"+44" },
-  { name:"Ireland", code:"+353" },
-  { name:"Australia", code:"+61" },
-  { name:"New Zealand", code:"+64" },
-  { name:"Germany", code:"+49" },
-  { name:"France", code:"+33" },
-  { name:"Netherlands", code:"+31" },
-  { name:"Belgium", code:"+32" },
-  { name:"Switzerland", code:"+41" },
-  { name:"Austria", code:"+43" },
-  { name:"Denmark", code:"+45" },
-  { name:"Norway", code:"+47" },
-  { name:"Sweden", code:"+46" },
-  { name:"Finland", code:"+358" },
-  { name:"Luxembourg", code:"+352" },
-  { name:"Singapore", code:"+65" },
-  { name:"Japan", code:"+81" },
-  { name:"South Korea", code:"+82" },
-  { name:"Italy", code:"+39" },
-  { name:"Spain", code:"+34" },
-  { name:"Portugal", code:"+351" },
-  { name:"Greece", code:"+30" },
-  { name:"Czech Republic", code:"+420" },
-  { name:"Poland", code:"+48" },
-  { name:"Hungary", code:"+36" },
-  { name:"Slovakia", code:"+421" },
-  { name:"Slovenia", code:"+386" },
-  { name:"Croatia", code:"+385" },
-  { name:"Estonia", code:"+372" },
-  { name:"Latvia", code:"+371" },
-  { name:"Lithuania", code:"+370" },
-  { name:"UAE", code:"+971" },
-  { name:"Israel", code:"+972" },
-  { name:"South Africa", code:"+27" }
+  { name:"United States",  iso:"US", code:"+1" },
+  { name:"Canada",         iso:"CA", code:"+1" },
+  { name:"United Kingdom", iso:"GB", code:"+44" },
+  { name:"Ireland",        iso:"IE", code:"+353" },
+  { name:"Australia",      iso:"AU", code:"+61" },
+  { name:"New Zealand",    iso:"NZ", code:"+64" },
+  { name:"Germany",        iso:"DE", code:"+49" },
+  { name:"France",         iso:"FR", code:"+33" },
+  { name:"Netherlands",    iso:"NL", code:"+31" },
+  { name:"Belgium",        iso:"BE", code:"+32" },
+  { name:"Switzerland",    iso:"CH", code:"+41" },
+  { name:"Austria",        iso:"AT", code:"+43" },
+  { name:"Denmark",        iso:"DK", code:"+45" },
+  { name:"Norway",         iso:"NO", code:"+47" },
+  { name:"Sweden",         iso:"SE", code:"+46" },
+  { name:"Finland",        iso:"FI", code:"+358" },
+  { name:"Luxembourg",     iso:"LU", code:"+352" },
+  { name:"Singapore",      iso:"SG", code:"+65" },
+  { name:"Japan",          iso:"JP", code:"+81" },
+  { name:"South Korea",    iso:"KR", code:"+82" },
+  { name:"Italy",          iso:"IT", code:"+39" },
+  { name:"Spain",          iso:"ES", code:"+34" },
+  { name:"Portugal",       iso:"PT", code:"+351" },
+  { name:"Greece",         iso:"GR", code:"+30" },
+  { name:"Czech Republic", iso:"CZ", code:"+420" },
+  { name:"Poland",         iso:"PL", code:"+48" },
+  { name:"Hungary",        iso:"HU", code:"+36" },
+  { name:"Slovakia",       iso:"SK", code:"+421" },
+  { name:"Slovenia",       iso:"SI", code:"+386" },
+  { name:"Croatia",        iso:"HR", code:"+385" },
+  { name:"Estonia",        iso:"EE", code:"+372" },
+  { name:"Latvia",         iso:"LV", code:"+371" },
+  { name:"Lithuania",      iso:"LT", code:"+370" },
+  { name:"UAE",            iso:"AE", code:"+971" },
+  { name:"Israel",         iso:"IL", code:"+972" },
+  { name:"South Africa",   iso:"ZA", code:"+27" }
 ];
 
 const countrySel = document.getElementById("country");
 const prefixSel = document.getElementById("phonePrefix");
 
-COUNTRIES.forEach(c=>{
-  countrySel.append(new Option(c.name,c.name));
-  prefixSel.append(new Option(`${c.code} — ${c.name}`,c.code));
+// Build selects using ISO codes
+COUNTRIES.forEach(c => {
+  countrySel.append(new Option(c.name, c.iso));
+  prefixSel.append(new Option(`${c.code} — ${c.name}`, c.code));
 });
 
-countrySel.value = "United States";
+// Default values
+countrySel.value = "US";
 prefixSel.value = "+1";
 
 // Step switch
