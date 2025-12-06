@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GOD = LOGIC — Divine Edition Dad Hat</title>
+
+<style>
+/* ---------------------- */
+/*  LUXURY WHITE–GOLD UI  */
+/* ---------------------- */
+:root {
+  --bg: #f7f7f7;
+  --card: #ffffff;
+  --gold: #d4af37;
+  --gold-glow: rgba(212,175,55,0.35);
+  --text-dark: #0a0a0a;
+  --line: #e6e6e6;
+  --radius: 14px;
+}
+
+body {
+  background: var(--bg);
+  margin: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  color: var(--text-dark);
+}
+
+/* ---------------------- */
+/*     HERO SECTION       */
+/* ---------------------- */
+.hero-wrap {
+  text-align: center;
+  padding: 30px 15px 40px;
+  max-width: 900px;
+  margin: auto;
+}
+
+h1 {
+  font-size: 42px;
+  font-weight: 900;
+  background: linear-gradient(90deg, var(--gold), #fff1a8);
+  -webkit-background-clip: text;
+  color: transparent;
+  margin: 0 0 12px;
+}
+
+.hero-sub {
+  max-width: 700px;
+  margin: 0 auto;
+  font-size: 18px;
+  color: #444;
+}
+
+.price-tag {
+  margin-top: 10px;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--gold);
+}
+
+/* Image halo glow */
+.hero-img-wrap {
+  margin: 35px auto 20px;
+  width: 100%;
+  max-width: 540px;
+  position: relative;
+}
+
+.hero-img-wrap::before {
+  content:"";
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 130%;
+  height: 130%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+  filter: blur(40px);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.hero-img {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  border-radius: 16px;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.12);
+}
+
+/* ---------------------- */
+/*     MAIN LAYOUT        */
+/* ---------------------- */
+.wrap {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 360px;
+  gap: 24px;
+}
+@media (max-width:900px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+/* ---------------------- */
+/*     FORM CARD          */
+/* ---------------------- */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 26px;
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 14px rgba(0,0,0,0.05);
+}
+
+h2 {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.label {
+  font-weight: 600;
+  margin: 8px 0 4px;
+}
+
+.input, .select, .el {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #cfd6e4;
+  font-size: 15px;
+  background: #fff;
+}
+
+.btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 18px;
+  font-size: 18px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, var(--gold), #f8e7a2);
+  border: none;
+  font-weight: 800;
+  color: #000;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(212,175,55,0.35);
+}
+.btn:active { transform: scale(0.98); }
+
+.step { display: none; }
+.step[aria-hidden="false"] { display: block; }
+
+.err {
+  display:none;
+  padding:10px;
+  border-radius:10px;
+  background:#ffecec;
+  border:1px solid #e39c9c;
+  color:#a00;
+  margin-top:12px;
+}
+.err[aria-hidden="false"] { display:block; }
+
+/* ---------------------- */
+/*     SIDEBAR            */
+/* ---------------------- */
+.sidebar-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 14px rgba(0,0,0,0.05);
+}
+
+.sidebar-title {
+  text-align: center;
+  font-weight: 900;
+  font-size: 22px;
+  background: linear-gradient(90deg, var(--gold), #fff1a8);
+  -webkit-background-clip: text;
+  color: transparent;
+  margin-bottom: 14px;
+}
+
+.order-row {
+  display:flex;
+  justify-content:space-between;
+  padding:8px 0;
+  border-top:1px dashed #ddd;
+}
+.order-row:first-of-type { border-top:none; }
+
+</style>
+</head>
+
+<body>
+
+<!-- ---------------------------- -->
+<!--          HERO AREA           -->
+<!-- ---------------------------- -->
+<div class="hero-wrap">
+  <h1>GOD = LOGIC</h1>
+  <p class="hero-sub">
+    The divine Spinozist truth — God as pure Logic, Mathematics, and the Structure of Reality.  
+    Own the sacred symbol in this *limited-edition luxury dad hat*.
+  </p>
+  <div class="price-tag">$23.95 — Worldwide Shipping</div>
+
+  <div class="hero-img-wrap">
+    <img src="dadhat.jpg" class="hero-img" alt="GOD = LOGIC Hat">
+  </div>
+</div>
+
+<!-- ---------------------------- -->
+<!--          MAIN GRID           -->
+<!-- ---------------------------- -->
+<div class="wrap">
+  <div class="grid">
+
+    <!-- FORM -->
+    <div class="card">
+
+      <!-- STEP 1 -->
+      <section id="step1" class="step" aria-hidden="false">
+        <h2>1. Your Information</h2>
+
+        <div class="label">First name</div>
+        <input id="firstName" class="input" placeholder="Jane">
+
+        <div class="label">Last name</div>
+        <input id="lastName" class="input" placeholder="Doe">
+
+        <div class="label">Email</div>
+        <input id="email" type="email" class="input" placeholder="you@example.com">
+
+        <div class="label">Address</div>
+        <input id="addr" class="input" placeholder="Street address">
+
+        <div class="label">City</div>
+        <input id="city" class="input" placeholder="City">
+
+        <div class="label">Postcode</div>
+        <input id="postcode" class="input" placeholder="Postcode">
+
+        <div class="label">Country</div>
+        <select id="country" class="select"></select>
+
+        <div class="label">Phone Prefix</div>
+        <select id="phonePrefix" class="select"></select>
+
+        <div class="label">Phone Number</div>
+        <input id="phoneNumber" class="input" placeholder="12345678">
+
+        <button id="nextBtn" class="btn">Continue</button>
+      </section>
+
+      <!-- STEP 2 -->
+      <section id="step2" class="step" aria-hidden="true">
+        <h2>2. Payment</h2>
+
+        <div class="label">Card Number</div>
+        <div id="card-number" class="el"></div>
+
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1">
+            <div class="label">Expiration</div>
+            <div id="card-expiry" class="el"></div>
+          </div>
+          <div style="flex:1">
+            <div class="label">CVC</div>
+            <div id="card-cvc" class="el"></div>
+          </div>
+        </div>
+
+        <div id="err" class="err"></div>
+
+        <button id="payNow" class="btn">Pay $23.95</button>
+      </section>
+
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar-box">
+      <div class="sidebar-title">Order Summary</div>
+
+      <div class="order-row">
+        <span>GOD = LOGIC Hat</span>
+        <span>$23.95</span>
+      </div>
+
+      <div class="order-row">
+        <span>Worldwide Shipping</span>
+        <span>Free</span>
+      </div>
+
+      <div class="order-row" style="font-weight:900;">
+        <span>Total</span>
+        <span>$23.95</span>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<!-- STRIPE -->
+<script src="https://js.stripe.com/v3"></script>
+
+<script>
+// ----------------------------
+// Countries + Prefixes
+// ----------------------------
+const COUNTRIES = [
+  { name:"United States", code:"+1" },
+  { name:"Canada", code:"+1" },
+  { name:"United Kingdom", code:"+44" },
+  { name:"Ireland", code:"+353" },
+  { name:"Australia", code:"+61" },
+  { name:"New Zealand", code:"+64" },
+  { name:"Germany", code:"+49" },
+  { name:"France", code:"+33" },
+  { name:"Netherlands", code:"+31" },
+  { name:"Belgium", code:"+32" },
+  { name:"Switzerland", code:"+41" },
+  { name:"Austria", code:"+43" },
+  { name:"Denmark", code:"+45" },
+  { name:"Norway", code:"+47" },
+  { name:"Sweden", code:"+46" },
+  { name:"Finland", code:"+358" },
+  { name:"Luxembourg", code:"+352" },
+  { name:"Singapore", code:"+65" },
+  { name:"Japan", code:"+81" },
+  { name:"South Korea", code:"+82" },
+  { name:"Italy", code:"+39" },
+  { name:"Spain", code:"+34" },
+  { name:"Portugal", code:"+351" },
+  { name:"Greece", code:"+30" },
+  { name:"Czech Republic", code:"+420" },
+  { name:"Poland", code:"+48" },
+  { name:"Hungary", code:"+36" },
+  { name:"Slovakia", code:"+421" },
+  { name:"Slovenia", code:"+386" },
+  { name:"Croatia", code:"+385" },
+  { name:"Estonia", code:"+372" },
+  { name:"Latvia", code:"+371" },
+  { name:"Lithuania", code:"+370" },
+  { name:"UAE", code:"+971" },
+  { name:"Israel", code:"+972" },
+  { name:"South Africa", code:"+27" }
+];
+
+const countrySel = document.getElementById("country");
+const prefixSel = document.getElementById("phonePrefix");
+
+COUNTRIES.forEach(c=>{
+  countrySel.append(new Option(c.name,c.name));
+  prefixSel.append(new Option(`${c.code} — ${c.name}`,c.code));
+});
+
+countrySel.value = "United States";
+prefixSel.value = "+1";
+
+// Step switch
+nextBtn.onclick = () => {
+  step1.setAttribute("aria-hidden","true");
+  step2.setAttribute("aria-hidden","false");
+};
+
+// ----------------------------
+// Stripe
+// ----------------------------
+const stripe = Stripe("<PUBLISHABLE_KEY>");
+const elements = stripe.elements();
+
+const cardNumber = elements.create("cardNumber");
+const cardExpiry = elements.create("cardExpiry");
+const cardCvc    = elements.create("cardCvc");
+
+cardNumber.mount("#card-number");
+cardExpiry.mount("#card-expiry");
+cardCvc.mount("#card-cvc");
+
+// ----------------------------
+// Payment
+// ----------------------------
+payNow.onclick = async () => {
+  err.textContent = "";
+  err.setAttribute("aria-hidden","true");
+
+  const pm = await stripe.createPaymentMethod({
+    type:"card",
+    card:cardNumber,
+    billing_details:{
+      name: firstName.value + " " + lastName.value,
+      email: email.value,
+      phone: prefixSel.value + phoneNumber.value,
+      address:{
+        line1: addr.value,
+        city: city.value,
+        postal_code: postcode.value,
+        country: countrySel.value
+      }
+    }
+  });
+
+  if(pm.error){
+    err.textContent = pm.error.message;
+    err.setAttribute("aria-hidden","false");
+    return;
+  }
+
+  const res = await fetch("/api/stripe/one-time-23-95",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      paymentMethodId: pm.paymentMethod.id,
+      name: firstName.value + " " + lastName.value,
+      email: email.value,
+      phone: prefixSel.value + phoneNumber.value,
+      address:{
+        line1: addr.value,
+        city: city.value,
+        postal_code: postcode.value,
+        country: countrySel.value
+      }
+    })
+  });
+  const data = await res.json();
+
+  if(!data.clientSecret){
+    err.textContent = data.error || "Payment failed to start";
+    err.setAttribute("aria-hidden","false");
+    return;
+  }
+
+  const conf = await stripe.confirmCardPayment(data.clientSecret);
+
+  if(conf.error){
+    err.textContent = conf.error.message;
+    err.setAttribute("aria-hidden","false");
+    return;
+  }
+
+  if(conf.paymentIntent.status === "succeeded"){
+    window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
+  }
+};
+</script>
+
+</body>
+</html>
