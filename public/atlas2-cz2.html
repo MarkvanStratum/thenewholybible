@@ -317,6 +317,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
     errBox.setAttribute('aria-hidden','true');
 
+    // Show loading overlay
+    const overlay = document.getElementById('loading-overlay');
+    overlay.style.display = "flex";
+    overlay.setAttribute('aria-hidden', 'false');
+
     const name = nameInput.value;
     const email = document.getElementById('emailInput').value;
     const phone = document.getElementById('phoneNumber').value;
@@ -328,7 +333,7 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     try {
-      // 1) Create PaymentMethod
+      // Create PaymentMethod
       const pmRes = await stripe.createPaymentMethod({
         type: "card",
         card: cardNumber,
@@ -336,7 +341,7 @@ window.addEventListener('DOMContentLoaded', () => {
       });
       if (pmRes.error) throw new Error(pmRes.error.message);
 
-      // 2) Create PaymentIntent via backend
+      // Create PaymentIntent via backend
       const resp = await fetch("/api/stripe/one-time-23-95", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
@@ -349,7 +354,7 @@ window.addEventListener('DOMContentLoaded', () => {
       const data = await resp.json();
       if (!data.clientSecret) throw new Error(data.error || "Nepodařilo se zahájit platbu.");
 
-      // 3) Confirm — FIX APPLIED
+      // Confirm
       const conf = await stripe.confirmCardPayment(data.clientSecret, {
         payment_method: pmRes.paymentMethod.id
       });
@@ -359,7 +364,7 @@ window.addEventListener('DOMContentLoaded', () => {
         throw new Error("Platba nebyla dokončena.");
       }
 
-      // SUCCESS redirect
+      // Redirect success
       window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
 
     } catch(err) {
@@ -370,6 +375,11 @@ window.addEventListener('DOMContentLoaded', () => {
       payBtn.disabled = false;
       payBtn.style.pointerEvents = "auto";
       payBtn.style.opacity = "1";
+
+      // HIDE LOADING OVERLAY ⭐ FIXED HERE
+      const overlay = document.getElementById('loading-overlay');
+      overlay.style.display = "none";
+      overlay.setAttribute('aria-hidden', 'true');
     }
 
   });
