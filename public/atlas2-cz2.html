@@ -305,7 +305,15 @@ window.addEventListener('DOMContentLoaded', () => {
   cardExpiry.mount('#card-expiry');
   cardCvc.mount('#card-cvc');
 
-  document.getElementById('payNow').addEventListener('click', async () => {
+  // NEW: disable double clicks
+  const payBtn = document.getElementById('payNow');
+
+  payBtn.addEventListener('click', async () => {
+
+    // disable button immediately
+    payBtn.disabled = true;
+    payBtn.style.pointerEvents = "none";
+    payBtn.style.opacity = "0.6";
 
     errBox.setAttribute('aria-hidden','true');
 
@@ -341,7 +349,7 @@ window.addEventListener('DOMContentLoaded', () => {
       const data = await resp.json();
       if (!data.clientSecret) throw new Error(data.error || "Nepodařilo se zahájit platbu.");
 
-      // 3) Confirm — FIX APPLIED HERE
+      // 3) Confirm — FIX APPLIED
       const conf = await stripe.confirmCardPayment(data.clientSecret, {
         payment_method: pmRes.paymentMethod.id
       });
@@ -357,6 +365,11 @@ window.addEventListener('DOMContentLoaded', () => {
     } catch(err) {
       errBox.textContent = err.message;
       errBox.setAttribute('aria-hidden',"false");
+
+      // re-enable button on failure
+      payBtn.disabled = false;
+      payBtn.style.pointerEvents = "auto";
+      payBtn.style.opacity = "1";
     }
 
   });
