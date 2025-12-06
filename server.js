@@ -13,7 +13,7 @@ app.use(cors());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve static site
+// Serve static site (public folder)
 app.use(express.static(path.join(__dirname, "public")));
 
 // Stripe init
@@ -21,28 +21,29 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
 });
 
-// Helper
+// Helper to sanitize strings
 function sanitize(str) {
   return typeof str === "string" ? str.trim() : undefined;
 }
 
-// ================================
-// ONE-TIME PAYMENT: $23.95
-// ================================
+/* ========================================
+   ONE-TIME PAYMENT: $23.95
+======================================== */
 app.post("/api/stripe/one-time-23-95", async (req, res) => {
   try {
-    const { name, email, phone, address } = req.body;
+    const { name, email, phone, address, paymentMethodId } = req.body;
 
     const intent = await stripe.paymentIntents.create({
       amount: Math.round(23.95 * 100),
       currency: "usd",
 
-      payment_method: req.body.paymentMethodId,
-      confirmation_method: "manual",
+      payment_method: paymentMethodId,
+      confirmation_method: "automatic",
       confirm: false,
 
       receipt_email: sanitize(email),
       description: "One-time purchase: $23.95",
+
       metadata: {
         customer_name: sanitize(name),
         customer_phone: sanitize(phone),
@@ -66,19 +67,24 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
   }
 });
 
-// ================================
-// ONE-TIME PAYMENT: $33.95
-// ================================
+/* ========================================
+   ONE-TIME PAYMENT: $33.95
+======================================== */
 app.post("/api/stripe/one-time-33-95", async (req, res) => {
   try {
-    const { name, email, phone, address } = req.body;
+    const { name, email, phone, address, paymentMethodId } = req.body;
 
     const intent = await stripe.paymentIntents.create({
       amount: Math.round(33.95 * 100),
       currency: "usd",
 
+      payment_method: paymentMethodId,
+      confirmation_method: "automatic",
+      confirm: false,
+
       receipt_email: sanitize(email),
       description: "One-time purchase: $33.95",
+
       metadata: {
         customer_name: sanitize(name),
         customer_phone: sanitize(phone),
@@ -102,30 +108,32 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
   }
 });
 
-// ================================
-// NEW ENDPOINT: WooCommerce Dynamic Cart Total (ZAR)
-// ================================
+/* ========================================
+   DYNAMIC WooCommerce CART TOTAL (USD)
+======================================== */
 app.post("/api/stripe/charge-cart-total", async (req, res) => {
   try {
-    const { paymentMethodId, amountZAR, name, email, phone, address } = req.body;
+    const { paymentMethodId, amountUSD, name, email, phone, address } = req.body;
 
-    if (!amountZAR || amountZAR <= 0) {
+    if (!amountUSD || amountUSD <= 0) {
       return res.status(400).json({ error: "Invalid amount" });
     }
 
     const intent = await stripe.paymentIntents.create({
-      amount: Math.round(amountZAR * 100), // Convert to ZAR cents
-      currency: "zar",
+      amount: Math.round(amountUSD * 100),   // USD → cents
+      currency: "usd",
 
       payment_method: paymentMethodId,
-      confirmation_method: "manual",
+      confirmation_method: "automatic",
       confirm: false,
 
       receipt_email: sanitize(email),
-      description: `WooCommerce cart payment: R${amountZAR}`,
+      description: `WooCommerce cart payment: $${amountUSD}`,
+
       metadata: {
         customer_name: sanitize(name),
         customer_phone: sanitize(phone),
+        cart_total_usd: amountUSD,
       },
 
       shipping: {
@@ -146,11 +154,17 @@ app.post("/api/stripe/charge-cart-total", async (req, res) => {
   }
 });
 
-// Health check
+/* ========================================
+   HEALTH CHECK
+======================================== */
 app.get("/health", (req, res) => {
   res.json({ status: "Stripe payment server running" });
 });
 
-// Start server
+/* ========================================
+   START SERVER
+======================================== */
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`Server running on port ${PORT}`)
+);
