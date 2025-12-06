@@ -99,15 +99,54 @@
     .step{display:none}
     .step[aria-hidden="false"]{display:block}
 
+    /* ================================
+       ZA-STYLE LOADING OVERLAY (OPTION B)
+       ================================ */
     .loading-overlay{
-      position:fixed; inset:0; background:rgba(246,249,252,.92);
-      display:none; align-items:center; justify-content:center; z-index:9999;
+      position:fixed; inset:0;
+      background:rgba(246,249,252,.92);
+      display:none; align-items:center; justify-content:center;
+      z-index:9999;
     }
-    .loading-overlay[aria-hidden="false"]{display:flex}
+    .loading-overlay[aria-hidden="false"]{display:flex;}
 
     .loading-box{
-      width:min(92vw,460px); background:#fff; border:1px solid #e6edf5;
-      border-radius:14px; padding:20px; text-align:center;
+      width:min(92vw,460px);
+      background:#fff;
+      border:1px solid #e6edf5;
+      border-radius:14px;
+      padding:24px;
+      text-align:center;
+      box-shadow:0 6px 18px rgba(0,0,0,0.06);
+    }
+
+    .loading-title{
+      font-size:20px;
+      font-weight:800;
+      margin-bottom:18px;
+      color:#2a3b55;
+    }
+
+    .progress-wrap{
+      width:100%;
+      height:12px;
+      background:#ecf1f8;
+      border-radius:999px;
+      overflow:hidden;
+      margin-bottom:14px;
+    }
+
+    .progress-bar{
+      width:0%;
+      height:100%;
+      background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
+      animation:loadingBar 2.2s ease-in-out infinite;
+    }
+
+    @keyframes loadingBar{
+      0%{width:0%}
+      60%{width:80%}
+      100%{width:100%}
     }
   </style>
 </head>
@@ -130,40 +169,19 @@
         <div class="h2">1. Informace</div>
 
         <div class="form-grid">
-          <div>
-            <div class="label">Jméno</div>
-            <input id="firstName" class="input" placeholder="Jana">
-          </div>
-          <div>
-            <div class="label">Příjmení</div>
-            <input id="lastName" class="input" placeholder="Nováková">
-          </div>
+          <div><div class="label">Jméno</div><input id="firstName" class="input" placeholder="Jana"></div>
+          <div><div class="label">Příjmení</div><input id="lastName" class="input" placeholder="Nováková"></div>
         </div>
 
         <div class="form-grid">
-          <div style="grid-column:1 / -1">
-            <div class="label">Adresa</div>
-            <input id="billingStreet" class="input">
-          </div>
-          <div>
-            <div class="label">PSČ</div>
-            <input id="billingPostcode" class="input">
-          </div>
-          <div>
-            <div class="label">Město</div>
-            <input id="billingCity" class="input">
-          </div>
+          <div style="grid-column:1 / -1"><div class="label">Adresa</div><input id="billingStreet" class="input"></div>
+          <div><div class="label">PSČ</div><input id="billingPostcode" class="input"></div>
+          <div><div class="label">Město</div><input id="billingCity" class="input"></div>
         </div>
 
         <div class="form-grid">
-          <div>
-            <div class="label">E-mail</div>
-            <input id="emailInput" class="input" type="email">
-          </div>
-          <div>
-            <div class="label">Země</div>
-            <input id="billingCountry" class="input" placeholder="Czechia">
-          </div>
+          <div><div class="label">E-mail</div><input id="emailInput" class="input" type="email"></div>
+          <div><div class="label">Země</div><input id="billingCountry" class="input" placeholder="Czechia"></div>
         </div>
 
         <div class="form-grid">
@@ -173,10 +191,7 @@
               <option value="+420">+420 — Czechia</option>
             </select>
           </div>
-          <div>
-            <div class="label">Telefon</div>
-            <input id="phoneNumber" class="input">
-          </div>
+          <div><div class="label">Telefon</div><input id="phoneNumber" class="input"></div>
         </div>
 
         <input id="nameInput" class="input" style="display:none">
@@ -184,10 +199,7 @@
         <button id="nextBtn" class="btn" type="button">Pokračovat</button>
 
         <div class="logos">
-          <img src="/visa.png">
-          <img src="/mastercard.png">
-          <img src="/amex.png">
-          <img src="/discover.jpg">
+          <img src="/visa.png"><img src="/mastercard.png"><img src="/amex.png"><img src="/discover.jpg">
         </div>
       </section>
 
@@ -202,14 +214,8 @@
             <div id="card-number" class="el"></div>
           </div>
           <div class="form-grid">
-            <div>
-              <div class="label">Platnost</div>
-              <div id="card-expiry" class="el"></div>
-            </div>
-            <div>
-              <div class="label">CVC</div>
-              <div id="card-cvc" class="el"></div>
-            </div>
+            <div><div class="label">Platnost</div><div id="card-expiry" class="el"></div></div>
+            <div><div class="label">CVC</div><div id="card-cvc" class="el"></div></div>
           </div>
         </div>
 
@@ -235,10 +241,7 @@
       <div class="widget">
         <div class="delivery">
           <img id="sidebarImg">
-          <div>
-            <div style="font-weight:800">Rychlé doručení</div>
-            <div class="tiny">3–5 pracovních dnů</div>
-          </div>
+          <div><div style="font-weight:800">Rychlé doručení</div><div class="tiny">3–5 pracovních dnů</div></div>
           <div style="margin-left:auto;font-weight:800">Zdarma</div>
         </div>
 
@@ -258,10 +261,12 @@
   </div>
 </div>
 
-<!-- LOADING -->
-<div id="loading-overlay" class="loading-overlay">
+<!-- ⭐ ZA-STYLE LOADING OVERLAY (OPTION B) -->
+<div id="loading-overlay" class="loading-overlay" aria-hidden="true" style="display:none">
   <div class="loading-box">
     <div class="loading-title">Zpracováváme platbu…</div>
+    <div class="progress-wrap"><div class="progress-bar"></div></div>
+    <p class="sub" style="margin-top:10px">Prosím čekejte, může to trvat několik sekund…</p>
   </div>
 </div>
 
@@ -305,26 +310,24 @@ window.addEventListener('DOMContentLoaded', () => {
   cardExpiry.mount('#card-expiry');
   cardCvc.mount('#card-cvc');
 
-  // NEW: disable double clicks
   const payBtn = document.getElementById('payNow');
 
   payBtn.addEventListener('click', async () => {
 
-    // disable button immediately
     payBtn.disabled = true;
     payBtn.style.pointerEvents = "none";
     payBtn.style.opacity = "0.6";
 
     errBox.setAttribute('aria-hidden','true');
 
-    // Show loading overlay
     const overlay = document.getElementById('loading-overlay');
     overlay.style.display = "flex";
-    overlay.setAttribute('aria-hidden', 'false');
+    overlay.setAttribute('aria-hidden','false');
 
     const name = nameInput.value;
     const email = document.getElementById('emailInput').value;
     const phone = document.getElementById('phoneNumber').value;
+
     const address = {
       line1: document.getElementById('billingStreet').value,
       city: document.getElementById('billingCity').value,
@@ -333,7 +336,6 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     try {
-      // Create PaymentMethod
       const pmRes = await stripe.createPaymentMethod({
         type: "card",
         card: cardNumber,
@@ -341,7 +343,6 @@ window.addEventListener('DOMContentLoaded', () => {
       });
       if (pmRes.error) throw new Error(pmRes.error.message);
 
-      // Create PaymentIntent via backend
       const resp = await fetch("/api/stripe/one-time-23-95", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
@@ -354,7 +355,6 @@ window.addEventListener('DOMContentLoaded', () => {
       const data = await resp.json();
       if (!data.clientSecret) throw new Error(data.error || "Nepodařilo se zahájit platbu.");
 
-      // Confirm
       const conf = await stripe.confirmCardPayment(data.clientSecret, {
         payment_method: pmRes.paymentMethod.id
       });
@@ -364,22 +364,20 @@ window.addEventListener('DOMContentLoaded', () => {
         throw new Error("Platba nebyla dokončena.");
       }
 
-      // Redirect success
       window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
 
     } catch(err) {
+
       errBox.textContent = err.message;
       errBox.setAttribute('aria-hidden',"false");
 
-      // re-enable button on failure
       payBtn.disabled = false;
       payBtn.style.pointerEvents = "auto";
       payBtn.style.opacity = "1";
 
-      // HIDE LOADING OVERLAY ⭐ FIXED HERE
       const overlay = document.getElementById('loading-overlay');
       overlay.style.display = "none";
-      overlay.setAttribute('aria-hidden', 'true');
+      overlay.setAttribute('aria-hidden','true');
     }
 
   });
