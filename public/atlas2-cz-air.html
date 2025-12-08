@@ -296,9 +296,11 @@ window.addEventListener('DOMContentLoaded', () => {
   // Initialize Airwallex
   // ================================
   Airwallex.init({
-    env: "production",
-    origin: window.location.origin
-  });
+  env: "production",
+  origin: window.location.origin,
+  client_id: "HKwsSvqwS2efVwb5GDhbZw"   // YOUR real Client ID
+});
+
 
   const card = Airwallex.createElement("card");
   card.mount("#card-element");
