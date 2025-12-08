@@ -109,8 +109,7 @@
       color:#2a3b55;
     }
 
-    /* --- FULL SIDEBAR WIDGETS (from ZA page) --- */
-
+    /* SIDEBAR */
     .widget{
       background:#fff;
       border:1px solid var(--line);
@@ -348,9 +347,136 @@
   <!-- Stripe.js -->
   <script src="https://js.stripe.com/v3"></script>
 
-  <!-- YOUR PAYMENT LOGIC (UNCHANGED) -->
+  <!-- FULL ORIGINAL JS (REQUIRED FOR CONTINUE BUTTON) -->
   <script>
-  /* Your entire JavaScript block goes here exactly as in your original page */
+  document.addEventListener("DOMContentLoaded", () => {
+
+    const PUBLISHABLE_KEY =
+      "pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t";
+
+    const SUBSCRIBE_URL = "/api/stripe/one-time-33-95";
+
+    const step1 = document.getElementById("step1");
+    const step2 = document.getElementById("step2");
+    const nextBtn = document.getElementById("nextBtn");
+    const backBtn = document.getElementById("backBtn");
+    const errBox = document.getElementById("err");
+    const overlay = document.getElementById("loading-overlay");
+
+    const firstName = document.getElementById("firstName");
+    const lastName = document.getElementById("lastName");
+    const nameInput = document.getElementById("nameInput");
+    const emailInput = document.getElementById("emailInput");
+
+    const phonePrefix = document.getElementById("phonePrefix");
+    const phoneNumber = document.getElementById("phoneNumber");
+
+    const billingStreet = document.getElementById("billingStreet");
+    const billingCity = document.getElementById("billingCity");
+    const billingPostcode = document.getElementById("billingPostcode");
+
+    /* Make Continue work */
+    nextBtn.onclick = () => {
+      nameInput.value = (firstName.value + " " + lastName.value).trim();
+      step1.setAttribute("aria-hidden","true");
+      step2.setAttribute("aria-hidden","false");
+    };
+
+    /* Back button */
+    backBtn.onclick = () => {
+      step1.setAttribute("aria-hidden","false");
+      step2.setAttribute("aria-hidden","true");
+    };
+
+    /* Stripe setup */
+    const stripe = Stripe(PUBLISHABLE_KEY);
+    const elements = stripe.elements();
+
+    const cardNumber = elements.create("cardNumber");
+    const cardExpiry = elements.create("cardExpiry");
+    const cardCvc = elements.create("cardCvc");
+
+    cardNumber.mount("#card-number");
+    cardExpiry.mount("#card-expiry");
+    cardCvc.mount("#card-cvc");
+
+    document.getElementById("payNow").onclick = async () => {
+
+      errBox.setAttribute("aria-hidden","true");
+      overlay.setAttribute("aria-hidden","false");
+
+      const address = {
+        line1: billingStreet.value.trim(),
+        city: billingCity.value.trim(),
+        postal_code: billingPostcode.value.trim(),
+        country: "ES"
+      };
+
+      const pm = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardNumber,
+        billing_details:{
+          name: nameInput.value,
+          email: emailInput.value.trim(),
+          phone: phonePrefix.value + phoneNumber.value.replace(/\D/g,""),
+          address
+        }
+      });
+
+      if(pm.error){
+        errBox.textContent = pm.error.message;
+        errBox.setAttribute("aria-hidden","false");
+        overlay.setAttribute("aria-hidden","true");
+        return;
+      }
+
+      const response = await fetch(SUBSCRIBE_URL,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          paymentMethodId: pm.paymentMethod.id,
+          name: nameInput.value,
+          email: emailInput.value.trim(),
+          phone: phonePrefix.value + phoneNumber.value.replace(/\D/g,""),
+          address
+        })
+      });
+
+      const data = await response.json();
+
+      if(!data.clientSecret){
+        errBox.textContent = data.error || "Error al iniciar el pago.";
+        errBox.setAttribute("aria-hidden","false");
+        overlay.setAttribute("aria-hidden","true");
+        return;
+      }
+
+      const conf = await stripe.confirmCardPayment(data.clientSecret);
+
+      if(conf.error){
+        errBox.textContent = conf.error.message;
+        errBox.setAttribute("aria-hidden","false");
+        overlay.setAttribute("aria-hidden","true");
+        return;
+      }
+
+      if(conf.paymentIntent.status !== "succeeded"){
+        errBox.textContent = "El pago no se completó.";
+        errBox.setAttribute("aria-hidden","false");
+        overlay.setAttribute("aria-hidden","true");
+        return;
+      }
+
+      const TRACKER_URL =
+        "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
+
+      const qp = new URLSearchParams();
+      qp.set("v", conf.paymentIntent.id);
+
+      window.location.href = TRACKER_URL + "?" + qp.toString();
+    };
+
+  });
   </script>
 
 </body>
