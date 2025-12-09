@@ -353,6 +353,63 @@ sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
 <script>
 window.addEventListener('DOMContentLoaded', () => {
 
+/* ======================================================
+   PHONE PREFIX SYSTEM (same as ATLAS2 CZ)
+   ====================================================== */
+
+const phonePrefix = document.getElementById("phonePrefix");
+const phoneNumber = document.getElementById("phoneNumber");
+const billingCountry = document.getElementById("billingCountry");
+
+/* Country → Name */
+const COUNTRY_CHOICES = {
+  CH:'Switzerland', DE:'Germany', AT:'Austria', FR:'France', IT:'Italy',
+  GB:'United Kingdom', US:'United States', CA:'Canada', AU:'Australia',
+  NZ:'New Zealand', ES:'Spain', NL:'Netherlands', BE:'Belgium',
+  SE:'Sweden', FI:'Finland', DK:'Denmark', NO:'Norway', PL:'Poland',
+  CZ:'Czechia', HU:'Hungary', RO:'Romania'
+};
+
+/* Country → Calling code */
+const CALLING_CODES = {
+  CH:'+41', DE:'+49', AT:'+43', FR:'+33', IT:'+39',
+  GB:'+44', US:'+1', CA:'+1', AU:'+61',
+  NZ:'+64', ES:'+34', NL:'+31', BE:'+32',
+  SE:'+46', FI:'+358', DK:'+45', NO:'+47',
+  PL:'+48', CZ:'+420', HU:'+36', RO:'+40'
+};
+
+/* Build dropdown options */
+function populatePrefixOptions(){
+  phonePrefix.innerHTML = "";
+  Object.entries(CALLING_CODES).forEach(([code, prefix]) => {
+    const label = `${prefix} — ${COUNTRY_CHOICES[code]}`;
+    phonePrefix.add(new Option(label, prefix));
+  });
+}
+
+/* Convert text to ISO country code */
+function countryToISO(text){
+  if (!text) return null;
+  const t = text.trim().toLowerCase();
+  if (t === 'schweiz' || t === 'switzerland' || t === 'suisse' || t === 'svizzera') return 'CH';
+  return null;
+}
+
+/* Sync prefix when country changes */
+function syncPrefixFromCountry(){
+  const iso = countryToISO(billingCountry.value);
+  if (iso && CALLING_CODES[iso]) phonePrefix.value = CALLING_CODES[iso];
+}
+
+/* Initialize */
+populatePrefixOptions();
+syncPrefixFromCountry();
+
+billingCountry.addEventListener("change", syncPrefixFromCountry);
+billingCountry.addEventListener("blur", syncPrefixFromCountry);
+
+
   const step1 = document.getElementById('step1');
   const step2 = document.getElementById('step2');
   const nextBtn = document.getElementById('nextBtn');
