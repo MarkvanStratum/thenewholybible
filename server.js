@@ -160,22 +160,32 @@ app.post("/api/airwallex/create-payment-intent", async (req, res) => {
   try {
     const { amount, currency, customer } = req.body;
 
-    const response = await axios.post(
-      "https://pci-api.airwallex.com/api/v1/pa/payment_intents/create",
-      {
-        request_id: `req_${Date.now()}`,
-        amount,
-        currency,
-        customer,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.AIRWALLEX_SECRET_KEY}`,
-          "Content-Type": "application/json",
-          "x-client-id": process.env.AIRWALLEX_CLIENT_ID,
-        },
-      }
-    );
+    const response = await fetch("https://pci-api.airwallex.com/api/v1/pa/payment_intents/create", {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${process.env.AIRWALLEX_SECRET_KEY}`,
+    "Content-Type": "application/json",
+    "x-client-id": process.env.AIRWALLEX_CLIENT_ID,
+  },
+  body: JSON.stringify({
+    request_id: `req_${Date.now()}`,
+    amount,
+    currency,
+    customer,
+  }),
+});
+
+if (!response.ok) {
+  const errData = await response.json();
+  throw new Error(errData.message || "Failed to create Airwallex payment intent");
+}
+
+const paymentIntent = await response.json();
+res.json({
+  paymentIntentId: paymentIntent.id,
+  clientSecret: paymentIntent.client_secret,
+});
+
 
     const paymentIntent = response.data;
     res.json({
@@ -192,7 +202,8 @@ app.post("/api/airwallex/create-payment-intent", async (req, res) => {
    HEALTH CHECK
 ======================================== */
 app.get("/health", (req, res) => {
-  res.json({ status: "Stripe payment server running" });
+  res.json({ status: "Payment server running (Stripe + Airwallex)" });
+
 });
 
 /* ========================================
