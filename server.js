@@ -3,7 +3,6 @@ import express from "express";
 import Stripe from "stripe";
 import cors from "cors";
 import path from "path";
-import axios from "axios";
 import { fileURLToPath } from "url";
 
 const app = express();
@@ -181,17 +180,12 @@ if (!response.ok) {
 }
 
 const paymentIntent = await response.json();
+
 res.json({
   paymentIntentId: paymentIntent.id,
   clientSecret: paymentIntent.client_secret,
 });
 
-
-    const paymentIntent = response.data;
-    res.json({
-      paymentIntentId: paymentIntent.id,
-      clientSecret: paymentIntent.client_secret,
-    });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -213,3 +207,4 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () =>
   console.log(`Server running on port ${PORT}`)
 );
+// Updated: removing old axios code
