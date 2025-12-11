@@ -347,12 +347,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
       // 2️⃣ Confirm the payment
       const result = await Airwallex.confirmPayment({
-        element: card,
-        payment_intent: {
-          id: data.paymentIntentId,
-          client_secret: data.clientSecret
-        }
-      });
+  element: card,
+  intent_id: data.paymentIntentId,
+  client_secret: data.clientSecret,
+});
+
 
       if (result.status === "succeeded") {
         window.location.href =
