@@ -3,6 +3,7 @@ import express from "express";
 import Stripe from "stripe";
 import cors from "cors";
 import path from "path";
+import axios from "axios";
 import { fileURLToPath } from "url";
 
 const app = express();
@@ -153,6 +154,39 @@ app.post("/api/stripe/charge-cart-total", async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
+
+// Airwallex route
+app.post("/api/airwallex/create-payment-intent", async (req, res) => {
+  try {
+    const { amount, currency, customer } = req.body;
+
+    const response = await axios.post(
+      "https://pci-api.airwallex.com/api/v1/pa/payment_intents/create",
+      {
+        request_id: `req_${Date.now()}`,
+        amount,
+        currency,
+        customer,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.AIRWALLEX_SECRET_KEY}`,
+          "Content-Type": "application/json",
+          "x-client-id": process.env.AIRWALLEX_CLIENT_ID,
+        },
+      }
+    );
+
+    const paymentIntent = response.data;
+    res.json({
+      paymentIntentId: paymentIntent.id,
+      clientSecret: paymentIntent.client_secret,
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 
 /* ========================================
    HEALTH CHECK
