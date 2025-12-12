@@ -145,7 +145,7 @@
 </div>
 
 <script>
-window.addEventListener('DOMContentLoaded',()=>{
+window.addEventListener('DOMContentLoaded', async () => {
   const qs = new URLSearchParams(location.search);
 
   const step1 = document.getElementById('step1');
@@ -165,70 +165,72 @@ window.addEventListener('DOMContentLoaded',()=>{
   const title = qs.get('sub1');
   const img = qs.get('sub2');
 
-  if(title || img){
+  if (title || img) {
     document.getElementById('hero').style.display = 'flex';
-    if(title) document.getElementById('heroTitle').textContent = decodeURIComponent(title);
-    if(img){
+    if (title) document.getElementById('heroTitle').textContent = decodeURIComponent(title);
+    if (img) {
       const src = decodeURIComponent(img);
       document.getElementById('heroImg').src = src;
       document.getElementById('sidebarImg').src = src;
     }
   }
 
-  const set = (id, v) => { if(v) document.getElementById(id).value = decodeURIComponent(v) };
+  const set = (id, val) => {
+    if (val) document.getElementById(id).value = decodeURIComponent(val);
+  };
   set('firstName', qs.get('sub3'));
   set('lastName', qs.get('sub4'));
   set('billingStreet', qs.get('sub5'));
   set('billingPostcode', qs.get('sub6'));
   set('billingCity', qs.get('sub7'));
   set('emailInput', qs.get('sub9'));
-
-  if(qs.get('sub10')) phoneNumber.value = decodeURIComponent(qs.get('sub10')).replace(/\D/g,'');
+  if (qs.get('sub10')) phoneNumber.value = decodeURIComponent(qs.get('sub10')).replace(/\D/g,'');
 
   nextBtn.onclick = () => {
     nameInput.value = firstName.value + ' ' + lastName.value;
-    step1.setAttribute('aria-hidden','true');
-    step2.setAttribute('aria-hidden','false');
+    step1.setAttribute('aria-hidden', 'true');
+    step2.setAttribute('aria-hidden', 'false');
   };
 
   backBtn.onclick = () => {
-    step2.setAttribute('aria-hidden','true');
-    step1.setAttribute('aria-hidden','false');
+    step2.setAttribute('aria-hidden', 'true');
+    step1.setAttribute('aria-hidden', 'false');
   };
 
-  Airwallex.init({env:"production",origin:location.origin,client_id:"HKwsSvqwS2efVwb5GDhbZw"});
+  Airwallex.init({
+    env: "demo", // change to "production" when ready
+    origin: window.location.origin,
+    client_id: "HKwsSvqwS2efVwb5GDhbZw"
+  });
+
   const card = Airwallex.createElement("card");
   card.mount("#card-element");
 
   payNow.onclick = async () => {
-  const intent = await Airwallex.createPaymentIntent({
-    amount: 2395,
-    currency: "USD",
-    merchant_order_id: "order_" + Date.now(),
-    client_secret: "", // leave blank, it's handled automatically
-    customer: {
-      email: emailInput.value,
-      phone_number: phoneNumber.value,
-      name: nameInput.value,
-      address: {
-        line1: billingStreet.value,
-        city: billingCity.value,
-        postcode: billingPostcode.value,
-        country_code: "ZA"
-      }
+    const res = await fetch("https://api-demo.airwallex.com/api/v1/pa/payment_intents/create", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer <YOUR_TEST_SECRET_KEY>'
+      },
+      body: JSON.stringify({
+        amount: 2395,
+        currency: "USD",
+        merchant_order_id: "order_" + Date.now(),
+        request_id: "req_" + Date.now()
+      })
+    });
+
+    const data = await res.json();
+    const confirm = await Airwallex.confirmPayment({
+      element: card,
+      client_secret: data.client_secret
+    });
+
+    if (confirm.status === "succeeded") {
+      location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
     }
-  });
-
-  const confirm = await Airwallex.confirmPayment({
-    element: card,
-    client_secret: intent.client_secret
-  });
-
-  if (confirm.status === "succeeded") {
-    location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
-  }
-};
-
+  };
 });
 </script>
 
