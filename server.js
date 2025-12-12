@@ -159,7 +159,7 @@ app.post("/api/airwallex/create-payment-intent", async (req, res) => {
   try {
     const { amount, currency, customer } = req.body;
 
-    const response = await fetch("https://pci-api.airwallex.com/api/v1/pa/payment_intents/create", {
+    const response = await fetch("https://api.airwallex.com/api/v1/pa/payment_intents/create", {
   method: "POST",
   headers: {
     Authorization: `Bearer ${process.env.AIRWALLEX_SECRET_KEY}`,
