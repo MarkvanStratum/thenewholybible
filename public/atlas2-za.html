@@ -146,46 +146,89 @@
 
 <script>
 window.addEventListener('DOMContentLoaded',()=>{
-  const qs=new URLSearchParams(location.search);
+  const qs = new URLSearchParams(location.search);
 
-  const title=qs.get('sub1');
-  const img=qs.get('sub2');
+  const step1 = document.getElementById('step1');
+  const step2 = document.getElementById('step2');
+  const nextBtn = document.getElementById('nextBtn');
+  const backBtn = document.getElementById('backBtn');
+  const payNow = document.getElementById('payNow');
+  const nameInput = document.getElementById('nameInput');
+  const firstName = document.getElementById('firstName');
+  const lastName = document.getElementById('lastName');
+  const emailInput = document.getElementById('emailInput');
+  const phoneNumber = document.getElementById('phoneNumber');
+  const billingStreet = document.getElementById('billingStreet');
+  const billingPostcode = document.getElementById('billingPostcode');
+  const billingCity = document.getElementById('billingCity');
 
-  if(title||img){
-    document.getElementById('hero').style.display='flex';
-    if(title) document.getElementById('heroTitle').textContent=decodeURIComponent(title);
+  const title = qs.get('sub1');
+  const img = qs.get('sub2');
+
+  if(title || img){
+    document.getElementById('hero').style.display = 'flex';
+    if(title) document.getElementById('heroTitle').textContent = decodeURIComponent(title);
     if(img){
-      const src=decodeURIComponent(img);
-      document.getElementById('heroImg').src=src;
-      document.getElementById('sidebarImg').src=src;
+      const src = decodeURIComponent(img);
+      document.getElementById('heroImg').src = src;
+      document.getElementById('sidebarImg').src = src;
     }
   }
 
-  const set=(id,v)=>{if(v)document.getElementById(id).value=decodeURIComponent(v)};
-  set('firstName',qs.get('sub3'));
-  set('lastName',qs.get('sub4'));
-  set('billingStreet',qs.get('sub5'));
-  set('billingPostcode',qs.get('sub6'));
-  set('billingCity',qs.get('sub7'));
-  set('emailInput',qs.get('sub9'));
+  const set = (id, v) => { if(v) document.getElementById(id).value = decodeURIComponent(v) };
+  set('firstName', qs.get('sub3'));
+  set('lastName', qs.get('sub4'));
+  set('billingStreet', qs.get('sub5'));
+  set('billingPostcode', qs.get('sub6'));
+  set('billingCity', qs.get('sub7'));
+  set('emailInput', qs.get('sub9'));
 
-  if(qs.get('sub10')) phoneNumber.value=decodeURIComponent(qs.get('sub10')).replace(/\D/g,'');
+  if(qs.get('sub10')) phoneNumber.value = decodeURIComponent(qs.get('sub10')).replace(/\D/g,'');
 
-  nextBtn.onclick=()=>{nameInput.value=firstName.value+' '+lastName.value;step1.hidden=true;step2.hidden=false};
-  backBtn.onclick=()=>{step2.hidden=true;step1.hidden=false};
+  nextBtn.onclick = () => {
+    nameInput.value = firstName.value + ' ' + lastName.value;
+    step1.setAttribute('aria-hidden','true');
+    step2.setAttribute('aria-hidden','false');
+  };
+
+  backBtn.onclick = () => {
+    step2.setAttribute('aria-hidden','true');
+    step1.setAttribute('aria-hidden','false');
+  };
 
   Airwallex.init({env:"production",origin:location.origin,client_id:"HKwsSvqwS2efVwb5GDhbZw"});
-  const card=Airwallex.createElement("card");card.mount("#card-element");
+  const card = Airwallex.createElement("card");
+  card.mount("#card-element");
 
-  payNow.onclick=async()=>{
-    const r=await fetch("/api/airwallex/create-payment-intent",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      amount:2395,currency:"USD",
-      customer:{name:nameInput.value,email:emailInput.value,phone_number:phoneNumber.value,
-        address:{line1:billingStreet.value,city:billingCity.value,postcode:billingPostcode.value,country_code:"ZA"}}
-    })});
-    const d=await r.json();
-    const c=await Airwallex.confirmPayment({element:card,intent_id:d.paymentIntentId,client_secret:d.clientSecret});
-    if(c.status==="succeeded") location.href="https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
+  payNow.onclick = async () => {
+    const r = await fetch("/api/airwallex/create-payment-intent", {
+      method: "POST",
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        amount: 2395,
+        currency: "USD",
+        customer: {
+          name: nameInput.value,
+          email: emailInput.value,
+          phone_number: phoneNumber.value,
+          address: {
+            line1: billingStreet.value,
+            city: billingCity.value,
+            postcode: billingPostcode.value,
+            country_code: "ZA"
+          }
+        }
+      })
+    });
+    const d = await r.json();
+    const c = await Airwallex.confirmPayment({
+      element: card,
+      intent_id: d.paymentIntentId,
+      client_secret: d.clientSecret
+    });
+    if(c.status === "succeeded"){
+      location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
+    }
   };
 });
 </script>
