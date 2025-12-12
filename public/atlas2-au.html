@@ -38,6 +38,45 @@
     .trust .box { border: 1px solid #e5e7eb; border-radius: 10px; padding: 8px; }
     .trust .big { font-weight: 900; font-size: 18px; }
     .trust .small { font-size: 12px; color: #5b6b82; }
+
+    /* Loading overlay */
+    #loadingOverlay {
+      position: fixed; inset: 0;
+      background: rgba(246,249,252,.92);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    #loadingOverlay[aria-hidden="false"] {
+      display: flex;
+    }
+    .loading-box {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 320px;
+    }
+    .loading-title {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(to right, #3b82f6 0%, #06b6d4 50%, #3b82f6 100%);
+      background-size: 200% auto;
+      animation: loading 1.5s linear infinite;
+    }
+    @keyframes loading {
+      0% { background-position: 0% 0%; }
+      100% { background-position: -200% 0%; }
+    }
   </style>
 </head>
 
@@ -50,7 +89,7 @@
   </div>
 
   <div class="grid">
-    <!-- LEFT SIDE -->
+    <!-- LEFT -->
     <div class="card">
       <section id="step1" class="step" aria-hidden="false">
         <div class="h2">1. Shipping Info</div>
@@ -89,7 +128,7 @@
       </section>
     </div>
 
-    <!-- RIGHT SIDE -->
+    <!-- RIGHT -->
     <aside>
       <div class="widget">
         <div class="w-title" style="text-align:center">What customers are saying</div>
@@ -120,36 +159,40 @@
   </div>
 </div>
 
+<!-- Loading Overlay -->
+<div id="loadingOverlay" aria-hidden="true">
+  <div class="loading-box">
+    <div class="loading-title">Processing your payment…</div>
+    <div class="progress-bar"></div>
+  </div>
+</div>
+
 <!-- Stripe JS -->
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
-  // Prefill from URL (sub1–sub9)
-  (function() {
-    const qs = new URLSearchParams(window.location.search);
-    const map = {
-      sub1: { selector: ".page-title", textOnly: true, prepend: "🔒 " },
-      sub2: { selector: "#sidebarImg", attr: "src" },
-      sub3: { selector: "#firstName" },
-      sub4: { selector: "#lastName" },
-      sub5: { selector: "#billingStreet" },
-      sub6: { selector: "#billingPostcode" },
-      sub7: { selector: "#billingCity" },
-      sub8: { selector: "#billingCountry" },
-      sub9: { selector: "#emailInput" }
-    };
-    for (const [k, cfg] of Object.entries(map)) {
-      const v = qs.get(k);
-      if (!v) continue;
-      const el = document.querySelector(cfg.selector);
-      if (!el) continue;
-      if (cfg.textOnly) el.innerHTML = (cfg.prepend || "") + v;
-      else if (cfg.attr) el.setAttribute(cfg.attr, v);
-      else el.value = v;
-    }
-  })();
+  const qs = new URLSearchParams(window.location.search);
+  const map = {
+    sub1: { selector: ".page-title", textOnly: true, prepend: "🔒 " },
+    sub2: { selector: "#sidebarImg", attr: "src" },
+    sub3: { selector: "#firstName" },
+    sub4: { selector: "#lastName" },
+    sub5: { selector: "#billingStreet" },
+    sub6: { selector: "#billingPostcode" },
+    sub7: { selector: "#billingCity" },
+    sub8: { selector: "#billingCountry" },
+    sub9: { selector: "#emailInput" }
+  };
+  for (const [k, cfg] of Object.entries(map)) {
+    const v = qs.get(k);
+    if (!v) continue;
+    const el = document.querySelector(cfg.selector);
+    if (!el) continue;
+    if (cfg.textOnly) el.innerHTML = (cfg.prepend || "") + v;
+    else if (cfg.attr) el.setAttribute(cfg.attr, v);
+    else el.value = v;
+  }
 
-  // Stripe logic
   const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
   const elements = stripe.elements();
   const cardNumber = elements.create('cardNumber');
@@ -160,36 +203,48 @@ window.addEventListener('DOMContentLoaded', () => {
   cardCvc.mount('#card-cvc');
 
   nextBtn.onclick = () => {
-    document.getElementById('step1').setAttribute('aria-hidden','true');
-    document.getElementById('step2').setAttribute('aria-hidden','false');
+    step1.setAttribute('aria-hidden','true');
+    step2.setAttribute('aria-hidden','false');
   };
 
   backBtn.onclick = () => {
-    document.getElementById('step2').setAttribute('aria-hidden','true');
-    document.getElementById('step1').setAttribute('aria-hidden','false');
+    step2.setAttribute('aria-hidden','true');
+    step1.setAttribute('aria-hidden','false');
   };
 
   payNow.onclick = async () => {
-    const name = firstName.value + " " + lastName.value;
-    const email = emailInput.value;
-    const address = {
-      line1: billingStreet.value,
-      city: billingCity.value,
-      postal_code: billingPostcode.value,
-      country: "AU"
-    };
-    const pm = await stripe.createPaymentMethod({
-      type: "card",
-      card: cardNumber,
-      billing_details: { name, email, address }
-    });
-    const res = await fetch("/api/stripe/one-time-33-95", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ paymentMethodId: pm.paymentMethod.id, name, email, address })
-    });
-    const data = await res.json();
-    await stripe.confirmCardPayment(data.clientSecret);
+    const overlay = document.getElementById("loadingOverlay");
+    overlay.setAttribute("aria-hidden", "false");
+
+    try {
+      const name = firstName.value + " " + lastName.value;
+      const email = emailInput.value;
+      const address = {
+        line1: billingStreet.value,
+        city: billingCity.value,
+        postal_code: billingPostcode.value,
+        country: "AU"
+      };
+
+      const pm = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardNumber,
+        billing_details: { name, email, address }
+      });
+
+      const res = await fetch("/api/stripe/one-time-33-95", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentMethodId: pm.paymentMethod.id, name, email, address })
+      });
+
+      const data = await res.json();
+      await stripe.confirmCardPayment(data.clientSecret);
+    } catch (e) {
+      document.getElementById("err").textContent = e.message;
+      document.getElementById("err").setAttribute("aria-hidden", "false");
+      document.getElementById("loadingOverlay").setAttribute("aria-hidden", "true");
+    }
   };
 });
 </script>
