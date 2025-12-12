@@ -160,36 +160,37 @@ app.post("/api/airwallex/create-payment-intent", async (req, res) => {
     const { amount, currency, customer } = req.body;
 
     const response = await fetch("https://api.airwallex.com/api/v1/pa/payment_intents/create", {
-  method: "POST",
-  headers: {
-    Authorization: `Bearer ${process.env.AIRWALLEX_SECRET_KEY}`,
-    "Content-Type": "application/json",
-    "x-client-id": process.env.AIRWALLEX_CLIENT_ID,
-  },
-  body: JSON.stringify({
-    request_id: `req_${Date.now()}`,
-    amount,
-    currency,
-    customer,
-  }),
-});
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.AIRWALLEX_SECRET_KEY}`,
+        "Content-Type": "application/json",
+        "x-client-id": process.env.AIRWALLEX_CLIENT_ID,
+      },
+      body: JSON.stringify({
+        request_id: `req_${Date.now()}`,
+        amount,
+        currency,
+        customer,
+      }),
+    });
 
-if (!response.ok) {
-  const errData = await response.json();
-  throw new Error(errData.message || "Failed to create Airwallex payment intent");
-}
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.message || "Failed to create Airwallex payment intent");
+    }
 
-const paymentIntent = await response.json();
+    const responseData = await response.json();
 
-res.json({
-  paymentIntentId: paymentIntent.id,
-  clientSecret: paymentIntent.client_secret,
-});
+    res.json({
+      paymentIntentId: responseData.id,
+      clientSecret: responseData.client_secret,
+    });
 
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
+
 
 
 /* ========================================
