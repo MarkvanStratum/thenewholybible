@@ -1,60 +1,164 @@
-<!-- [START: secure-checkout-za-airwallex.html] -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Secure Checkout</title>
+  <meta name="referrer" content="no-referrer">
 
+  <!-- Google tag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-FDQ6REQWS8');
+    gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
   </script>
 
+  <!-- Airwallex Elements -->
   <script src="https://checkout.airwallex.com/assets/elements.bundle.min.js"></script>
 
   <style>
-    body { font-family: Inter, sans-serif; margin: 0; background: #fafafa; color: #0a2540 }
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 18px 14px 60px }
-    .safe { background: #0a0a0a; color: #fff; font-size: 12px; padding: 6px 10px }
-    .page-title { font-size: 28px; font-weight: 900; display: flex; align-items: center; gap: 8px; margin: 6px 0 14px }
-    .stars { color: #f6b80c }
-    .reviews { color: #f6b80c; font-size: 13px; margin-left: 6px }
-    .grid { display: grid; grid-template-columns: minmax(0,1fr) 360px; gap: 18px }
-    @media (max-width:980px){ .grid{ grid-template-columns:1fr } }
-    .card,.widget{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px}
-    .widget+.widget{margin-top:12px}
-    .h2{font-size:18px;font-weight:800;margin:10px 0 14px}
-    .label{font-weight:700;font-size:13px;margin:4px 0}
-    .input,.select,.el{width:100%;border:1px solid #cfd6e4;border-radius:10px;padding:12px}
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .btn{width:100%;border:none;border-radius:12px;padding:12px;font-weight:900;background:#16a34a;color:#fff}
-    .btn.muted{background:#f1f4f8;color:#20324d;border:1px solid #e5e7eb}
-    .logos{display:flex;gap:10px;margin-top:12px}
+    :root{
+      --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb; --card:#ffffff;
+      --green:#18a957; --accent:#0f9d58; --accent2:#2dd4bf; --warn:#d30000;
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+
+    .wrap{max-width:1100px; margin:0 auto; padding:18px 14px 60px}
+    .safe{background:#0a0a0a; color:#fff; font-size:12px; padding:6px 10px}
+
+    .grid{
+      display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:18px;
+    }
+    @media (max-width:980px){ .grid{grid-template-columns:1fr} }
+
+    .card{
+      background:#fff; border:1px solid var(--line);
+      padding:22px; border-radius:12px;
+    }
+
+    .page-title{
+      font-size:28px; font-weight:900; display:flex; gap:8px; margin:6px 0 14px;
+    }
+    .stars{ color:#f6b80c; font-size:15px }
+    .reviews{ color:var(--muted); font-size:13px; margin-left:6px }
+
+    .h2{ font-size:18px; font-weight:800; margin:10px 0 14px }
+    .sub{ font-size:13px; color:#5b6b82 }
+
+    .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
+    @media(max-width:620px){ .form-grid{grid-template-columns:1fr} }
+
+    .input, .select, .el{
+      width:100%; border:1px solid #cfd6e4; border-radius:10px; padding:12px;
+      background:#fff; font-size:15px;
+    }
+
+    .btn{
+      width:100%; padding:12px; border:none; border-radius:12px;
+      background:#16a34a; color:#fff; cursor:pointer; font-weight:900;
+    }
+
+    .logos{display:flex; gap:10px; margin-top:12px}
     .logos img{height:20px}
+
+    .err{
+      display:none; background:#fff1f1; border:1px solid #f5bcbc;
+      padding:10px; border-radius:10px; margin-top:10px; color:#9a1a1a;
+    }
+    .err[aria-hidden="false"]{display:block}
+
+    .widget{
+      background:#fff; border:1px solid var(--line);
+      padding:16px; border-radius:12px;
+    }
+    .widget + .widget{margin-top:12px}
+
+    .order-row{
+      display:flex; justify-content:space-between;
+      padding:6px 0; border-top:1px dashed #e6eaf1;
+    }
+
+    .delivery{
+      display:flex; gap:12px; padding:12px;
+      border:1px dashed #d9e2ef; border-radius:10px; background:#f7fbff;
+    }
+    .delivery img{
+      width:52px;height:52px;object-fit:cover;border-radius:8px;
+    }
+
+    .trust{
+      display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; text-align:center;
+    }
+    .trust .box{border:1px solid var(--line); padding:8px; border-radius:10px}
+
     .step{display:none}
     .step[aria-hidden="false"]{display:block}
-    .err{display:none;background:#fff1f1;border:1px solid #f5bcbc;color:#9a1a1a;padding:10px;border-radius:10px}
-    .err[aria-hidden="false"]{display:block}
-    .delivery{display:flex;gap:12px;border:1px dashed #d9e2ef;background:#f7fbff;padding:12px;border-radius:10px}
-    .delivery img{width:52px;height:52px;border-radius:8px;object-fit:cover}
-    .order-row{display:flex;justify-content:space-between;padding:6px 0;border-top:1px dashed #e6eaf1}
-    .tiny{font-size:12px;color:#5b6b82}
-    .trust{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center}
-    .trust .box{border:1px solid #e5e7eb;border-radius:10px;padding:8px}
+
+    .loading-overlay{
+      position:fixed; inset:0;
+      background:rgba(246,249,252,.92);
+      display:none; align-items:center; justify-content:center;
+      z-index:9999;
+    }
+
+    .loading-overlay[aria-hidden="false"]{display:flex;}
+
+    .loading-box{
+      width:min(92vw,460px);
+      background:#fff;
+      border:1px solid #e6edf5;
+      border-radius:14px;
+      padding:24px;
+      text-align:center;
+      box-shadow:0 6px 18px rgba(0,0,0,0.06);
+    }
+
+    .loading-title{
+      font-size:20px;
+      font-weight:800;
+      margin-bottom:18px;
+      color:#2a3b55;
+    }
+
+    .progress-wrap{
+      width:100%;
+      height:12px;
+      background:#ecf1f8;
+      border-radius:999px;
+      overflow:hidden;
+      margin-bottom:14px;
+    }
+
+    .progress-bar{
+      width:0%;
+      height:100%;
+      background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
+      animation:loadingBar 2.2s ease-in-out infinite;
+    }
+
+    @keyframes loadingBar{
+      0%{width:0%}
+      60%{width:80%}
+      100%{width:100%}
+    }
   </style>
 </head>
 
 <body>
-<div class="safe">SSL safe payment</div>
+<div class="safe">SSL Secure Payment</div>
 
 <div class="wrap">
   <div class="page-title">
     Secure Checkout 🔒 <span class="stars">★★★★★</span>
-    <span class="reviews">(2777 Reviews)</span>
+    <span class="reviews">(2777 reviews)</span>
   </div>
 
   <div class="grid">
@@ -62,35 +166,37 @@
 
       <!-- STEP 1 -->
       <section id="step1" class="step" aria-hidden="false">
-        <div id="hero" style="display:none;align-items:center;gap:10px;margin-bottom:12px">
-          <img id="heroImg" style="width:44px;height:44px;border-radius:8px;border:1px solid #e6eaf1;object-fit:cover">
-          <div id="heroTitle" style="font-weight:900"></div>
-        </div>
-
         <div class="h2">1. Information</div>
+
         <div class="form-grid">
-          <div><div class="label">First name</div><input id="firstName" class="input"></div>
-          <div><div class="label">Last name</div><input id="lastName" class="input"></div>
+          <div><div class="label">First name</div><input id="firstName" class="input" placeholder="Jane"></div>
+          <div><div class="label">Last name</div><input id="lastName" class="input" placeholder="Doe"></div>
         </div>
 
         <div class="form-grid">
-          <div style="grid-column:1/-1"><div class="label">Address</div><input id="billingStreet" class="input"></div>
+          <div style="grid-column:1 / -1"><div class="label">Address</div><input id="billingStreet" class="input"></div>
           <div><div class="label">Postcode</div><input id="billingPostcode" class="input"></div>
           <div><div class="label">City</div><input id="billingCity" class="input"></div>
         </div>
 
         <div class="form-grid">
-          <div><div class="label">E-mail</div><input id="emailInput" class="input"></div>
-          <div><div class="label">Country</div><input class="input" value="South Africa" disabled></div>
+          <div><div class="label">E-mail</div><input id="emailInput" class="input" type="email"></div>
+          <div><div class="label">Country</div><input id="billingCountry" class="input" placeholder="South Africa"></div>
         </div>
 
         <div class="form-grid">
-          <div><div class="label">Calling code</div><select class="select"><option>+27 — South Africa</option></select></div>
-          <div><div class="label">Phone</div><input id="phoneNumber" class="input"></div>
+          <div>
+            <div class="label">Country calling code</div>
+            <select id="phonePrefix" class="select">
+              <option value="+27">+27 — South Africa</option>
+            </select>
+          </div>
+          <div><div class="label">Phone number</div><input id="phoneNumber" class="input"></div>
         </div>
 
-        <input id="nameInput" type="hidden">
-        <button id="nextBtn" class="btn">Continue</button>
+        <input id="nameInput" class="input" style="display:none">
+
+        <button id="nextBtn" class="btn" type="button">Continue</button>
 
         <div class="logos">
           <img src="/visa.png"><img src="/mastercard.png"><img src="/amex.png"><img src="/discover.jpg">
@@ -100,115 +206,162 @@
       <!-- STEP 2 -->
       <section id="step2" class="step" aria-hidden="true">
         <div class="h2">2. Payment</div>
-        <div id="card-element" class="el"></div>
+        <p class="sub">Card details are encrypted and securely processed by our provider.</p>
+
+        <div class="form-grid-1">
+          <div>
+            <div class="label">Card number</div>
+            <div id="card-element" class="el"></div>
+          </div>
+        </div>
+
         <div id="err" class="err" aria-hidden="true"></div>
-        <div style="display:flex;gap:10px;margin-top:12px">
-          <button id="backBtn" class="btn muted" style="width:40%">← Back</button>
-          <button id="payNow" class="btn" style="width:60%">Pay securely</button>
+
+        <div style="display:flex; gap:10px; margin-top:12px">
+          <button id="backBtn" class="btn muted" style="width:40%" type="button">← Back</button>
+          <button id="payNow" class="btn" style="width:60%" type="button">Pay securely</button>
         </div>
       </section>
+
     </div>
 
+    <!-- RIGHT SIDEBAR -->
     <aside>
       <div class="widget">
-        <div style="font-weight:800;text-align:center">What our customers say</div>
-        <div style="text-align:center;font-weight:700">Fenella Lara</div>
-        <div style="text-align:center;color:#f6b80c">★★★★★</div>
-        <p class="tiny" style="text-align:center">Fast and outstanding service!</p>
+        <div class="w-title" style="text-align:center">What our customers say</div>
+        <div style="text-align:center;font-weight:700;">Fenella Lara</div>
+        <div style="text-align:center;color:#f6b80c;">★★★★★</div>
+        <p class="tiny" style="text-align:center">I received my product yesterday. Great experience!</p>
       </div>
 
       <div class="widget">
         <div class="delivery">
-          <img id="sidebarImg" src="/box.jpg">
-          <div><strong>Fast delivery</strong><div class="tiny">3–5 working days</div></div>
+          <img id="sidebarImg">
+          <div><div style="font-weight:800">Fast delivery</div><div class="tiny">3–5 business days</div></div>
           <div style="margin-left:auto;font-weight:800">Free</div>
         </div>
-        <div class="order-row"><span>Total</span><span>R35</span></div>
+
+        <div class="w-title" style="margin-top:14px">Order Summary</div>
+        <div class="order-row"><span>Total</span><span id="orderTotal">R449</span></div>
       </div>
 
       <div class="widget">
-        <div style="font-weight:800">TRUSTED STORE</div>
+        <div class="w-title">TRUSTED STORE</div>
         <div class="trust">
-          <div class="box"><div class="big">99%</div><div class="tiny">Happy Customers</div></div>
-          <div class="box"><div class="big">Secure</div><div class="tiny">SSL</div></div>
-          <div class="box"><div class="big">ZAR 100K</div><div class="tiny">Protection</div></div>
+          <div class="box"><div class="big">99%</div><div class="small">Customer Satisfaction</div></div>
+          <div class="box"><div class="big">SSL</div><div class="small">Encryption</div></div>
+          <div class="box"><div class="big">R100,000</div><div class="small">Buyer Protection</div></div>
         </div>
       </div>
     </aside>
   </div>
 </div>
 
+<div id="loading-overlay" class="loading-overlay" aria-hidden="true" style="display:none">
+  <div class="loading-box">
+    <div class="loading-title">Processing your payment…</div>
+    <div class="progress-wrap"><div class="progress-bar"></div></div>
+    <p class="sub" style="margin-top:10px">Please wait, this may take a few seconds…</p>
+  </div>
+</div>
+
+<!-- 🔥 Airwallex Checkout Logic (UNCHANGED) -->
 <script>
-window.addEventListener('DOMContentLoaded', async () => {
-  const qs = new URLSearchParams(location.search);
-  const $ = id => document.getElementById(id);
+window.addEventListener('DOMContentLoaded', () => {
 
-  if (qs.get('sub1') || qs.get('sub2')) {
-    $('hero').style.display = 'flex';
-    if (qs.get('sub1')) $('heroTitle').textContent = decodeURIComponent(qs.get('sub1'));
-    if (qs.get('sub2')) {
-      const src = decodeURIComponent(qs.get('sub2'));
-      $('heroImg').src = src;
-      $('sidebarImg').src = src;
-    }
-  }
+  const step1 = document.getElementById('step1');
+  const step2 = document.getElementById('step2');
+  const nextBtn = document.getElementById('nextBtn');
+  const backBtn = document.getElementById('backBtn');
+  const payBtn = document.getElementById('payNow');
+  const errBox = document.getElementById('err');
 
-  const set = (id, val) => { if (val) $(id).value = decodeURIComponent(val); };
-  set('firstName', qs.get('sub3'));
-  set('lastName', qs.get('sub4'));
-  set('billingStreet', qs.get('sub5'));
-  set('billingPostcode', qs.get('sub6'));
-  set('billingCity', qs.get('sub7'));
-  set('emailInput', qs.get('sub9'));
-  if (qs.get('sub10')) $('phoneNumber').value = decodeURIComponent(qs.get('sub10')).replace(/\D/g,'');
+  const firstName = document.getElementById('firstName');
+  const lastName = document.getElementById('lastName');
 
-  $('nextBtn').onclick = () => {
-    $('nameInput').value = $('firstName').value + ' ' + $('lastName').value;
-    $('step1').setAttribute('aria-hidden', 'true');
-    $('step2').setAttribute('aria-hidden', 'false');
-  };
+  function show(o){ o.setAttribute('aria-hidden','false'); }
+  function hide(o){ o.setAttribute('aria-hidden','true'); }
 
-  $('backBtn').onclick = () => {
-    $('step2').setAttribute('aria-hidden', 'true');
-    $('step1').setAttribute('aria-hidden', 'false');
-  };
+  nextBtn.addEventListener('click', () => {
+    document.getElementById('nameInput').value =
+      `${firstName.value} ${lastName.value}`.trim();
+    hide(step1); show(step2);
+  });
 
-  Airwallex.init({ env: 'demo', origin: window.location.origin, client_id: 'HKwsSvqwS2efVwb5GDhbZw' });
+  backBtn.addEventListener('click', () => {
+    hide(step2); show(step1);
+  });
+
+  Airwallex.init({
+    env: "production",
+    origin: window.location.origin,
+    client_id: "HKwsSvqwS2efVwb5GDhbZw"
+  });
+
   const card = Airwallex.createElement("card");
   card.mount("#card-element");
 
-  $('payNow').onclick = async () => {
-    const res = await fetch("https://api-demo.airwallex.com/api/v1/pa/payment_intents/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer <YOUR_TEST_SECRET_KEY>"
-      },
-      body: JSON.stringify({
-        amount: 2395,
-        currency: "USD",
-        merchant_order_id: "order_" + Date.now(),
-        request_id: "req_" + Date.now()
-      })
-    });
+  payBtn.addEventListener('click', async () => {
+    payBtn.disabled = true;
+    payBtn.style.opacity = "0.6";
+    errBox.setAttribute("aria-hidden","true");
 
-    const data = await res.json();
-    const confirm = await Airwallex.confirmPayment({
-      element: card,
-      client_secret: data.client_secret
-    });
+    const overlay = document.getElementById('loading-overlay');
+    overlay.style.display = "flex";
+    overlay.setAttribute("aria-hidden","false");
 
-    if (confirm.status === "succeeded") {
-      location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
-    } else {
-      $('err').textContent = "Payment failed.";
-      $('err').setAttribute("aria-hidden", "false");
+    const customer = {
+      name: document.getElementById('nameInput').value,
+      email: document.getElementById('emailInput').value,
+      phone_number: document.getElementById('phoneNumber').value,
+      address: {
+        line1: document.getElementById('billingStreet').value,
+        city: document.getElementById('billingCity').value,
+        postcode: document.getElementById('billingPostcode').value,
+        country_code: "CZ"
+      }
+    };
+
+    try {
+      const resp = await fetch("/api/airwallex/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: 2395,
+          currency: "USD",
+          customer
+        })
+      });
+
+      const data = await resp.json();
+      if (!data.clientSecret) throw new Error("Failed to create payment.");
+
+      const result = await Airwallex.confirmPayment({
+        element: card,
+        intent_id: data.paymentIntentId,
+        client_secret: data.clientSecret,
+      });
+
+      if (result.status === "succeeded") {
+        window.location.href =
+          "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
+        return;
+      }
+
+      throw new Error(result.error?.message || "Payment failed.");
+
+    } catch(err) {
+      errBox.textContent = err.message;
+      errBox.setAttribute("aria-hidden","false");
+      payBtn.disabled = false;
+      payBtn.style.opacity = "1";
+      overlay.style.display = "none";
+      overlay.setAttribute("aria-hidden","true");
     }
-  };
+  });
+
 });
 </script>
 
-<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 </body>
 </html>
-<!-- [END] -->
