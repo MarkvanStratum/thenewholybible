@@ -120,7 +120,7 @@ app.post("/api/stripe/charge-cart-total", async (req, res) => {
     }
 
     const intent = await stripe.paymentIntents.create({
-      amount: Math.round(amountUSD * 100),   // USD → cents
+      amount: Math.round(amountUSD * 100),
       currency: "usd",
 
       payment_method: paymentMethodId,
@@ -159,20 +159,25 @@ app.post("/api/airwallex/create-payment-intent", async (req, res) => {
   try {
     const { amount, currency, customer } = req.body;
 
-    const response = await fetch("https://api.airwallex.com/api/v1/pa/payment_intents/create", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.AIRWALLEX_SECRET_KEY}`,
-        "Content-Type": "application/json",
-        "x-client-id": process.env.AIRWALLEX_CLIENT_ID,
-      },
-      body: JSON.stringify({
-        request_id: `req_${Date.now()}`,
-        amount,
-        currency,
-        customer,
-      }),
-    });
+    const response = await fetch(
+      "https://api.airwallex.com/api/v1/pa/payment_intents/create",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.AIRWALLEX_SECRET_KEY}`,
+          "Content-Type": "application/json",
+          "x-client-id": process.env.AIRWALLEX_CLIENT_ID,
+        },
+        body: JSON.stringify({
+          request_id: `req_${Date.now()}`,
+          amount,
+          currency,
+          customer,
+          merchant_order_id: `order_${Date.now()}`,
+          return_url: `${req.headers.origin || "https://checkoutpartner.xyz"}/thank-you`,
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errData = await response.json();
@@ -185,20 +190,16 @@ app.post("/api/airwallex/create-payment-intent", async (req, res) => {
       paymentIntentId: responseData.id,
       clientSecret: responseData.client_secret,
     });
-
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
-
-
 
 /* ========================================
    HEALTH CHECK
 ======================================== */
 app.get("/health", (req, res) => {
   res.json({ status: "Payment server running (Stripe + Airwallex)" });
-
 });
 
 /* ========================================
@@ -208,4 +209,3 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () =>
   console.log(`Server running on port ${PORT}`)
 );
-// Updated: removing old axios code
