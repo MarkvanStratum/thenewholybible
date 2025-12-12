@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Secure Checkout</title>
 
-  <!-- Google tag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -15,7 +14,6 @@
     gtag('config', 'G-FDQ6REQWS8');
   </script>
 
-  <!-- Airwallex -->
   <script src="https://checkout.airwallex.com/assets/elements.bundle.min.js"></script>
 
   <style>
@@ -64,15 +62,12 @@
 
       <!-- STEP 1 -->
       <section id="step1" class="step" aria-hidden="false">
-
-        <!-- HERO -->
         <div id="hero" style="display:none;align-items:center;gap:10px;margin-bottom:12px">
           <img id="heroImg" style="width:44px;height:44px;border-radius:8px;border:1px solid #e6eaf1;object-fit:cover">
           <div id="heroTitle" style="font-weight:900"></div>
         </div>
 
         <div class="h2">1. Information</div>
-
         <div class="form-grid">
           <div><div class="label">First name</div><input id="firstName" class="input"></div>
           <div><div class="label">Last name</div><input id="lastName" class="input"></div>
@@ -114,7 +109,6 @@
       </section>
     </div>
 
-    <!-- SIDEBAR -->
     <aside>
       <div class="widget">
         <div style="font-weight:800;text-align:center">What our customers say</div>
@@ -147,71 +141,48 @@
 <script>
 window.addEventListener('DOMContentLoaded', async () => {
   const qs = new URLSearchParams(location.search);
+  const $ = id => document.getElementById(id);
 
-  const step1 = document.getElementById('step1');
-  const step2 = document.getElementById('step2');
-  const nextBtn = document.getElementById('nextBtn');
-  const backBtn = document.getElementById('backBtn');
-  const payNow = document.getElementById('payNow');
-  const nameInput = document.getElementById('nameInput');
-  const firstName = document.getElementById('firstName');
-  const lastName = document.getElementById('lastName');
-  const emailInput = document.getElementById('emailInput');
-  const phoneNumber = document.getElementById('phoneNumber');
-  const billingStreet = document.getElementById('billingStreet');
-  const billingPostcode = document.getElementById('billingPostcode');
-  const billingCity = document.getElementById('billingCity');
-
-  const title = qs.get('sub1');
-  const img = qs.get('sub2');
-
-  if (title || img) {
-    document.getElementById('hero').style.display = 'flex';
-    if (title) document.getElementById('heroTitle').textContent = decodeURIComponent(title);
-    if (img) {
-      const src = decodeURIComponent(img);
-      document.getElementById('heroImg').src = src;
-      document.getElementById('sidebarImg').src = src;
+  if (qs.get('sub1') || qs.get('sub2')) {
+    $('hero').style.display = 'flex';
+    if (qs.get('sub1')) $('heroTitle').textContent = decodeURIComponent(qs.get('sub1'));
+    if (qs.get('sub2')) {
+      const src = decodeURIComponent(qs.get('sub2'));
+      $('heroImg').src = src;
+      $('sidebarImg').src = src;
     }
   }
 
-  const set = (id, val) => {
-    if (val) document.getElementById(id).value = decodeURIComponent(val);
-  };
+  const set = (id, val) => { if (val) $(id).value = decodeURIComponent(val); };
   set('firstName', qs.get('sub3'));
   set('lastName', qs.get('sub4'));
   set('billingStreet', qs.get('sub5'));
   set('billingPostcode', qs.get('sub6'));
   set('billingCity', qs.get('sub7'));
   set('emailInput', qs.get('sub9'));
-  if (qs.get('sub10')) phoneNumber.value = decodeURIComponent(qs.get('sub10')).replace(/\D/g,'');
+  if (qs.get('sub10')) $('phoneNumber').value = decodeURIComponent(qs.get('sub10')).replace(/\D/g,'');
 
-  nextBtn.onclick = () => {
-    nameInput.value = firstName.value + ' ' + lastName.value;
-    step1.setAttribute('aria-hidden', 'true');
-    step2.setAttribute('aria-hidden', 'false');
+  $('nextBtn').onclick = () => {
+    $('nameInput').value = $('firstName').value + ' ' + $('lastName').value;
+    $('step1').setAttribute('aria-hidden', 'true');
+    $('step2').setAttribute('aria-hidden', 'false');
   };
 
-  backBtn.onclick = () => {
-    step2.setAttribute('aria-hidden', 'true');
-    step1.setAttribute('aria-hidden', 'false');
+  $('backBtn').onclick = () => {
+    $('step2').setAttribute('aria-hidden', 'true');
+    $('step1').setAttribute('aria-hidden', 'false');
   };
 
-  Airwallex.init({
-    env: "demo", // change to "production" when ready
-    origin: window.location.origin,
-    client_id: "HKwsSvqwS2efVwb5GDhbZw"
-  });
-
+  Airwallex.init({ env: 'demo', origin: window.location.origin, client_id: 'HKwsSvqwS2efVwb5GDhbZw' });
   const card = Airwallex.createElement("card");
   card.mount("#card-element");
 
-  payNow.onclick = async () => {
+  $('payNow').onclick = async () => {
     const res = await fetch("https://api-demo.airwallex.com/api/v1/pa/payment_intents/create", {
       method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer <YOUR_TEST_SECRET_KEY>'
+        "Content-Type": "application/json",
+        "Authorization": "Bearer <YOUR_TEST_SECRET_KEY>"
       },
       body: JSON.stringify({
         amount: 2395,
@@ -229,6 +200,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     if (confirm.status === "succeeded") {
       location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
+    } else {
+      $('err').textContent = "Payment failed.";
+      $('err').setAttribute("aria-hidden", "false");
     }
   };
 });
