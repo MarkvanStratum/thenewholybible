@@ -179,9 +179,15 @@ app.post("/api/airwallex/create-payment-intent", async (req, res) => {
       }
     );
 
+    // NEW CODE TO REPLACE WITH (in server.js)
     if (!response.ok) {
       const errData = await response.json();
-      throw new Error(errData.message || "Failed to create Airwallex payment intent");
+      // FIX: Log the Airwallex response details for better debugging
+      console.error("Airwallex API Error:", response.status, errData); 
+      throw new Error(
+        errData.message ||
+          `Failed to create Airwallex payment intent (Status: ${response.status})`
+      );
     }
 
     const responseData = await response.json();
