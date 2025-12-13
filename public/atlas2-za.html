@@ -130,9 +130,11 @@
   <div class="safe">SSL safe payment</div>
 
   <div class="wrap">
+    <!-- Left: Form -->
     <div class="card">
       <div class="h2">Secure Checkout 🔒 <span style="font-size:16px; color:gold">★★★★★ (2777 Reviews)</span></div>
 
+      <!-- Step 1 -->
       <section id="step1" class="step" aria-hidden="false">
         <div class="h2">1. Information</div>
 
@@ -147,10 +149,58 @@
           </div>
         </div>
 
+        <div class="form-grid-1">
+          <div class="label">Address</div>
+          <input id="address" class="input" placeholder="Address">
+        </div>
+
+        <div class="form-grid">
+          <div>
+            <div class="label">Postcode</div>
+            <input id="postcode" class="input" placeholder="Postcode">
+          </div>
+          <div>
+            <div class="label">City</div>
+            <input id="city" class="input" placeholder="City">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div>
+            <div class="label">E-mail</div>
+            <input id="email" class="input" placeholder="you@example.com" type="email">
+          </div>
+          <div>
+            <div class="label">Country</div>
+            <input id="country" class="input" value="South Africa">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div>
+            <div class="label">Country calling code</div>
+            <select id="prefix" class="select">
+              <option value="+27" selected>+27 — South Africa</option>
+            </select>
+          </div>
+          <div>
+            <div class="label">Phone number</div>
+            <input id="phone" class="input" placeholder="Your number">
+          </div>
+        </div>
+
         <input type="hidden" id="nameInput">
         <button id="nextBtn" class="btn">Continue</button>
+
+        <div class="logos">
+          <img src="/visa.png" alt="Visa">
+          <img src="/mastercard.png" alt="Mastercard">
+          <img src="/amex.png" alt="Amex">
+          <img src="/discover.jpg" alt="Discover">
+        </div>
       </section>
 
+      <!-- Step 2 -->
       <section id="step2" class="step" aria-hidden="true">
         <div class="h2">2. Payment</div>
         <p style="font-size:14px; color:#666;">Card details are securely processed via PayPal.</p>
@@ -177,19 +227,42 @@
         <button id="backBtn" class="btn muted" style="margin-top:10px">← Back</button>
       </section>
     </div>
+
+    <!-- Right: Sidebar -->
+    <aside>
+      <div class="widget">
+        <div style="text-align:center; font-weight:700;">Fenella Lara</div>
+        <div style="text-align:center; color:gold">★★★★★</div>
+        <p class="tiny" style="text-align:center">I received my product yesterday. Fast and outstanding customer service! Thanks a lot.</p>
+      </div>
+      <div class="widget">
+        <div style="font-weight:700;">Fast delivery to your address</div>
+        <div class="tiny">3–5 working days</div>
+        <div style="margin-top:8px;"><strong>Free</strong></div>
+        <hr>
+        <div style="font-weight:800; margin-top:10px;">Order Summary</div>
+        <div style="display:flex; justify-content:space-between; font-size:14px; padding:6px 0;">
+          <span>Total</span><span><strong>R35</strong></span>
+        </div>
+      </div>
+    </aside>
   </div>
 
-  <!-- ✅ FIXED PayPal JS SDK (intent=CAPTURE added) -->
-  <script src="https://www.paypal.com/sdk/js?client-id=AcyjYbBvQNLrOk9OsZoMhSmvCpMFg8ynnK24IIpNYBOSPfngh4_gC68fPaTHew7SQn46ukmR7kC1xNm1&components=buttons,card-fields&intent=CAPTURE&currency=USD"></script>
+  <!-- PayPal JS SDK -->
+  <script src="https://www.paypal.com/sdk/js?client-id=AcyjYbBvQNLrOk9OsZoMhSmvCpMFg8ynnK24IIpNYBOSPfngh4_gC68fPaTHew7SQn46ukmR7kC1xNm1&components=buttons,card-fields&currency=USD"></script>
 
   <script>
     const step1 = document.getElementById("step1");
     const step2 = document.getElementById("step2");
     const nextBtn = document.getElementById("nextBtn");
     const backBtn = document.getElementById("backBtn");
+    const nameInput = document.getElementById("nameInput");
     const errBox = document.getElementById("err");
 
     nextBtn.addEventListener("click", () => {
+      const first = document.getElementById("firstName").value.trim();
+      const last = document.getElementById("lastName").value.trim();
+      nameInput.value = `${first} ${last}`.trim();
       step1.setAttribute("aria-hidden", "true");
       step2.setAttribute("aria-hidden", "false");
     });
@@ -201,21 +274,30 @@
 
     if (paypal.CardFields.isEligible()) {
       const cardFields = paypal.CardFields({
-        createOrder: () =>
-          fetch("/api/paypal/create-order", {
+        createOrder: () => {
+          return fetch("/api/paypal/create-order", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ amount: 23.95 })
-          }).then(res => res.json()).then(d => d.id),
+          })
+          .then(res => res.json())
+          .then(data => data.id);
+        },
 
-        onApprove: (data) =>
-          fetch("/api/paypal/capture-order", {
+        onApprove: (data) => {
+          return fetch("/api/paypal/capture-order", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ orderID: data.orderID })
-          }).then(() => alert("Payment successful!")),
+          })
+          .then(res => res.json())
+          .then(() => {
+            alert("Payment successful!");
+          });
+        },
 
-        onError: () => {
+        onError: (err) => {
+          console.error(err);
           errBox.textContent = "Payment failed. Please try another card.";
           errBox.setAttribute("aria-hidden", "false");
         }
