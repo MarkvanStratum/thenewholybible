@@ -169,7 +169,9 @@ app.post("/api/airwallex/create-payment-intent", async (req, res) => {
 // =========================
 
 async function getPayPalAccessToken() {
-  const auth = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET_KEY}`).toString("base64");
+  const auth = Buffer.from(
+    `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET_KEY}`
+  ).toString("base64");
 
   const res = await fetch("https://api-m.paypal.com/v1/oauth2/token", {
     method: "POST",
@@ -185,6 +187,7 @@ async function getPayPalAccessToken() {
   return data.access_token;
 }
 
+// 🔹 Existing helper (unchanged)
 async function createPayPalOrder(amount, currency = "USD") {
   const accessToken = await getPayPalAccessToken();
 
@@ -211,6 +214,7 @@ async function createPayPalOrder(amount, currency = "USD") {
   return data;
 }
 
+// 🔹 Existing routes (unchanged)
 app.post("/api/paypal/one-time-23-95", async (req, res) => {
   try {
     const order = await createPayPalOrder(23.95);
@@ -226,6 +230,76 @@ app.post("/api/paypal/one-time-33-95", async (req, res) => {
     res.json(order);
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+// =========================
+// ✅ NEW PayPal JS SDK ROUTES (Option A)
+// =========================
+
+app.post("/api/paypal/create-order", async (req, res) => {
+  try {
+    const { amount = 23.95, currency = "USD" } = req.body;
+    const accessToken = await getPayPalAccessToken();
+
+    const response = await fetch("https://api-m.paypal.com/v2/checkout/orders", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        intent: "CAPTURE",
+        purchase_units: [{
+          amount: {
+            currency_code: currency,
+            value: amount.toFixed(2),
+          },
+        }],
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("PayPal create-order error:", data);
+      return res.status(400).json({ error: data.message || "Failed to create order" });
+    }
+
+    // IMPORTANT: JS SDK expects ONLY the ID
+    res.json({ id: data.id });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/paypal/capture-order", async (req, res) => {
+  try {
+    const { orderID } = req.body;
+    const accessToken = await getPayPalAccessToken();
+
+    const response = await fetch(
+      `https://api-m.paypal.com/v2/checkout/orders/${orderID}/capture`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("PayPal capture error:", data);
+      return res.status(400).json({ error: data.message || "Capture failed" });
+    }
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
