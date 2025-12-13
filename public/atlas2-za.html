@@ -86,6 +86,23 @@
       border-radius: 10px;
       background: #fff;
     }
+
+    /* ✅ PayPal Card Fields containers (iframe-safe) */
+    .paypal-field {
+      width: 100%;
+      height: 44px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background: #fff;
+      padding: 10px;
+    }
+    .paypal-field iframe {
+      width: 100% !important;
+      height: 100% !important;
+      border: 0 !important;
+      display: block !important;
+    }
+
     .btn {
       width: 100%;
       background: var(--green);
@@ -209,17 +226,17 @@
 
         <div style="margin-top:12px">
           <div class="label">Card number</div>
-          <div id="card-number" class="input"></div>
+          <div id="card-number" class="paypal-field"></div>
         </div>
 
         <div class="form-grid">
           <div>
             <div class="label">Expiry</div>
-            <div id="card-expiry" class="input"></div>
+            <div id="card-expiry" class="paypal-field"></div>
           </div>
           <div>
             <div class="label">CVV</div>
-            <div id="card-cvv" class="input"></div>
+            <div id="card-cvv" class="paypal-field"></div>
           </div>
         </div>
 
@@ -245,11 +262,17 @@
           <span>Total</span><span><strong>R35</strong></span>
         </div>
       </div>
+      <div class="widget">
+        <div><strong>TRUSTED STORE</strong></div>
+        <div class="tiny">✅ 99% Happy Customers</div>
+        <div class="tiny">🔐 SSL Encrypted</div>
+        <div class="tiny">💸 ZAR 100K Buyer Protection</div>
+      </div>
     </aside>
   </div>
 
-  <!-- PayPal JS SDK -->
-  <script src="https://www.paypal.com/sdk/js?client-id=AcyjYbBvQNLrOk9OsZoMhSmvCpMFg8ynnK24IIpNYBOSPfngh4_gC68fPaTHew7SQn46ukmR7kC1xNm1&components=buttons,card-fields&currency=USD"></script>
+  <!-- ✅ PayPal JS SDK (intent=CAPTURE is required for Card Fields) -->
+  <script src="https://www.paypal.com/sdk/js?client-id=AcyjYbBvQNLrOk9OsZoMhSmvCpMFg8ynnK24IIpNYBOSPfngh4_gC68fPaTHew7SQn46ukmR7kC1xNm1&components=buttons,card-fields&intent=CAPTURE&currency=USD"></script>
 
   <script>
     const step1 = document.getElementById("step1");
@@ -259,21 +282,28 @@
     const nameInput = document.getElementById("nameInput");
     const errBox = document.getElementById("err");
 
-    nextBtn.addEventListener("click", () => {
-      const first = document.getElementById("firstName").value.trim();
-      const last = document.getElementById("lastName").value.trim();
-      nameInput.value = `${first} ${last}`.trim();
-      step1.setAttribute("aria-hidden", "true");
-      step2.setAttribute("aria-hidden", "false");
-    });
+    let cardFieldsInstance = null;
+    let payBtnWired = false;
 
-    backBtn.addEventListener("click", () => {
-      step2.setAttribute("aria-hidden", "true");
-      step1.setAttribute("aria-hidden", "false");
-    });
+    function showError(msg) {
+      errBox.textContent = msg;
+      errBox.setAttribute("aria-hidden", "false");
+    }
 
-    if (paypal.CardFields.isEligible()) {
-      const cardFields = paypal.CardFields({
+    function initPayPalCardFieldsOnce() {
+      if (cardFieldsInstance) return;
+
+      if (!window.paypal || !paypal.CardFields || typeof paypal.CardFields.isEligible !== "function") {
+        showError("PayPal card fields are not available. Please refresh the page.");
+        return;
+      }
+
+      if (!paypal.CardFields.isEligible()) {
+        showError("Card payment is not available for this browser/account.");
+        return;
+      }
+
+      cardFieldsInstance = paypal.CardFields({
         createOrder: () => {
           return fetch("/api/paypal/create-order", {
             method: "POST",
@@ -298,20 +328,39 @@
 
         onError: (err) => {
           console.error(err);
-          errBox.textContent = "Payment failed. Please try another card.";
-          errBox.setAttribute("aria-hidden", "false");
+          showError("Payment failed. Please try another card.");
         }
       });
 
-      cardFields.Number().render("#card-number");
-      cardFields.Expiry().render("#card-expiry");
-      cardFields.CVV().render("#card-cvv");
+      cardFieldsInstance.Number().render("#card-number");
+      cardFieldsInstance.Expiry().render("#card-expiry");
+      cardFieldsInstance.CVV().render("#card-cvv");
 
-      document.getElementById("payBtn").addEventListener("click", () => {
-        errBox.setAttribute("aria-hidden", "true");
-        cardFields.submit();
-      });
+      if (!payBtnWired) {
+        document.getElementById("payBtn").addEventListener("click", () => {
+          errBox.setAttribute("aria-hidden", "true");
+          cardFieldsInstance.submit();
+        });
+        payBtnWired = true;
+      }
     }
+
+    nextBtn.addEventListener("click", () => {
+      const first = document.getElementById("firstName").value.trim();
+      const last = document.getElementById("lastName").value.trim();
+      nameInput.value = `${first} ${last}`.trim();
+
+      step1.setAttribute("aria-hidden", "true");
+      step2.setAttribute("aria-hidden", "false");
+
+      // ✅ Render PayPal iframes ONLY after Step 2 is visible (prevents tiny/unusable fields)
+      setTimeout(initPayPalCardFieldsOnce, 0);
+    });
+
+    backBtn.addEventListener("click", () => {
+      step2.setAttribute("aria-hidden", "true");
+      step1.setAttribute("aria-hidden", "false");
+    });
   </script>
 </body>
 </html>
