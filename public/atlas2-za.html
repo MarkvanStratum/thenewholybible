@@ -209,7 +209,6 @@
         <div class="h2">2. Payment</div>
         <p style="font-size:14px; color:#666;">Card details are securely processed via PayPal.</p>
 
-        <button id="payNow" class="btn">Pay $23.95</button>
         <div id="err" class="err" aria-hidden="true"></div>
 
         <button id="backBtn" class="btn muted" style="margin-top:10px">← Back</button>
@@ -229,9 +228,9 @@
         <div style="margin-top:8px;"><strong>Free</strong></div>
         <hr>
         <div style="font-weight:800; margin-top:10px;">Order Summary</div>
-<div style="display:flex; justify-content:space-between; font-size:14px; padding:6px 0;">
-  <span>Total</span><span><strong>R35</strong></span>
-</div>
+        <div style="display:flex; justify-content:space-between; font-size:14px; padding:6px 0;">
+          <span>Total</span><span><strong>R35</strong></span>
+        </div>
 
         <div class="tiny">🗃️ Only 13 left in stock</div>
         <div class="tiny">👀 31 people are viewing this</div>
@@ -252,7 +251,6 @@
     const step2 = document.getElementById('step2');
     const nextBtn = document.getElementById('nextBtn');
     const backBtn = document.getElementById('backBtn');
-    const payNow = document.getElementById('payNow');
     const nameInput = document.getElementById('nameInput');
     const errBox = document.getElementById('err');
 
@@ -262,6 +260,7 @@
       nameInput.value = `${first} ${last}`.trim();
       step1.setAttribute('aria-hidden', 'true');
       step2.setAttribute('aria-hidden', 'false');
+      redirectToPayPal();
     });
 
     backBtn?.addEventListener('click', () => {
@@ -269,7 +268,7 @@
       step1.setAttribute('aria-hidden', 'false');
     });
 
-    payNow?.addEventListener('click', async () => {
+    async function redirectToPayPal() {
       errBox.textContent = '';
       errBox.setAttribute('aria-hidden', 'true');
 
@@ -290,7 +289,7 @@
         errBox.textContent = err.message || 'Something went wrong.';
         errBox.setAttribute('aria-hidden', 'false');
       }
-    });
+    }
   </script>
 </body>
 </html>
