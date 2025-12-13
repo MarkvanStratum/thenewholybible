@@ -6,6 +6,28 @@
   <title>Bezpečná pokladna</title>
   <meta name="referrer" content="no-referrer">
 
+  <!-- ✅ CSP: allow Airwallex + GA + inline scripts/styles + required network calls -->
+  <meta http-equiv="Content-Security-Policy"
+    content="
+      default-src 'self';
+      script-src
+        'self'
+        'unsafe-inline'
+        https://checkout.airwallex.com
+        https://static.airwallex.com
+        https://www.googletagmanager.com;
+      connect-src
+        'self'
+        https://api.airwallex.com
+        https://checkout.airwallex.com
+        https://static.airwallex.com
+        https://o11y.airwallex.com;
+      frame-src
+        https://checkout.airwallex.com;
+      img-src 'self' data: https:;
+      style-src 'self' 'unsafe-inline';
+    ">
+
   <!-- Google tag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
   <script>
@@ -285,10 +307,12 @@ window.addEventListener('DOMContentLoaded', () => {
   nextBtn.addEventListener('click', () => {
     document.getElementById('nameInput').value =
       `${firstName.value} ${lastName.value}`.trim();
+    nextBtn.blur();
     hide(step1); show(step2);
   });
 
   backBtn.addEventListener('click', () => {
+    backBtn.blur();
     hide(step2); show(step1);
   });
 
@@ -296,7 +320,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // Initialize Airwallex
   // ================================
   Airwallex.init({
-  env: "production",
+  env: "staging",
   origin: window.location.origin,
   client_id: "HKwsSvqwS2efVwb5GDhbZw"   // YOUR real Client ID
 });
@@ -328,7 +352,7 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     try {
-      // 1️⃣ Request PaymentIntent from backend
+      //1️⃣ Request PaymentIntent from backend
       const resp = await fetch("/api/airwallex/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
