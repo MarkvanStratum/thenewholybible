@@ -303,9 +303,8 @@
   </div>
 </div>
 
-<!-- 🔥 Airwallex Checkout Logic -->
 <script>
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
 
   const step1 = document.getElementById('step1');
   const step2 = document.getElementById('step2');
@@ -333,33 +332,39 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   // ================================
-  // ✅ Initialize Airwallex — LIVE
+  // ✅ Initialize Airwallex — FIXED
   // ================================
-  let cardNumber;
+  let cardNumber, expiry, cvc;
 
-Airwallex.init({
-  env: "prod",
-  origin: window.location.origin,
-  clientId: "G5sy4gihRZG8gU0538Ktkw"
-});
+  try {
+    // Initialize Airwallex (no clientId needed for legacy SDK)
+    await Airwallex.init({
+      env: "prod",
+      origin: window.location.origin
+    });
 
-const style = {
-  base: {
-    fontSize: "16px",
-    fontFamily: "Inter, sans-serif",
-    color: "#0a2540",
-    "::placeholder": { color: "#5b6b82" }
+    const style = {
+      base: {
+        fontSize: "16px",
+        fontFamily: "Inter, sans-serif",
+        color: "#0a2540",
+        "::placeholder": { color: "#5b6b82" }
+      }
+    };
+
+    // Create elements
+    cardNumber = Airwallex.createElement('cardNumber', { style });
+    expiry = Airwallex.createElement('expiry', { style });
+    cvc = Airwallex.createElement('cvc', { style });
+
+    // Mount elements
+    cardNumber.mount('cardNumber');
+    expiry.mount('expiry');
+    cvc.mount('cvc');
+
+  } catch(err) {
+    console.error('Airwallex initialization failed:', err);
   }
-};
-
-cardNumber = Airwallex.createElement('cardNumber', { style });
-const expiry = Airwallex.createElement('expiry', { style });
-const cvc = Airwallex.createElement('cvc', { style });
-
-cardNumber.mount('cardNumber');
-expiry.mount('expiry');
-cvc.mount('cvc');
-
 
   payBtn.addEventListener('click', async () => {
     payBtn.disabled = true;
@@ -371,14 +376,17 @@ cvc.mount('cvc');
     overlay.setAttribute("aria-hidden","false");
 
     const customer = {
-      name: document.getElementById('nameInput').value,
+      first_name: firstName.value,
+      last_name: lastName.value,
       email: document.getElementById('emailInput').value,
-      phone_number: document.getElementById('phoneNumber').value,
-      address: {
-        line1: document.getElementById('billingStreet').value,
-        city: document.getElementById('billingCity').value,
-        postcode: document.getElementById('billingPostcode').value,
-        country_code: "CZ"
+      phone_number: document.getElementById('phonePrefix').value + document.getElementById('phoneNumber').value,
+      billing: {
+        address: {
+          line1: document.getElementById('billingStreet').value,
+          city: document.getElementById('billingCity').value,
+          postcode: document.getElementById('billingPostcode').value,
+          country_code: "CZ"
+        }
       }
     };
 
@@ -395,26 +403,26 @@ cvc.mount('cvc');
 
       const data = await resp.json();
 
-      if (!data.clientSecret) {
+      if (!data.client_secret || !data.id) {
         throw new Error("Nepodařilo se vytvořit platbu.");
       }
 
+      // Confirm payment with legacy SDK
       const result = await Airwallex.confirmPaymentIntent({
-  element: cardNumber,
-  id: data.paymentIntentId,
-  client_secret: data.clientSecret,
-  payment_method_options: {
-    card: {
-      auto_capture: true
-    }
-  }
-});
+        element: cardNumber,
+        id: data.id,
+        client_secret: data.client_secret,
+        payment_method_options: {
+          card: {
+            auto_capture: true
+          }
+        }
+      });
 
-if (result.status === "SUCCEEDED") {
-  window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
-  return;
-}
-
+      if (result.status === "SUCCEEDED") {
+        window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
+        return;
+      }
 
       throw new Error(result.error?.message || "Platba selhala.");
 
@@ -430,7 +438,6 @@ if (result.status === "SUCCEEDED") {
 
 });
 </script>
-
 
 </body>
 </html>
