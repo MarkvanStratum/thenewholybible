@@ -303,10 +303,9 @@
   </div>
 </div>
 
-<!-- 🔥 Airwallex Checkout Logic -->
+<!-- 🔥 Modern Airwallex Checkout Logic -->
 <script>
-window.addEventListener('DOMContentLoaded', () => {
-
+window.addEventListener('DOMContentLoaded', async () => {
   const step1 = document.getElementById('step1');
   const step2 = document.getElementById('step2');
   const nextBtn = document.getElementById('nextBtn');
@@ -317,8 +316,8 @@ window.addEventListener('DOMContentLoaded', () => {
   const firstName = document.getElementById('firstName');
   const lastName = document.getElementById('lastName');
 
-  function show(o){ o.setAttribute('aria-hidden','false'); }
-  function hide(o){ o.setAttribute('aria-hidden','true'); }
+  function show(o) { o.setAttribute('aria-hidden', 'false'); }
+  function hide(o) { o.setAttribute('aria-hidden', 'true'); }
 
   nextBtn.addEventListener('click', () => {
     document.getElementById('nameInput').value =
@@ -332,52 +331,48 @@ window.addEventListener('DOMContentLoaded', () => {
     hide(step2); show(step1);
   });
 
-  // ================================
-  // ✅ Initialize Airwallex — LIVE
-  // ================================
-  let cardNumber;
+  // ✅ MODERN AIRWALLEX INIT (CDN-based)
+  const { init, createElement, confirmPaymentIntent } = window;
 
-Airwallex.init({
-  env: "prod",
-  origin: window.location.origin,
-  clientId: "vybho_aRT-6Q9f3qHJTxmw"
-});
+  await init({
+    env: "prod", // or 'demo' for sandbox
+    origin: window.location.origin
+  });
 
-const style = {
-  base: {
-    fontSize: "16px",
-    fontFamily: "Inter, sans-serif",
-    color: "#0a2540",
-    "::placeholder": { color: "#5b6b82" }
-  }
-};
+  const style = {
+    base: {
+      fontSize: "16px",
+      fontFamily: "Inter, sans-serif",
+      color: "#0a2540",
+      "::placeholder": { color: "#5b6b82" }
+    }
+  };
 
-cardNumber = Airwallex.createElement('cardNumber', { style });
-const expiry = Airwallex.createElement('expiry', { style });
-const cvc = Airwallex.createElement('cvc', { style });
+  const cardNumber = createElement("cardNumber", { style });
+  const expiry = createElement("expiry", { style });
+  const cvc = createElement("cvc", { style });
 
-cardNumber.mount('cardNumber');
-expiry.mount('expiry');
-cvc.mount('cvc');
+  cardNumber.mount("cardNumber");
+  expiry.mount("expiry");
+  cvc.mount("cvc");
 
-
-  payBtn.addEventListener('click', async () => {
+  payBtn.addEventListener("click", async () => {
     payBtn.disabled = true;
     payBtn.style.opacity = "0.6";
-    errBox.setAttribute("aria-hidden","true");
+    errBox.setAttribute("aria-hidden", "true");
 
-    const overlay = document.getElementById('loading-overlay');
+    const overlay = document.getElementById("loading-overlay");
     overlay.style.display = "flex";
-    overlay.setAttribute("aria-hidden","false");
+    overlay.setAttribute("aria-hidden", "false");
 
     const customer = {
-      name: document.getElementById('nameInput').value,
-      email: document.getElementById('emailInput').value,
-      phone_number: document.getElementById('phoneNumber').value,
+      name: document.getElementById("nameInput").value,
+      email: document.getElementById("emailInput").value,
+      phone_number: document.getElementById("phoneNumber").value,
       address: {
-        line1: document.getElementById('billingStreet').value,
-        city: document.getElementById('billingCity').value,
-        postcode: document.getElementById('billingPostcode').value,
+        line1: document.getElementById("billingStreet").value,
+        city: document.getElementById("billingCity").value,
+        postcode: document.getElementById("billingPostcode").value,
         country_code: "CZ"
       }
     };
@@ -387,7 +382,7 @@ cvc.mount('cvc');
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: 2395,
+          amount: 23.95,
           currency: "USD",
           customer
         })
@@ -395,32 +390,34 @@ cvc.mount('cvc');
 
       const data = await resp.json();
 
-      if (!data.clientSecret) {
+      if (!data.clientSecret || !data.paymentIntentId) {
         throw new Error("Nepodařilo se vytvořit platbu.");
       }
 
-      const result = await cardNumber.confirm({
-        intent_id: data.paymentIntentId,
+      const result = await confirmPaymentIntent({
+        element: cardNumber,
+        id: data.paymentIntentId,
         client_secret: data.clientSecret,
+        payment_method_options: {
+          card: { auto_capture: true }
+        }
       });
 
-      if (result.status === "succeeded") {
+      if (result.status === "SUCCEEDED") {
         window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
         return;
       }
 
       throw new Error(result.error?.message || "Platba selhala.");
-
-    } catch(err) {
+    } catch (err) {
       errBox.textContent = err.message;
-      errBox.setAttribute("aria-hidden","false");
+      errBox.setAttribute("aria-hidden", "false");
       payBtn.disabled = false;
       payBtn.style.opacity = "1";
       overlay.style.display = "none";
-      overlay.setAttribute("aria-hidden","true");
+      overlay.setAttribute("aria-hidden", "true");
     }
   });
-
 });
 </script>
 
