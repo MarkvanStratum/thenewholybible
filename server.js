@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-import paypal from "@paypal/checkout-server-sdk";
+import paypal from "@paypal/paypal-server-sdk";
 
 const app = express();
 app.use(express.json());
