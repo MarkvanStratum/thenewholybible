@@ -255,10 +255,11 @@ window.addEventListener('DOMContentLoaded', async () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-  amount: 23.95,
-  currency: "USD",
-  customer
-})
+          amount: 23.95,
+          currency: "USD",
+          customer
+        })
+      });
 
 
       if (!resp.ok) {
