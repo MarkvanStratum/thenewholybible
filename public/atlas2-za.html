@@ -243,13 +243,16 @@
 <script>
 window.addEventListener('DOMContentLoaded', async () => {
 
-  const step1 = document.getElementById('step1');
+    const step1 = document.getElementById('step1');
   const step2 = document.getElementById('step2');
   const nextBtn = document.getElementById('nextBtn');
   const backBtn = document.getElementById('backBtn');
+  const payBtn = document.getElementById('payNow');
+  const errBox = document.getElementById('err');
 
   const firstName = document.getElementById('firstName');
   const lastName = document.getElementById('lastName');
+
 
   function show(o){ o.setAttribute('aria-hidden','false'); }
   function hide(o){ o.setAttribute('aria-hidden','true'); }
@@ -289,16 +292,76 @@ window.addEventListener('DOMContentLoaded', async () => {
   expiry.mount('expiry');
   cvc.mount('cvc');
 
-  document.getElementById('payNow').addEventListener('click', async () => {
-    await fetch("/api/airwallex/create-payment-intent", {
+  payBtn.addEventListener('click', async () => {
+  payBtn.disabled = true;
+  payBtn.style.opacity = "0.6";
+  errBox.setAttribute("aria-hidden","true");
+
+  const overlay = document.getElementById('loading-overlay');
+  overlay.style.display = "flex";
+  overlay.setAttribute("aria-hidden","false");
+
+  const customer = {
+    first_name: firstName.value,
+    last_name: lastName.value,
+    email: document.getElementById('emailInput').value,
+    phone_number:
+      document.getElementById('phonePrefix').value +
+      document.getElementById('phoneNumber').value,
+    address: {
+      country_code: "ZA",
+      state: document.getElementById('billingCity').value,
+      city: document.getElementById('billingCity').value,
+      street: document.getElementById('billingStreet').value,
+      postcode: document.getElementById('billingPostcode').value
+    }
+  };
+
+  try {
+    const resp = await fetch("/api/airwallex/create-payment-intent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         amount: 449.00,
-        currency: "ZAR"
+        currency: "ZAR",
+        customer
       })
     });
-  });
+
+    if (!resp.ok) {
+      const e = await resp.json();
+      throw new Error(e.error || "Payment failed");
+    }
+
+    const data = await resp.json();
+
+    const result = await Airwallex.confirmPaymentIntent({
+      element: cardNumber,
+      id: data.id,
+      client_secret: data.client_secret,
+      payment_method_options: {
+        card: { auto_capture: true }
+      }
+    });
+
+    if (result.status === "SUCCEEDED") {
+      window.location.href =
+        "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
+      return;
+    }
+
+    throw new Error(result.error?.message || "Payment failed");
+
+  } catch (err) {
+    errBox.textContent = err.message;
+    errBox.setAttribute("aria-hidden","false");
+    payBtn.disabled = false;
+    payBtn.style.opacity = "1";
+    overlay.style.display = "none";
+    overlay.setAttribute("aria-hidden","true");
+  }
+});
+
 
 });
 </script>
