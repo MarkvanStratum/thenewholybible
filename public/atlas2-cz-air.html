@@ -227,38 +227,33 @@
       </section>
 
       <!-- STEP 2 -->
-      <section id="step2" class="step" aria-hidden="true">
-        <div class="h2">2. Platba</div>
-        <p class="sub">Údaje o kartě jsou šifrované a bezpečně zpracovává je náš poskytovatel.</p>
+<section id="step2" class="step" aria-hidden="true">
+  <div class="h2">2. Platba</div>
+  <p class="sub">Údaje o kartě jsou šifrované a bezpečně zpracovává je náš poskytovatel.</p>
 
-        <div class="form-grid-1">
-          <div>
-            <div class="label">Číslo karty</div>
-            <div class="form-grid-1">
-  <div>
-    <div class="label">Číslo karty</div>
-    <div id="cardNumber" class="el"></div>
+  <div class="form-grid-1">
+    <div>
+      <div class="label">Číslo karty</div>
+      <div id="cardNumber" class="el"></div>
+    </div>
+    <div>
+      <div class="label">Platnost</div>
+      <div id="expiry" class="el"></div>
+    </div>
+    <div>
+      <div class="label">CVC</div>
+      <div id="cvc" class="el"></div>
+    </div>
   </div>
-  <div>
-    <div class="label">Platnost</div>
-    <div id="expiry" class="el"></div>
+
+  <div id="err" class="err" aria-hidden="true"></div>
+
+  <div style="display:flex; gap:10px; margin-top:12px">
+    <button id="backBtn" class="btn muted" style="width:40%" type="button">← Zpět</button>
+    <button id="payNow" class="btn" style="width:60%" type="button">Zaplatit bezpečně</button>
   </div>
-  <div>
-    <div class="label">CVC</div>
-    <div id="cvc" class="el"></div>
-  </div>
-</div>
+</section>
 
-          </div>
-        </div>
-
-        <div id="err" class="err" aria-hidden="true"></div>
-
-        <div style="display:flex; gap:10px; margin-top:12px">
-          <button id="backBtn" class="btn muted" style="width:40%" type="button">← Zpět</button>
-          <button id="payNow" class="btn" style="width:60%" type="button">Zaplatit bezpečně</button>
-        </div>
-      </section>
 
     </div>
 
