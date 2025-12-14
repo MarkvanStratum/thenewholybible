@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+import paypal from "@paypal/checkout-server-sdk";
 
 const app = express();
 app.use(express.json());
@@ -27,7 +28,94 @@ function sanitize(str) {
 }
 
 /* ========================================
-   ONE-TIME PAYMENT: $23.95
+   PAYPAL CLIENT SETUP
+======================================== */
+function getPayPalClient() {
+  const environment =
+    process.env.PAYPAL_ENV === "live"
+      ? new paypal.core.LiveEnvironment(
+          process.env.PAYPAL_CLIENT_ID,
+          process.env.PAYPAL_CLIENT_SECRET
+        )
+      : new paypal.core.SandboxEnvironment(
+          process.env.PAYPAL_CLIENT_ID,
+          process.env.PAYPAL_CLIENT_SECRET
+        );
+
+  return new paypal.core.PayPalHttpClient(environment);
+}
+
+/* ========================================
+   PAYPAL: CREATE ORDER (Atlas 2)
+======================================== */
+app.post("/api/paypal/create-order", async (req, res) => {
+  try {
+    const { amount } = req.body;
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: "Invalid amount" });
+    }
+
+    const client = getPayPalClient();
+    const request = new paypal.orders.OrdersCreateRequest();
+
+    request.prefer("return=representation");
+    request.requestBody({
+      intent: "CAPTURE",
+      purchase_units: [
+        {
+          amount: {
+            currency_code: "USD",
+            value: amount.toFixed(2),
+          },
+          description: "Atlas 2 Purchase",
+        },
+      ],
+    });
+
+    const order = await client.execute(request);
+
+    res.json({ id: order.result.id });
+  } catch (err) {
+    console.error("PayPal create-order error:", err);
+    res.status(500).json({ error: "Failed to create PayPal order" });
+  }
+});
+
+/* ========================================
+   PAYPAL: CAPTURE ORDER (Atlas 2)
+======================================== */
+app.post("/api/paypal/capture-order", async (req, res) => {
+  try {
+    const { orderID } = req.body;
+
+    if (!orderID) {
+      return res.status(400).json({ error: "Missing orderID" });
+    }
+
+    const client = getPayPalClient();
+    const request = new paypal.orders.OrdersCaptureRequest(orderID);
+
+    request.requestBody({});
+
+    const capture = await client.execute(request);
+
+    if (capture.result.status !== "COMPLETED") {
+      throw new Error("Payment not completed");
+    }
+
+    res.json({
+      status: "COMPLETED",
+      orderID: capture.result.id,
+    });
+  } catch (err) {
+    console.error("PayPal capture-order error:", err);
+    res.status(500).json({ error: "Failed to capture PayPal order" });
+  }
+});
+
+/* ========================================
+   STRIPE: ONE-TIME PAYMENT $23.95
 ======================================== */
 app.post("/api/stripe/one-time-23-95", async (req, res) => {
   try {
@@ -36,19 +124,15 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
     const intent = await stripe.paymentIntents.create({
       amount: Math.round(23.95 * 100),
       currency: "usd",
-
       payment_method: paymentMethodId,
       confirmation_method: "automatic",
       confirm: false,
-
       receipt_email: sanitize(email),
       description: "One-time purchase: $23.95",
-
       metadata: {
         customer_name: sanitize(name),
         customer_phone: sanitize(phone),
       },
-
       shipping: {
         name: sanitize(name),
         phone: sanitize(phone),
@@ -68,7 +152,7 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
 });
 
 /* ========================================
-   ONE-TIME PAYMENT: $33.95
+   STRIPE: ONE-TIME PAYMENT $33.95
 ======================================== */
 app.post("/api/stripe/one-time-33-95", async (req, res) => {
   try {
@@ -77,19 +161,15 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
     const intent = await stripe.paymentIntents.create({
       amount: Math.round(33.95 * 100),
       currency: "usd",
-
       payment_method: paymentMethodId,
       confirmation_method: "automatic",
       confirm: false,
-
       receipt_email: sanitize(email),
       description: "One-time purchase: $33.95",
-
       metadata: {
         customer_name: sanitize(name),
         customer_phone: sanitize(phone),
       },
-
       shipping: {
         name: sanitize(name),
         phone: sanitize(phone),
@@ -109,7 +189,7 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
 });
 
 /* ========================================
-   DYNAMIC WooCommerce CART TOTAL (USD)
+   STRIPE: DYNAMIC CART TOTAL
 ======================================== */
 app.post("/api/stripe/charge-cart-total", async (req, res) => {
   try {
@@ -120,22 +200,18 @@ app.post("/api/stripe/charge-cart-total", async (req, res) => {
     }
 
     const intent = await stripe.paymentIntents.create({
-      amount: Math.round(amountUSD * 100),   // USD → cents
+      amount: Math.round(amountUSD * 100),
       currency: "usd",
-
       payment_method: paymentMethodId,
       confirmation_method: "automatic",
       confirm: false,
-
       receipt_email: sanitize(email),
       description: `WooCommerce cart payment: $${amountUSD}`,
-
       metadata: {
         customer_name: sanitize(name),
         customer_phone: sanitize(phone),
         cart_total_usd: amountUSD,
       },
-
       shipping: {
         name: sanitize(name),
         phone: sanitize(phone),
@@ -154,50 +230,52 @@ app.post("/api/stripe/charge-cart-total", async (req, res) => {
   }
 });
 
-// Airwallex route
+/* ========================================
+   AIRWALLEX
+======================================== */
 app.post("/api/airwallex/create-payment-intent", async (req, res) => {
   try {
     const { amount, currency, customer } = req.body;
 
-    const response = await fetch("https://pci-api.airwallex.com/api/v1/pa/payment_intents/create", {
-  method: "POST",
-  headers: {
-    Authorization: `Bearer ${process.env.AIRWALLEX_SECRET_KEY}`,
-    "Content-Type": "application/json",
-    "x-client-id": process.env.AIRWALLEX_CLIENT_ID,
-  },
-  body: JSON.stringify({
-    request_id: `req_${Date.now()}`,
-    amount,
-    currency,
-    customer,
-  }),
-});
+    const response = await fetch(
+      "https://pci-api.airwallex.com/api/v1/pa/payment_intents/create",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.AIRWALLEX_SECRET_KEY}`,
+          "Content-Type": "application/json",
+          "x-client-id": process.env.AIRWALLEX_CLIENT_ID,
+        },
+        body: JSON.stringify({
+          request_id: `req_${Date.now()}`,
+          amount,
+          currency,
+          customer,
+        }),
+      }
+    );
 
-if (!response.ok) {
-  const errData = await response.json();
-  throw new Error(errData.message || "Failed to create Airwallex payment intent");
-}
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.message || "Failed to create Airwallex payment intent");
+    }
 
-const paymentIntent = await response.json();
+    const paymentIntent = await response.json();
 
-res.json({
-  paymentIntentId: paymentIntent.id,
-  clientSecret: paymentIntent.client_secret,
-});
-
+    res.json({
+      paymentIntentId: paymentIntent.id,
+      clientSecret: paymentIntent.client_secret,
+    });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-
 /* ========================================
    HEALTH CHECK
 ======================================== */
 app.get("/health", (req, res) => {
-  res.json({ status: "Payment server running (Stripe + Airwallex)" });
-
+  res.json({ status: "Payment server running (Stripe + Airwallex + PayPal)" });
 });
 
 /* ========================================
@@ -207,4 +285,3 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () =>
   console.log(`Server running on port ${PORT}`)
 );
-// Updated: removing old axios code
