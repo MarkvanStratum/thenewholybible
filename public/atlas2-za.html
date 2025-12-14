@@ -243,6 +243,32 @@
 <script>
 window.addEventListener('DOMContentLoaded', async () => {
 
+  const step1 = document.getElementById('step1');
+  const step2 = document.getElementById('step2');
+  const nextBtn = document.getElementById('nextBtn');
+  const backBtn = document.getElementById('backBtn');
+
+  const firstName = document.getElementById('firstName');
+  const lastName = document.getElementById('lastName');
+
+  function show(o){ o.setAttribute('aria-hidden','false'); }
+  function hide(o){ o.setAttribute('aria-hidden','true'); }
+
+  nextBtn.addEventListener('click', () => {
+    document.getElementById('nameInput').value =
+      `${firstName.value} ${lastName.value}`.trim();
+    nextBtn.blur();
+    hide(step1);
+    show(step2);
+  });
+
+  backBtn.addEventListener('click', () => {
+    backBtn.blur();
+    hide(step2);
+    show(step1);
+  });
+
+
   let cardNumber, expiry, cvc;
 
   await Airwallex.init({ env: "prod", origin: window.location.origin });
