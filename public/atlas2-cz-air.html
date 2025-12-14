@@ -359,3 +359,88 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 
   payBtn.addEventListener('click', async () => {
+    payBtn.disabled = true;
+    payBtn.style.opacity = "0.6";
+    errBox.setAttribute("aria-hidden","true");
+
+    const overlay = document.getElementById('loading-overlay');
+    overlay.style.display = "flex";
+    overlay.setAttribute("aria-hidden","false");
+
+    const customer = {
+      first_name: firstName.value,
+      last_name: lastName.value,
+      email: document.getElementById('emailInput').value,
+      phone_number: document.getElementById('phonePrefix').value + document.getElementById('phoneNumber').value,
+      address: {
+        country_code: "CZ",
+        state: document.getElementById('billingCity').value,
+        city: document.getElementById('billingCity').value,
+        street: document.getElementById('billingStreet').value,
+        postcode: document.getElementById('billingPostcode').value
+      }
+    };
+
+    try {
+      console.log('Creating payment intent...');
+      
+      const resp = await fetch("/api/airwallex/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: 23.95,
+          currency: "USD",
+          customer
+        })
+      });
+
+      if (!resp.ok) {
+        const errorData = await resp.json();
+        throw new Error(errorData.error || 'Backend error');
+      }
+
+      const data = await resp.json();
+      console.log('Payment intent created:', data);
+
+      if (!data.client_secret || !data.id) {
+        throw new Error("Nepodařilo se vytvořit platbu.");
+      }
+
+      console.log('Confirming payment...');
+      
+      const result = await Airwallex.confirmPaymentIntent({
+        element: cardNumber,
+        id: data.id,
+        client_secret: data.client_secret,
+        payment_method_options: {
+          card: {
+            auto_capture: true
+          }
+        }
+      });
+
+      console.log('Payment result:', result);
+
+      if (result.status === "SUCCEEDED") {
+        window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
+        return;
+      }
+
+      throw new Error(result.error?.message || "Platba selhala.");
+
+    } catch(err) {
+      console.error('Payment error:', err);
+      errBox.textContent = err.message;
+      errBox.setAttribute("aria-hidden","false");
+      payBtn.disabled = false;
+      payBtn.style.opacity = "1";
+      overlay.style.display = "none";
+      overlay.setAttribute("aria-hidden","true");
+    }
+  });
+
+});
+</script>
+
+</body>
+</html>
