@@ -38,7 +38,7 @@
   </script>
 
   <!-- Airwallex Elements -->
-  <script src="https://static.airwallex.com/libs/airwallex-js/1.14.0/airwallex.js"></script>
+  <script src="https://checkout.airwallex.com/assets/elements.bundle.min.js"></script>
 
 
   <style>
@@ -343,41 +343,39 @@ window.addEventListener('DOMContentLoaded', () => {
   // ================================
   // ✅ Initialize Airwallex — LIVE
   // ================================
+  let cardNumber;
+
   Airwallex.onReady(() => {
-  Airwallex.init({
-    env: "production",
-    origin: window.location.origin,
-    client_id: "G5sy4gihRZG8gU0538Ktkw"
+    Airwallex.init({
+      env: "production",
+      origin: window.location.origin,
+      client_id: "G5sy4gihRZG8gU0538Ktkw"
+    });
+
+    const style = {
+      base: {
+        fontSize: "16px",
+        fontFamily: "Inter, sans-serif",
+        color: "#0a2540",
+        "::placeholder": {
+          color: "#5b6b82",
+        },
+      },
+      invalid: {
+        color: "#d30000",
+      }
+    };
+
+    cardNumber = Airwallex.createElement('cardNumber', { style });
+    const expiry = Airwallex.createElement('expiry', { style });
+    const cvc = Airwallex.createElement('cvc', { style });
+
+    cardNumber.mount('cardNumber');
+    expiry.mount('expiry');
+    cvc.mount('cvc');
   });
 
-  const style = {
-  base: {
-    fontSize: "16px",
-    fontFamily: "Inter, sans-serif",
-    color: "#0a2540",
-    "::placeholder": {
-      color: "#5b6b82",
-    },
-  },
-  invalid: {
-    color: "#d30000",
-  }
-};
-
-const cardNumber = Airwallex.createElement('cardNumber', { style });
-const expiry = Airwallex.createElement('expiry', { style });
-const cvc = Airwallex.createElement('cvc', { style });
-
-
-cardNumber.mount('cardNumber');
-expiry.mount('expiry');
-cvc.mount('cvc');
-
-});
-
-
   payBtn.addEventListener('click', async () => {
-
     payBtn.disabled = true;
     payBtn.style.opacity = "0.6";
     errBox.setAttribute("aria-hidden","true");
@@ -416,10 +414,9 @@ cvc.mount('cvc');
       }
 
       const result = await cardNumber.confirm({
-  intent_id: data.paymentIntentId,
-  client_secret: data.clientSecret,
-});
-
+        intent_id: data.paymentIntentId,
+        client_secret: data.clientSecret,
+      });
 
       if (result.status === "succeeded") {
         window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
