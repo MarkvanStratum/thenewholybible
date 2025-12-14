@@ -241,20 +241,25 @@ window.addEventListener('DOMContentLoaded', async () => {
       email: document.getElementById('emailInput').value,
       phone_number: document.getElementById('phonePrefix').value + document.getElementById('phoneNumber').value,
       address: {
-        country_code: "ZA",
-        state: document.getElementById('billingCity').value,
-        city: document.getElementById('billingCity').value,
-        street: document.getElementById('billingStreet').value,
-        postcode: document.getElementById('billingPostcode').value
-      }
+  country_code: "US",
+  state: document.getElementById('billingCity').value,
+  city: document.getElementById('billingCity').value,
+  street: document.getElementById('billingStreet').value,
+  postcode: document.getElementById('billingPostcode').value
+}
+
     };
 
     try {
       const resp = await fetch("/api/airwallex/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: 35.00, currency: "ZAR", customer })
-      });
+        body: JSON.stringify({
+  amount: 23.95,
+  currency: "USD",
+  customer
+})
+
 
       if (!resp.ok) {
         const errorData = await resp.json();
