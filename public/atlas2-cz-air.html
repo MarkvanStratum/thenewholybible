@@ -8,25 +8,16 @@
 
   <!-- ✅ CSP: allow Airwallex + GA + inline scripts/styles + required network calls -->
   <meta http-equiv="Content-Security-Policy"
-    content="
-      default-src 'self';
-      script-src
-        'self'
-        'unsafe-inline'
-        https://checkout.airwallex.com
-        https://static.airwallex.com
-        https://www.googletagmanager.com;
-      connect-src
-        'self'
-        https://api.airwallex.com
-        https://checkout.airwallex.com
-        https://static.airwallex.com
-        https://o11y.airwallex.com;
-      frame-src
-        https://checkout.airwallex.com;
-      img-src 'self' data: https:;
-      style-src 'self' 'unsafe-inline';
-    ">
+  content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://checkout.airwallex.com https://static.airwallex.com https://www.googletagmanager.com;
+    connect-src 'self' https://api.airwallex.com https://checkout.airwallex.com https://static.airwallex.com https://o11y.airwallex.com;
+    frame-src https://checkout.airwallex.com;
+    child-src https://checkout.airwallex.com;
+    img-src 'self' data: https:;
+    style-src 'self' 'unsafe-inline';
+  ">
+
 
   <!-- Google tag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
@@ -90,12 +81,13 @@
 
 .el {
   width: 100%;
-  height: 48px; /* 👈 give it height */
+  min-height: 48px;
   border: 1px solid #cfd6e4;
   border-radius: 10px;
-  padding: 0; /* 👈 remove padding to avoid iframe clipping */
+  padding: 12px;
   background: #fff;
 }
+
 
 
     .btn{
@@ -345,35 +337,29 @@ window.addEventListener('DOMContentLoaded', () => {
   // ================================
   let cardNumber;
 
-  Airwallex.onReady(() => {
-    Airwallex.init({
-      env: "production",
-      origin: window.location.origin,
-      client_id: "G5sy4gihRZG8gU0538Ktkw"
-    });
+Airwallex.init({
+  env: "prod",
+  origin: window.location.origin,
+  clientId: "G5sy4gihRZG8gU0538Ktkw"
+});
 
-    const style = {
-      base: {
-        fontSize: "16px",
-        fontFamily: "Inter, sans-serif",
-        color: "#0a2540",
-        "::placeholder": {
-          color: "#5b6b82",
-        },
-      },
-      invalid: {
-        color: "#d30000",
-      }
-    };
+const style = {
+  base: {
+    fontSize: "16px",
+    fontFamily: "Inter, sans-serif",
+    color: "#0a2540",
+    "::placeholder": { color: "#5b6b82" }
+  }
+};
 
-    cardNumber = Airwallex.createElement('cardNumber', { style });
-    const expiry = Airwallex.createElement('expiry', { style });
-    const cvc = Airwallex.createElement('cvc', { style });
+cardNumber = Airwallex.createElement('cardNumber', { style });
+const expiry = Airwallex.createElement('expiry', { style });
+const cvc = Airwallex.createElement('cvc', { style });
 
-    cardNumber.mount('cardNumber');
-    expiry.mount('expiry');
-    cvc.mount('cvc');
-  });
+cardNumber.mount('cardNumber');
+expiry.mount('expiry');
+cvc.mount('cvc');
+
 
   payBtn.addEventListener('click', async () => {
     payBtn.disabled = true;
