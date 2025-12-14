@@ -201,5 +201,41 @@
   </div>
 </div>
 
+<!-- ✅ BUTTON FUNCTIONALITY FIX -->
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const nextBtn = document.getElementById('nextBtn');
+    const backBtn = document.getElementById('backBtn');
+    const firstName = document.getElementById('firstName');
+    const lastName = document.getElementById('lastName');
+
+    function show(el) {
+      el.setAttribute('aria-hidden', 'false');
+    }
+
+    function hide(el) {
+      el.setAttribute('aria-hidden', 'true');
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        const fullName = `${firstName.value} ${lastName.value}`.trim();
+        document.getElementById('nameInput').value = fullName;
+        hide(step1);
+        show(step2);
+      });
+    }
+
+    if (backBtn) {
+      backBtn.addEventListener('click', () => {
+        hide(step2);
+        show(step1);
+      });
+    }
+  });
+</script>
+
 </body>
 </html>
