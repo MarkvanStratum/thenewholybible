@@ -1,18 +1,18 @@
 {
-  "name": "stripe-payment-server",
+  "name": "thenewholybible-server",
   "version": "1.0.0",
-  "description": "Simple Stripe payment backend",
-  "type": "module",
   "main": "server.js",
+  "license": "MIT",
   "scripts": {
     "start": "node server.js"
   },
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.19.2",
-    "stripe": "^14.0.0"
-  },
   "engines": {
-    "node": "22.x"
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "stripe": "^14.0.0",
+    "cors": "^2.8.5",
+    "@paypal/checkout-server-sdk": "^1.2.0"
   }
 }
