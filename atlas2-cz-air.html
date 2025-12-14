@@ -11,13 +11,12 @@
   content="
     default-src 'self';
     script-src 'self' 'unsafe-inline' https://checkout.airwallex.com https://static.airwallex.com https://www.googletagmanager.com;
-    connect-src 'self' https://api.airwallex.com https://checkout.airwallex.com https://static.airwallex.com https://o11y.airwallex.com;
+    connect-src 'self' https://api.airwallex.com https://checkout.airwallex.com https://static.airwallex.com https://o11y.airwallex.com https://the-new-holy-bible.onrender.com;
     frame-src https://checkout.airwallex.com;
     child-src https://checkout.airwallex.com;
     img-src 'self' data: https:;
     style-src 'self' 'unsafe-inline';
   ">
-
 
   <!-- Google tag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
@@ -30,7 +29,6 @@
 
   <!-- Airwallex Elements -->
   <script src="https://checkout.airwallex.com/assets/elements.bundle.min.js"></script>
-
 
   <style>
     :root{
@@ -71,24 +69,22 @@
     @media(max-width:620px){ .form-grid{grid-template-columns:1fr} }
 
     .input, .select {
-  width: 100%;
-  border: 1px solid #cfd6e4;
-  border-radius: 10px;
-  padding: 12px;
-  background: #fff;
-  font-size: 15px;
-}
+      width: 100%;
+      border: 1px solid #cfd6e4;
+      border-radius: 10px;
+      padding: 12px;
+      background: #fff;
+      font-size: 15px;
+    }
 
-.el {
-  width: 100%;
-  min-height: 48px;
-  border: 1px solid #cfd6e4;
-  border-radius: 10px;
-  padding: 12px;
-  background: #fff;
-}
-
-
+    .el {
+      width: 100%;
+      min-height: 48px;
+      border: 1px solid #cfd6e4;
+      border-radius: 10px;
+      padding: 12px;
+      background: #fff;
+    }
 
     .btn{
       width:100%; padding:12px; border:none; border-radius:12px;
@@ -233,33 +229,32 @@
       </section>
 
       <!-- STEP 2 -->
-<section id="step2" class="step" aria-hidden="true">
-  <div class="h2">2. Platba</div>
-  <p class="sub">Údaje o kartě jsou šifrované a bezpečně zpracovává je náš poskytovatel.</p>
+      <section id="step2" class="step" aria-hidden="true">
+        <div class="h2">2. Platba</div>
+        <p class="sub">Údaje o kartě jsou šifrované a bezpečně zpracovává je náš poskytovatel.</p>
 
-  <div class="form-grid-1">
-    <div>
-      <div class="label">Číslo karty</div>
-      <div id="cardNumber" class="el"></div>
-    </div>
-    <div>
-      <div class="label">Platnost</div>
-      <div id="expiry" class="el"></div>
-    </div>
-    <div>
-      <div class="label">CVC</div>
-      <div id="cvc" class="el"></div>
-    </div>
-  </div>
+        <div class="form-grid-1">
+          <div>
+            <div class="label">Číslo karty</div>
+            <div id="cardNumber" class="el"></div>
+          </div>
+          <div>
+            <div class="label">Platnost</div>
+            <div id="expiry" class="el"></div>
+          </div>
+          <div>
+            <div class="label">CVC</div>
+            <div id="cvc" class="el"></div>
+          </div>
+        </div>
 
-  <div id="err" class="err" aria-hidden="true"></div>
+        <div id="err" class="err" aria-hidden="true"></div>
 
-  <div style="display:flex; gap:10px; margin-top:12px">
-    <button id="backBtn" class="btn muted" style="width:40%" type="button">← Zpět</button>
-    <button id="payNow" class="btn" style="width:60%" type="button">Zaplatit bezpečně</button>
-  </div>
-</section>
-
+        <div style="display:flex; gap:10px; margin-top:12px">
+          <button id="backBtn" class="btn muted" style="width:40%" type="button">← Zpět</button>
+          <button id="payNow" class="btn" style="width:60%" type="button">Zaplatit bezpečně</button>
+        </div>
+      </section>
 
     </div>
 
@@ -303,9 +298,9 @@
   </div>
 </div>
 
-<!-- 🔥 Modern Airwallex Checkout Logic -->
 <script>
 window.addEventListener('DOMContentLoaded', async () => {
+
   const step1 = document.getElementById('step1');
   const step2 = document.getElementById('step2');
   const nextBtn = document.getElementById('nextBtn');
@@ -316,8 +311,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   const firstName = document.getElementById('firstName');
   const lastName = document.getElementById('lastName');
 
-  function show(o) { o.setAttribute('aria-hidden', 'false'); }
-  function hide(o) { o.setAttribute('aria-hidden', 'true'); }
+  function show(o){ o.setAttribute('aria-hidden','false'); }
+  function hide(o){ o.setAttribute('aria-hidden','true'); }
 
   nextBtn.addEventListener('click', () => {
     document.getElementById('nameInput').value =
@@ -331,53 +326,64 @@ window.addEventListener('DOMContentLoaded', async () => {
     hide(step2); show(step1);
   });
 
-  // ✅ MODERN AIRWALLEX INIT (CDN-based)
-  const { init, createElement, confirmPaymentIntent } = window;
+  // ================================
+  // ✅ Initialize Airwallex
+  // ================================
+  let cardNumber, expiry, cvc;
 
-  await init({
-    env: "prod", // or 'demo' for sandbox
-    origin: window.location.origin
-  });
+  try {
+    await Airwallex.init({
+      env: "prod",
+      origin: window.location.origin
+    });
 
-  const style = {
-    base: {
-      fontSize: "16px",
-      fontFamily: "Inter, sans-serif",
-      color: "#0a2540",
-      "::placeholder": { color: "#5b6b82" }
-    }
-  };
+    const style = {
+      base: {
+        fontSize: "16px",
+        fontFamily: "Inter, sans-serif",
+        color: "#0a2540",
+        "::placeholder": { color: "#5b6b82" }
+      }
+    };
 
-  const cardNumber = createElement("cardNumber", { style });
-  const expiry = createElement("expiry", { style });
-  const cvc = createElement("cvc", { style });
+    cardNumber = Airwallex.createElement('cardNumber', { style });
+    expiry = Airwallex.createElement('expiry', { style });
+    cvc = Airwallex.createElement('cvc', { style });
 
-  cardNumber.mount("cardNumber");
-  expiry.mount("expiry");
-  cvc.mount("cvc");
+    cardNumber.mount('cardNumber');
+    expiry.mount('expiry');
+    cvc.mount('cvc');
 
-  payBtn.addEventListener("click", async () => {
+  } catch(err) {
+    console.error('Airwallex initialization failed:', err);
+  }
+
+  payBtn.addEventListener('click', async () => {
     payBtn.disabled = true;
     payBtn.style.opacity = "0.6";
-    errBox.setAttribute("aria-hidden", "true");
+    errBox.setAttribute("aria-hidden","true");
 
-    const overlay = document.getElementById("loading-overlay");
+    const overlay = document.getElementById('loading-overlay');
     overlay.style.display = "flex";
-    overlay.setAttribute("aria-hidden", "false");
+    overlay.setAttribute("aria-hidden","false");
 
     const customer = {
-      name: document.getElementById("nameInput").value,
-      email: document.getElementById("emailInput").value,
-      phone_number: document.getElementById("phoneNumber").value,
+      first_name: firstName.value,
+      last_name: lastName.value,
+      email: document.getElementById('emailInput').value,
+      phone_number: document.getElementById('phonePrefix').value + document.getElementById('phoneNumber').value,
       address: {
-        line1: document.getElementById("billingStreet").value,
-        city: document.getElementById("billingCity").value,
-        postcode: document.getElementById("billingPostcode").value,
-        country_code: "CZ"
+        country_code: "CZ",
+        state: document.getElementById('billingCity').value,
+        city: document.getElementById('billingCity').value,
+        street: document.getElementById('billingStreet').value,
+        postcode: document.getElementById('billingPostcode').value
       }
     };
 
     try {
+      console.log('Creating payment intent...');
+      
       const resp = await fetch("/api/airwallex/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -388,20 +394,32 @@ window.addEventListener('DOMContentLoaded', async () => {
         })
       });
 
-      const data = await resp.json();
+      if (!resp.ok) {
+        const errorData = await resp.json();
+        throw new Error(errorData.error || 'Backend error');
+      }
 
-      if (!data.clientSecret || !data.paymentIntentId) {
+      const data = await resp.json();
+      console.log('Payment intent created:', data);
+
+      if (!data.client_secret || !data.id) {
         throw new Error("Nepodařilo se vytvořit platbu.");
       }
 
-      const result = await confirmPaymentIntent({
+      console.log('Confirming payment...');
+      
+      const result = await Airwallex.confirmPaymentIntent({
         element: cardNumber,
-        id: data.paymentIntentId,
-        client_secret: data.clientSecret,
+        id: data.id,
+        client_secret: data.client_secret,
         payment_method_options: {
-          card: { auto_capture: true }
+          card: {
+            auto_capture: true
+          }
         }
       });
+
+      console.log('Payment result:', result);
 
       if (result.status === "SUCCEEDED") {
         window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
@@ -409,18 +427,20 @@ window.addEventListener('DOMContentLoaded', async () => {
       }
 
       throw new Error(result.error?.message || "Platba selhala.");
-    } catch (err) {
+
+    } catch(err) {
+      console.error('Payment error:', err);
       errBox.textContent = err.message;
-      errBox.setAttribute("aria-hidden", "false");
+      errBox.setAttribute("aria-hidden","false");
       payBtn.disabled = false;
       payBtn.style.opacity = "1";
       overlay.style.display = "none";
-      overlay.setAttribute("aria-hidden", "true");
+      overlay.setAttribute("aria-hidden","true");
     }
   });
+
 });
 </script>
-
 
 </body>
 </html>
