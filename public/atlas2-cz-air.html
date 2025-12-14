@@ -234,7 +234,21 @@
         <div class="form-grid-1">
           <div>
             <div class="label">Číslo karty</div>
-            <div id="card-element" class="el"></div>
+            <div class="form-grid-1">
+  <div>
+    <div class="label">Číslo karty</div>
+    <div id="cardNumber" class="el"></div>
+  </div>
+  <div>
+    <div class="label">Platnost</div>
+    <div id="expiry" class="el"></div>
+  </div>
+  <div>
+    <div class="label">CVC</div>
+    <div id="cvc" class="el"></div>
+  </div>
+</div>
+
           </div>
         </div>
 
@@ -327,8 +341,14 @@ window.addEventListener('DOMContentLoaded', () => {
     client_id: "G5sy4gihRZG8gU0538Ktkw"
   });
 
-  const card = Airwallex.createElement("card");
-  card.mount("#card-element");
+  const cardNumber = Airwallex.createElement('cardNumber');
+const expiry = Airwallex.createElement('expiry');
+const cvc = Airwallex.createElement('cvc');
+
+cardNumber.mount('cardNumber');
+expiry.mount('expiry');
+cvc.mount('cvc');
+
 });
 
 
@@ -371,11 +391,11 @@ window.addEventListener('DOMContentLoaded', () => {
         throw new Error("Nepodařilo se vytvořit platbu.");
       }
 
-      const result = await Airwallex.confirmPayment({
-        element: card,
-        intent_id: data.paymentIntentId,
-        client_secret: data.clientSecret,
-      });
+      const result = await cardNumber.confirm({
+  intent_id: data.paymentIntentId,
+  client_secret: data.clientSecret,
+});
+
 
       if (result.status === "succeeded") {
         window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
