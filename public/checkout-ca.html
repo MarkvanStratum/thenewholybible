@@ -176,31 +176,108 @@
 
 <script src="https://js.stripe.com/v3"></script>
 <script>
-  // Countdown logic
   const countdownEl = document.getElementById("countdown");
-  let timeLeft = 5 * 60; // 5 minutes
-
-  const interval = setInterval(() => {
+  let timeLeft = 5 * 60;
+  setInterval(() => {
     const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
     const s = String(timeLeft % 60).padStart(2, '0');
     countdownEl.textContent = m + ":" + s;
     timeLeft--;
-    if (timeLeft < 0) clearInterval(interval);
   }, 1000);
 
-  // Stripe payment logic (identical to original)
   const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
   const elements = stripe.elements();
   const cardNumber = elements.create('cardNumber');
   const cardExpiry = elements.create('cardExpiry');
   const cardCvc = elements.create('cardCvc');
 
-  document.getElementById("nextBtn").addEventListener("click", async () => {
-    // Normally this would move to step 2, but you can adapt your own step2 logic
-    alert("This is where you continue to Stripe payment step.");
-    // You can inject/mount Stripe elements or redirect here
+  const SUBSCRIBE_URL = "/api/stripe/one-time-33-95";
+
+  const step1 = document.getElementById('checkout-form');
+  const stripeStep = document.getElementById('stripe-step');
+
+
+  function showStripeStep() {
+    step1.style.display = 'none';
+    stripeStep.innerHTML = `
+      <div style="margin-top:20px">
+        <label>Card Number</label>
+        <div id="card-number" class="stripe-box"></div>
+        <div style="display:flex; gap:10px; margin-top:10px">
+          <div style="flex:1">
+            <label>Expiry</label>
+            <div id="card-expiry" class="stripe-box"></div>
+          </div>
+          <div style="flex:1">
+            <label>CVC</label>
+            <div id="card-cvc" class="stripe-box"></div>
+          </div>
+        </div>
+        <button id="payNow" class="btn" style="margin-top:20px">Pay Now</button>
+      </div>
+    `;
+    cardNumber.mount('#card-number');
+    cardExpiry.mount('#card-expiry');
+    cardCvc.mount('#card-cvc');
+  }
+
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    showStripeStep();
+  });
+
+  document.addEventListener('click', async (e) => {
+    if (e.target && e.target.id === 'payNow') {
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const name = `${firstName} ${lastName}`;
+      const email = document.getElementById('emailInput').value.trim();
+      const phone = document.getElementById('phoneNumber').value.trim();
+      const address = {
+        line1: document.getElementById('billingStreet').value.trim(),
+        city: document.getElementById('billingCity').value.trim(),
+        postal_code: document.getElementById('billingPostcode').value.trim(),
+        country: 'CA'
+      };
+
+      try {
+        const pmRes = await stripe.createPaymentMethod({
+          type: 'card',
+          card: cardNumber,
+          billing_details: { name, email, phone, address }
+        });
+        if (pmRes.error) throw new Error(pmRes.error.message);
+
+        const res = await fetch(SUBSCRIBE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            paymentMethodId: pmRes.paymentMethod.id,
+            name, email, phone, address
+          })
+        });
+        const data = await res.json();
+        if (!data.clientSecret) throw new Error(data.error || 'Payment initiation failed');
+
+        const conf = await stripe.confirmCardPayment(data.clientSecret);
+        if (conf.error) throw new Error(conf.error.message);
+        if (conf.paymentIntent.status !== 'succeeded') throw new Error('Payment not completed');
+
+        // Redirect after success
+        window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
+      } catch (err) {
+        alert("Payment failed: " + (err.message || "Unknown error"));
+      }
+    }
   });
 </script>
+<style>
+  .stripe-box {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: white;
+  }
+</style>
 
 </body>
 </html>
