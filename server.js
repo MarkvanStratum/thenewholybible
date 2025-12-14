@@ -236,61 +236,63 @@ app.post("/api/stripe/charge-cart-total", async (req, res) => {
 /* ========================================
    AIRWALLEX
 ======================================== */
-app.post("/api/airwallex/create-payment-intent", async (req, res) => {
+// server.js - Fix your create-payment-intent endpoint
+
+app.post('/api/airwallex/create-payment-intent', async (req, res) => {
   try {
     const { amount, currency, customer } = req.body;
 
-    // Step 1: Authenticate and get token
-    const authResponse = await fetch("https://api.airwallex.com/api/v1/authentication/login", {
-      method: "POST",
+    // Step 1: Authenticate with Airwallex
+    const authResponse = await fetch('https://api.airwallex.com/api/v1/authentication/login', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "x-client-id": process.env.AIRWALLEX_CLIENT_ID,
-        "x-api-key": process.env.AIRWALLEX_API_KEY
+        'Content-Type': 'application/json',
+        'x-client-id': process.env.AIRWALLEX_CLIENT_ID || 'G5sy4gihRZG8gU0538Ktkw',
+        'x-api-key': process.env.AIRWALLEX_API_KEY  // ✅ This pulls from Render environment
       }
     });
 
-    if (!authResponse.ok) {
-      const errData = await authResponse.json();
-      throw new Error(errData.message || "Airwallex authentication failed");
+    const authData = await authResponse.json();
+    
+    if (!authData.token) {
+      console.error('Auth failed:', authData);
+      throw new Error('Authentication failed');
     }
 
-    const authData = await authResponse.json();
-    const token = authData.token;
-
-    // Step 2: Create payment intent
-    const paymentResponse = await fetch("https://api.airwallex.com/api/v1/pa/payment_intents/create", {
-      method: "POST",
+    // Step 2: Create PaymentIntent
+    const paymentResponse = await fetch('https://api.airwallex.com/api/v1/pa/payment_intents/create', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authData.token}`
       },
       body: JSON.stringify({
-        request_id: `req_${Date.now()}`,
-        amount: parseFloat(amount), // must be decimal like 23.95
-        currency,
-        customer
+        request_id: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        amount: amount,
+        currency: currency,
+        merchant_order_id: `order_${Date.now()}`,
+        customer: customer
       })
     });
 
-    if (!paymentResponse.ok) {
-      const errData = await paymentResponse.json();
-      throw new Error(errData.message || "Failed to create Airwallex payment intent");
+    const paymentData = await paymentResponse.json();
+
+    if (!paymentData.id || !paymentData.client_secret) {
+      console.error('Payment creation failed:', paymentData);
+      throw new Error('Failed to create payment intent');
     }
 
-    const paymentIntent = await paymentResponse.json();
-
+    // Step 3: Return to frontend
     res.json({
-      paymentIntentId: paymentIntent.id,
-      clientSecret: paymentIntent.client_secret
+      id: paymentData.id,
+      client_secret: paymentData.client_secret
     });
 
-  } catch (err) {
-    console.error("Airwallex error:", err);
-    res.status(400).json({ error: err.message });
+  } catch (error) {
+    console.error('Airwallex error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
-
 
 /* ========================================
    HEALTH CHECK
