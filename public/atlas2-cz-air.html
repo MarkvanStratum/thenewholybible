@@ -319,6 +319,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // ================================
   // ✅ Initialize Airwallex — LIVE
   // ================================
+  Airwallex.onReady(() => {
   Airwallex.init({
     env: "production",
     origin: window.location.origin,
@@ -327,6 +328,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const card = Airwallex.createElement("card");
   card.mount("#card-element");
+});
+
 
   payBtn.addEventListener('click', async () => {
 
