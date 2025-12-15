@@ -234,6 +234,9 @@ app.post("/api/stripe/charge-cart-total", async (req, res) => {
    AIRWALLEX
 ======================================== */
 app.post('/api/airwallex/create-payment-intent', async (req, res) => {
+  console.log('=== AIRWALLEX REQUEST RECEIVED ===');
+  console.log('Request body:', req.body);
+  
   try {
     const { amount, currency, customer } = req.body;
 
@@ -241,6 +244,7 @@ app.post('/api/airwallex/create-payment-intent', async (req, res) => {
     console.log('AIRWALLEX_API_KEY:', process.env.AIRWALLEX_API_KEY ? 'SET' : 'MISSING');
 
     // Step 1: Authenticate
+    console.log('Attempting authentication...');
     const authResponse = await fetch('https://api.airwallex.com/api/v1/authentication/login', {
       method: 'POST',
       headers: {
@@ -251,16 +255,18 @@ app.post('/api/airwallex/create-payment-intent', async (req, res) => {
     });
 
     const authData = await authResponse.json();
-    console.log('Auth response:', authData);
+    console.log('Auth response status:', authResponse.status);
+    console.log('Auth response:', JSON.stringify(authData, null, 2));
     
     if (!authData.token) {
-      console.error('Authentication failed:', authData);
+      console.error('Authentication failed - no token');
       return res.status(401).json({ error: authData.message || 'Authentication failed' });
     }
 
     console.log('Authentication successful');
 
     // Step 2: Create PaymentIntent
+    console.log('Creating payment intent...');
     const paymentResponse = await fetch('https://api.airwallex.com/api/v1/pa/payment_intents/create', {
       method: 'POST',
       headers: {
@@ -279,10 +285,10 @@ app.post('/api/airwallex/create-payment-intent', async (req, res) => {
 
     const paymentData = await paymentResponse.json();
     console.log('Payment response status:', paymentResponse.status);
-    console.log('Payment response data:', paymentData);
+    console.log('Payment response:', JSON.stringify(paymentData, null, 2));
 
     if (!paymentData.id || !paymentData.client_secret) {
-      console.error('Payment creation failed:', paymentData);
+      console.error('Payment creation failed');
       return res.status(400).json({ error: paymentData.message || 'Failed to create payment intent' });
     }
 
