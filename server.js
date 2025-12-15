@@ -233,31 +233,32 @@ app.post("/api/stripe/charge-cart-total", async (req, res) => {
 /* ========================================
    AIRWALLEX
 ======================================== */
-/* ========================================
-   AIRWALLEX
-======================================== */
-// server.js - Fix your create-payment-intent endpoint
-
 app.post('/api/airwallex/create-payment-intent', async (req, res) => {
   try {
     const { amount, currency, customer } = req.body;
 
-    // Step 1: Authenticate with Airwallex
+    console.log('AIRWALLEX_CLIENT_ID:', process.env.AIRWALLEX_CLIENT_ID ? 'SET' : 'MISSING');
+    console.log('AIRWALLEX_API_KEY:', process.env.AIRWALLEX_API_KEY ? 'SET' : 'MISSING');
+
+    // Step 1: Authenticate
     const authResponse = await fetch('https://api.airwallex.com/api/v1/authentication/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-client-id': process.env.AIRWALLEX_CLIENT_ID || 'G5sy4gihRZG8gU0538Ktkw',
-        'x-api-key': process.env.AIRWALLEX_API_KEY  // ✅ This pulls from Render environment
+        'x-client-id': process.env.AIRWALLEX_CLIENT_ID,
+        'x-api-key': process.env.AIRWALLEX_API_KEY
       }
     });
 
     const authData = await authResponse.json();
+    console.log('Auth response:', authData);
     
     if (!authData.token) {
-      console.error('Auth failed:', authData);
-      throw new Error('Authentication failed');
+      console.error('Authentication failed:', authData);
+      return res.status(401).json({ error: authData.message || 'Authentication failed' });
     }
+
+    console.log('Authentication successful');
 
     // Step 2: Create PaymentIntent
     const paymentResponse = await fetch('https://api.airwallex.com/api/v1/pa/payment_intents/create', {
@@ -271,18 +272,22 @@ app.post('/api/airwallex/create-payment-intent', async (req, res) => {
         amount: amount,
         currency: currency,
         merchant_order_id: `order_${Date.now()}`,
-        customer: customer
+        customer: customer,
+        return_url: "https://checkoutpartner.xyz/success"
       })
     });
 
     const paymentData = await paymentResponse.json();
+    console.log('Payment response status:', paymentResponse.status);
+    console.log('Payment response data:', paymentData);
 
     if (!paymentData.id || !paymentData.client_secret) {
       console.error('Payment creation failed:', paymentData);
-      throw new Error('Failed to create payment intent');
+      return res.status(400).json({ error: paymentData.message || 'Failed to create payment intent' });
     }
 
-    // Step 3: Return to frontend
+    console.log('Payment intent created successfully');
+
     res.json({
       id: paymentData.id,
       client_secret: paymentData.client_secret
