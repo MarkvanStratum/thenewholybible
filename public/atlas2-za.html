@@ -6,19 +6,12 @@
   <title>Bezpečná pokladna</title>
   <meta name="referrer" content="strict-origin-when-cross-origin">
 
-  <!-- ✅ CSP: allow Airwallex + GA + inline scripts/styles + required network calls -->
+  <!-- ✅ CSP: fixed (was malformed in pasted file) + allow GoAffPro loader + GoAffPro connect -->
   <meta http-equiv="Content-Security-Policy"
   content="
     default-src 'self';
-    script-src 'self' 'unsafe-inline' https://checkout.airwallex.com https://static.airwallex.com https://www.googletagmanager.com;
-    connect-src 'self' https://api.airwallex.com https://checkout.airwallex.com https://static.airwallex.com https://o11y.airwallex.com connect-src 'self'
-  https://api.airwallex.com
-  https://checkout.airwallex.com
-  https://static.airwallex.com
-  https://o11y.airwallex.com
-  https://api.goaffpro.com
-  https://the-new-holy-bible.onrender.com;
- https://the-new-holy-bible.onrender.com;
+    script-src 'self' 'unsafe-inline' https://checkout.airwallex.com https://static.airwallex.com https://www.googletagmanager.com https://api.goaffpro.com;
+    connect-src 'self' https://api.airwallex.com https://checkout.airwallex.com https://static.airwallex.com https://o11y.airwallex.com https://api.goaffpro.com https://the-new-holy-bible.onrender.com;
     frame-src https://checkout.airwallex.com;
     child-src https://checkout.airwallex.com;
     img-src 'self' data: https:;
@@ -305,6 +298,11 @@
   </div>
 </div>
 
+<!-- ✅ GoAffPro: hidden click target (minimal addition) -->
+<a id="goaffpro-click"
+   href="https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062"
+   style="display:none"></a>
+
 <script>
 window.addEventListener('DOMContentLoaded', async () => {
 
@@ -390,7 +388,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     try {
       console.log('Creating payment intent...');
-      
+
       const resp = await fetch("/api/airwallex/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -414,7 +412,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       }
 
       console.log('Confirming payment...');
-      
+
       const result = await Airwallex.confirmPaymentIntent({
         element: cardNumber,
         id: data.id,
@@ -429,7 +427,8 @@ window.addEventListener('DOMContentLoaded', async () => {
       console.log('Payment result:', result);
 
       if (result.status === "SUCCEEDED") {
-        window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
+        // ✅ GoAffPro: real click instead of JS redirect
+        document.getElementById("goaffpro-click").click();
         return;
       }
 
