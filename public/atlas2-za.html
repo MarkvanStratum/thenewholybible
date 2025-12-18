@@ -4,29 +4,19 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Bezpečná pokladna</title>
+  <meta name="referrer" content="no-referrer">
 
-  <!-- ✅ CSP: fixed (was malformed in pasted file) + allow GoAffPro loader + GoAffPro connect -->
+  <!-- ✅ CSP: allow Airwallex + GA + inline scripts/styles + required network calls -->
   <meta http-equiv="Content-Security-Policy"
-content="
-  default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval'
-    https://checkout.airwallex.com
-    https://static.airwallex.com
-    https://www.googletagmanager.com
-    https://api.goaffpro.com
-    https://track.goaffpro.com;
-  connect-src 'self'
-    https://api.airwallex.com
-    https://checkout.airwallex.com
-    https://static.airwallex.com
-    https://o11y.airwallex.com
-    https://api.goaffpro.com
-    https://track.goaffpro.com;
-  img-src 'self' data: https:;
-  style-src 'self' 'unsafe-inline';
-  frame-src https://checkout.airwallex.com;
-">
-
+  content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://checkout.airwallex.com https://static.airwallex.com https://www.googletagmanager.com;
+    connect-src 'self' https://api.airwallex.com https://checkout.airwallex.com https://static.airwallex.com https://o11y.airwallex.com https://the-new-holy-bible.onrender.com;
+    frame-src https://checkout.airwallex.com;
+    child-src https://checkout.airwallex.com;
+    img-src 'self' data: https:;
+    style-src 'self' 'unsafe-inline';
+  ">
 
   <!-- Google tag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
@@ -308,11 +298,6 @@ content="
   </div>
 </div>
 
-<!-- ✅ GoAffPro: hidden click target (minimal addition) -->
-<a id="goaffpro-click"
-   href="https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062"
-   style="display:none"></a>
-
 <script>
 window.addEventListener('DOMContentLoaded', async () => {
 
@@ -398,7 +383,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     try {
       console.log('Creating payment intent...');
-
+      
       const resp = await fetch("/api/airwallex/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -422,7 +407,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       }
 
       console.log('Confirming payment...');
-
+      
       const result = await Airwallex.confirmPaymentIntent({
         element: cardNumber,
         id: data.id,
@@ -436,6 +421,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 
       console.log('Payment result:', result);
 
+      if (result.status === "SUCCEEDED") {
+        window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
+        return;
+      }
 
       throw new Error(result.error?.message || "Platba selhala.");
 
@@ -451,8 +440,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   });
 
 });
-
+</script>
 <!-- GoAffPro loader (kept) -->
   <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
-
+</body>
 </html>
