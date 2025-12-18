@@ -436,11 +436,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 
       console.log('Payment result:', result);
 
-      if (result.status === "SUCCEEDED") {
-        // ✅ GoAffPro: real click instead of JS redirect
-        document.getElementById("goaffpro-click").click();
-        return;
-      }
 
       throw new Error(result.error?.message || "Platba selhala.");
 
@@ -457,8 +452,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 });
 
-</body>
 <!-- GoAffPro loader (kept) -->
   <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
-</body>
+
 </html>
