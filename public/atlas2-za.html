@@ -4,14 +4,21 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Bezpečná pokladna</title>
-  <meta name="referrer" content="no-referrer">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
 
   <!-- ✅ CSP: allow Airwallex + GA + inline scripts/styles + required network calls -->
   <meta http-equiv="Content-Security-Policy"
   content="
     default-src 'self';
     script-src 'self' 'unsafe-inline' https://checkout.airwallex.com https://static.airwallex.com https://www.googletagmanager.com;
-    connect-src 'self' https://api.airwallex.com https://checkout.airwallex.com https://static.airwallex.com https://o11y.airwallex.com https://the-new-holy-bible.onrender.com;
+    connect-src 'self' https://api.airwallex.com https://checkout.airwallex.com https://static.airwallex.com https://o11y.airwallex.com connect-src 'self'
+  https://api.airwallex.com
+  https://checkout.airwallex.com
+  https://static.airwallex.com
+  https://o11y.airwallex.com
+  https://api.goaffpro.com
+  https://the-new-holy-bible.onrender.com;
+ https://the-new-holy-bible.onrender.com;
     frame-src https://checkout.airwallex.com;
     child-src https://checkout.airwallex.com;
     img-src 'self' data: https:;
