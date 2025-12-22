@@ -18,28 +18,21 @@
   <style>
     :root{
       --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb; --card:#ffffff;
-      --green:#18a957;
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
     body{
-      margin:0; background:var(--bg); color:var(--text);
+      margin:0;background:var(--bg);color:var(--text);
       font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      -webkit-font-smoothing:antialiased;
     }
 
     .safe{background:#0a0a0a;color:#fff;font-size:12px;padding:6px 10px}
     .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
 
-    .page-title{
-      font-size:28px;font-weight:900;display:flex;align-items:center;gap:8px;margin:6px 0 14px
-    }
-    .stars{color:#f6b80c;font-size:15px}
+    .page-title{font-size:28px;font-weight:900;display:flex;gap:8px;margin:6px 0 14px}
+    .stars{color:#f6b80c}
     .reviews{color:var(--muted);font-size:13px}
 
-    .grid{
-      display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start
-    }
+    .grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px}
     @media (max-width:980px){.grid{grid-template-columns:1fr}}
 
     .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px}
@@ -53,7 +46,7 @@
 
     .label{font-weight:700;font-size:13px;margin:4px 0}
     .input,.select,.el{
-      width:100%;background:#fff;border:1px solid #cfd6e4;border-radius:10px;
+      width:100%;border:1px solid #cfd6e4;border-radius:10px;
       padding:12px;font-size:15px
     }
 
@@ -75,7 +68,6 @@
     }
     .err[aria-hidden="false"]{display:block}
 
-    /* Sidebar */
     .widget{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
     .widget + .widget{margin-top:12px}
     .w-title{font-weight:800;font-size:16px;margin:2px 0 10px}
@@ -94,16 +86,13 @@
     }
     .order-row:first-of-type{border-top:none}
 
-    .trust{
-      display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center
-    }
+    .trust{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center}
     .trust .box{border:1px solid var(--line);border-radius:10px;padding:8px}
     .trust .big{font-weight:900;font-size:18px}
     .trust .small{font-size:12px;color:var(--muted)}
 
     .tiny{font-size:12px;color:var(--muted)}
 
-    /* Loading */
     .loading-overlay{
       position:fixed;inset:0;background:rgba(246,249,252,.92);
       display:none;align-items:center;justify-content:center;z-index:9999
@@ -137,11 +126,18 @@
     <!-- LEFT -->
     <div class="card">
       <section id="step1" class="step" aria-hidden="false">
+
+        <!-- Dynamic hero -->
+        <div id="hero" style="display:none;margin-bottom:10px;display:flex;gap:10px;align-items:center">
+          <img id="heroImg" style="width:44px;height:44px;border-radius:8px;border:1px solid #e6eaf1;object-fit:cover">
+          <div id="heroTitle" style="font-weight:900"></div>
+        </div>
+
         <div class="h2">1. Information</div>
 
         <div class="form-grid">
-          <div><div class="label">Förnamn</div><input id="firstName" class="input" placeholder="Anna"></div>
-          <div><div class="label">Efternamn</div><input id="lastName" class="input" placeholder="Svensson"></div>
+          <div><div class="label">Förnamn</div><input id="firstName" class="input"></div>
+          <div><div class="label">Efternamn</div><input id="lastName" class="input"></div>
         </div>
 
         <div class="form-grid">
@@ -156,38 +152,25 @@
         </div>
 
         <div class="form-grid">
-          <div>
-            <div class="label">Landskod</div>
-            <select id="phonePrefix" class="select"><option value="+46">+46 — Sverige</option></select>
-          </div>
+          <div><div class="label">Landskod</div><select id="phonePrefix" class="select"><option value="+46">+46 — Sverige</option></select></div>
           <div><div class="label">Telefonnummer</div><input id="phoneNumber" class="input"></div>
         </div>
 
         <input id="nameInput" style="display:none">
         <button id="nextBtn" class="btn">Fortsätt</button>
-
-        <div class="logos">
-          <img src="/visa.png"><img src="mastercard.png"><img src="amex.png"><img src="discover.jpg">
-        </div>
       </section>
 
       <section id="step2" class="step" aria-hidden="true">
         <div class="h2">2. Betalning</div>
-        <p class="sub">Kortuppgifter krypteras och behandlas av Stripe.</p>
-
-        <div class="form-grid-1">
-          <div><div class="label">Kortnummer</div><div id="card-number" class="el"></div></div>
-          <div class="form-grid">
-            <div><div class="label">Giltigt till</div><div id="card-expiry" class="el"></div></div>
-            <div><div class="label">CVC</div><div id="card-cvc" class="el"></div></div>
-          </div>
+        <div id="card-number" class="el"></div><br>
+        <div class="form-grid">
+          <div><div id="card-expiry" class="el"></div></div>
+          <div><div id="card-cvc" class="el"></div></div>
         </div>
-
-        <div id="err" class="err" aria-hidden="true"></div>
-
+        <div id="err" class="err"></div>
         <div style="display:flex;gap:10px;margin-top:12px">
-          <button id="backBtn" class="btn muted" style="width:40%">← Tillbaka</button>
-          <button id="payNow" class="btn" style="width:60%">Betala säkert</button>
+          <button id="backBtn" class="btn muted">← Tillbaka</button>
+          <button id="payNow" class="btn">Betala säkert</button>
         </div>
       </section>
     </div>
@@ -205,7 +188,7 @@
 
       <div class="widget">
         <div class="delivery">
-          <img>
+          <img id="sidebarImg">
           <div>
             <div style="font-weight:800">Snabb leverans till din adress</div>
             <div class="tiny">3–5 arbetsdagar</div>
@@ -214,14 +197,7 @@
         </div>
 
         <div class="w-title" style="margin-top:14px">Orderöversikt</div>
-        <div class="order-row"><span>Totalt</span><span id="orderTotal">≈ 19 kr</span></div>
-
-        <div class="tiny" style="margin-top:10px;line-height:1.6">
-          📦 Endast få kvar i lager<br>
-          👀 Några personer tittar på detta just nu<br>
-          ✅ Någon köpte detta nyligen<br>
-          💳 Många har köpt detta under de senaste dagarna
-        </div>
+        <div class="order-row"><span>Totalt</span><span>≈ 19 kr</span></div>
       </div>
 
       <div class="widget">
@@ -236,16 +212,13 @@
   </div>
 </div>
 
-<!-- Loading -->
 <div id="loading-overlay" class="loading-overlay">
   <div class="loading-box">
-    <div class="h2">Bearbetar din betalning…</div>
+    <div class="h2">Bearbetar betalning…</div>
     <div class="progress-wrap"><div class="progress-bar"></div></div>
-    <p class="sub">Vänligen vänta.</p>
   </div>
 </div>
 
-<!-- STRIPE: IDENTICAL TO ITALIAN FILE -->
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
@@ -253,59 +226,41 @@ window.addEventListener('DOMContentLoaded', () => {
   const SUBSCRIBE_URL = "/api/stripe/one-time-33-95";
   const PUBLISHABLE_KEY = "pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t";
 
+  const qs = new URLSearchParams(location.search);
+
+  // Prefill
+  if(qs.get('sub3')) firstName.value = decodeURIComponent(qs.get('sub3'));
+  if(qs.get('sub4')) lastName.value  = decodeURIComponent(qs.get('sub4'));
+  if(qs.get('sub5')) billingStreet.value = decodeURIComponent(qs.get('sub5'));
+  if(qs.get('sub6')) billingPostcode.value = decodeURIComponent(qs.get('sub6'));
+  if(qs.get('sub7')) billingCity.value = decodeURIComponent(qs.get('sub7'));
+  if(qs.get('sub9')) emailInput.value = decodeURIComponent(qs.get('sub9'));
+  if(qs.get('sub10')) phoneNumber.value = qs.get('sub10').replace(/\D/g,'');
+
+  // Hero
+  if(qs.get('sub1')) heroTitle.textContent = decodeURIComponent(qs.get('sub1'));
+  if(qs.get('sub2')){
+    const img = decodeURIComponent(qs.get('sub2'));
+    heroImg.src = img;
+    sidebarImg.src = img;
+    hero.style.display = 'flex';
+  }
+
   const stripe = Stripe(PUBLISHABLE_KEY);
   const elements = stripe.elements();
-  const cardNumber = elements.create('cardNumber');
-  const cardExpiry = elements.create('cardExpiry');
-  const cardCvc = elements.create('cardCvc');
+  elements.create('cardNumber').mount('#card-number');
+  elements.create('cardExpiry').mount('#card-expiry');
+  elements.create('cardCvc').mount('#card-cvc');
 
-  cardNumber.mount('#card-number');
-  cardExpiry.mount('#card-expiry');
-  cardCvc.mount('#card-cvc');
+  nextBtn.onclick = ()=>{ nameInput.value = firstName.value+' '+lastName.value; step1.hidden=true; step2.hidden=false; };
+  backBtn.onclick = ()=>{ step2.hidden=true; step1.hidden=false; };
 
-  nextBtn.onclick = () => {
-    nameInput.value = `${firstName.value} ${lastName.value}`.trim();
-    step1.setAttribute('aria-hidden','true');
-    step2.setAttribute('aria-hidden','false');
-  };
-
-  backBtn.onclick = () => {
-    step2.setAttribute('aria-hidden','true');
-    step1.setAttribute('aria-hidden','false');
-  };
-
-  payNow.onclick = async () => {
-    document.getElementById('loading-overlay').style.display = 'flex';
-
-    try{
-      const pm = await stripe.createPaymentMethod({
-        type:'card',
-        card:cardNumber,
-        billing_details:{
-          name:nameInput.value,
-          email:emailInput.value,
-          phone:phonePrefix.value + phoneNumber.value,
-          address:{
-            line1:billingStreet.value,
-            city:billingCity.value,
-            postal_code:billingPostcode.value,
-            country:'SE'
-          }
-        }
-      });
-
-      const res = await fetch(SUBSCRIBE_URL,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ paymentMethodId: pm.paymentMethod.id })
-      });
-
-      const data = await res.json();
-      await stripe.confirmCardPayment(data.clientSecret);
-
-    }catch(e){
-      window.location.href = 'https://www.united-defence-shield.com/7GQSPJ/27CC71Q';
-    }
+  payNow.onclick = async ()=>{
+    loading-overlay.style.display='flex';
+    const pm = await stripe.createPaymentMethod({ type:'card', card:elements.getElement('cardNumber') });
+    const res = await fetch(SUBSCRIBE_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentMethodId:pm.paymentMethod.id})});
+    const data = await res.json();
+    await stripe.confirmCardPayment(data.clientSecret);
   };
 });
 </script>
