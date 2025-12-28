@@ -1,22 +1,10 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Bezpečná pokladna</title>
+  <title>Secure Checkout</title>
   <meta name="referrer" content="no-referrer">
-
-  <!-- ✅ CSP: allow Airwallex + GA + inline scripts/styles + required network calls -->
-  <meta http-equiv="Content-Security-Policy"
-  content="
-    default-src 'self';
-    script-src 'self' 'unsafe-inline' https://checkout.airwallex.com https://static.airwallex.com https://www.googletagmanager.com https://api.goaffpro.com;
-    connect-src 'self' https://api.airwallex.com https://checkout.airwallex.com https://static.airwallex.com https://o11y.airwallex.com https://the-new-holy-bible.onrender.com https://api.goaffpro.com https://track.goaffpro.com https://events.goaffpro.com https://*.goaffpro.com;
-    frame-src https://checkout.airwallex.com;
-    child-src https://checkout.airwallex.com;
-    img-src 'self' data: https:;
-    style-src 'self' 'unsafe-inline';
-  ">
 
   <!-- Google tag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
@@ -27,199 +15,55 @@
     gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
   </script>
 
-  <!-- ✅ ADDED (same as za3.html): persist ref across the flow -->
-  <script>
-  (function persistRef(){
-    try{
-      const qs  = new URLSearchParams(location.search);
-      const fromQS = qs.get('ref');
-      const fromLS = localStorage.getItem('gaf_ref');
-      const fromCK = (document.cookie.match(/(?:^|;\s*)gaf_ref=([^;]+)/)||[])[1];
-      const ref = fromQS || fromLS || fromCK;
-      if (!ref) return;
-      localStorage.setItem('gaf_ref', ref);
-      document.cookie = 'gaf_ref=' + encodeURIComponent(ref) + '; path=/; max-age=2592000; SameSite=Lax';
-    }catch(_){}
-  })();
-  </script>
-
-  <!-- ✅ ADDED (same as za3.html): persist FULL landing query + affiliate click id -->
-  <script>
-  (function persistLandingQuery(){
-    try{
-      // Save raw query so we can replay it on the thank-you
-      if (location.search) {
-        sessionStorage.setItem('orig_qs', location.search.replace(/^\?/, ''));
-      }
-      // Capture a canonical affiliate click id for later (various networks)
-      const qs = new URLSearchParams(location.search);
-      const id = qs.get('sub_id') || qs.get('subid') || qs.get('aff_sub') ||
-                 qs.get('click_id') || qs.get('cid') || qs.get('tid');
-      if (id) {
-        localStorage.setItem('aff_sub_id', id);
-        document.cookie = 'aff_sub_id=' + encodeURIComponent(id) + '; path=/; max-age=31536000; SameSite=Lax';
-      }
-    }catch(_){}
-  })();
-  </script>
-
-  <!-- Airwallex Elements -->
-  <script src="https://checkout.airwallex.com/assets/elements.bundle.min.js"></script>
-
   <style>
     :root{
-      --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb; --card:#ffffff;
-      --green:#18a957; --accent:#0f9d58; --accent2:#2dd4bf; --warn:#d30000;
-      --radius:14px;
+      --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb;
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
     body{
-      margin:0; background:var(--bg); color:var(--text);
+      margin:0;background:var(--bg);color:var(--text);
       font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
     }
-
-    .wrap{max-width:1100px; margin:0 auto; padding:18px 14px 60px}
-    .safe{background:#0a0a0a; color:#fff; font-size:12px; padding:6px 10px}
-
-    .grid{
-      display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:18px;
+    .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
+    .safe{background:#0a0a0a;color:#fff;font-size:12px;padding:6px 10px}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:18px}
+    @media(max-width:980px){.grid{grid-template-columns:1fr}}
+    .card{background:#fff;border:1px solid var(--line);padding:22px;border-radius:12px}
+    .page-title{font-size:28px;font-weight:900;display:flex;gap:8px;margin:6px 0 14px}
+    .h2{font-size:18px;font-weight:800;margin:10px 0 14px}
+    .sub{font-size:13px;color:var(--muted)}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:620px){.form-grid{grid-template-columns:1fr}}
+    .input,.select,.el{
+      width:100%;border:1px solid #cfd6e4;border-radius:10px;
+      padding:12px;font-size:15px;background:#fff
     }
-    @media (max-width:980px){ .grid{grid-template-columns:1fr} }
-
-    .card{
-      background:#fff; border:1px solid var(--line);
-      padding:22px; border-radius:12px;
-    }
-
-    .page-title{
-      font-size:28px; font-weight:900; display:flex; gap:8px; margin:6px 0 14px;
-    }
-    .stars{ color:#f6b80c; font-size:15px }
-    .reviews{ color:var(--muted); font-size:13px; margin-left:6px }
-
-    .h2{ font-size:18px; font-weight:800; margin:10px 0 14px }
-    .sub{ font-size:13px; color:#5b6b82 }
-
-    .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
-    @media(max-width:620px){ .form-grid{grid-template-columns:1fr} }
-
-    .input, .select {
-      width: 100%;
-      border: 1px solid #cfd6e4;
-      border-radius: 10px;
-      padding: 12px;
-      background: #fff;
-      font-size: 15px;
-    }
-
-    .el {
-      width: 100%;
-      min-height: 48px;
-      border: 1px solid #cfd6e4;
-      border-radius: 10px;
-      padding: 12px;
-      background: #fff;
-    }
-
     .btn{
-      width:100%; padding:12px; border:none; border-radius:12px;
-      background:#16a34a; color:#fff; cursor:pointer; font-weight:900;
+      width:100%;padding:12px;border:none;border-radius:12px;
+      background:#16a34a;color:#fff;font-weight:900;cursor:pointer
     }
-
-    .logos{display:flex; gap:10px; margin-top:12px}
-    .logos img{height:20px}
-
     .err{
-      display:none; background:#fff1f1; border:1px solid #f5bcbc;
-      padding:10px; border-radius:10px; margin-top:10px; color:#9a1a1a;
+      display:none;background:#fff1f1;border:1px solid #f5bcbc;
+      padding:10px;border-radius:10px;margin-top:10px;color:#9a1a1a
     }
     .err[aria-hidden="false"]{display:block}
-
-    .widget{
-      background:#fff; border:1px solid var(--line);
-      padding:16px; border-radius:12px;
-    }
-    .widget + .widget{margin-top:12px}
-
-    .order-row{
-      display:flex; justify-content:space-between;
-      padding:6px 0; border-top:1px dashed #e6eaf1;
-    }
-
-    .delivery{
-      display:flex; gap:12px; padding:12px;
-      border:1px dashed #d9e2ef; border-radius:10px; background:#f7fbff;
-    }
-    .delivery img{
-      width:52px;height:52px;object-fit:cover;border-radius:8px;
-    }
-
-    .trust{
-      display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; text-align:center;
-    }
-    .trust .box{border:1px solid var(--line); padding:8px; border-radius:10px}
-
     .step{display:none}
     .step[aria-hidden="false"]{display:block}
-
-    .loading-overlay{
-      position:fixed; inset:0;
-      background:rgba(246,249,252,.92);
-      display:none; align-items:center; justify-content:center;
-      z-index:9999;
-    }
-
-    .loading-overlay[aria-hidden="false"]{display:flex;}
-
-    .loading-box{
-      width:min(92vw,460px);
-      background:#fff;
-      border:1px solid #e6edf5;
-      border-radius:14px;
-      padding:24px;
-      text-align:center;
-      box-shadow:0 6px 18px rgba(0,0,0,0.06);
-    }
-
-    .loading-title{
-      font-size:20px;
-      font-weight:800;
-      margin-bottom:18px;
-      color:#2a3b55;
-    }
-
-    .progress-wrap{
-      width:100%;
-      height:12px;
-      background:#ecf1f8;
-      border-radius:999px;
-      overflow:hidden;
-      margin-bottom:14px;
-    }
-
-    .progress-bar{
-      width:0%;
-      height:100%;
-      background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
-      animation:loadingBar 2.2s ease-in-out infinite;
-    }
-
-    @keyframes loadingBar{
-      0%{width:0%}
-      60%{width:80%}
-      100%{width:100%}
-    }
   </style>
 </head>
 
 <body>
+
+<script>
+  sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
+</script>
+
 <div class="safe">Secure SSL payment</div>
 
 <div class="wrap">
   <div class="page-title">
-    Secure Payment 🔒 <span class="stars">★★★★★</span>
-    <span class="reviews">(2777 reviews)</span>
+    Secure Checkout 🔒 <span style="color:#f6b80c">★★★★★</span>
+    <span style="color:#5b6b82">(2777 reviews)</span>
   </div>
 
   <div class="grid">
@@ -227,257 +71,137 @@
 
       <!-- STEP 1 -->
       <section id="step1" class="step" aria-hidden="false">
-        <div class="h2">1. Informace</div>
+        <div class="h2">1. Information</div>
 
         <div class="form-grid">
-          <div><div class="label">Name</div><input id="firstName" class="input" placeholder="firstName"></div>
-          <div><div class="label">Surname</div><input id="lastName" class="input" placeholder="lastName"></div>
-        </div>
-
-        <div class="form-grid">
-          <div style="grid-column:1 / -1"><div class="label">Address</div><input id="billingStreet" class="input"></div>
-          <div><div class="label">Post Code</div><input id="billingPostcode" class="input"></div>
-          <div><div class="label">City</div><input id="billingCity" class="input"></div>
+          <input id="firstName" class="input" placeholder="First name">
+          <input id="lastName" class="input" placeholder="Last name">
         </div>
 
         <div class="form-grid">
-          <div><div class="label">E-mail</div><input id="emailInput" class="input" type="email"></div>
-          <div><div class="label">Country</div><input id="billingCountry" class="input" placeholder="South Africa"></div>
+          <input id="billingStreet" class="input" placeholder="Address" style="grid-column:1/-1">
+          <input id="billingPostcode" class="input" placeholder="Post code">
+          <input id="billingCity" class="input" placeholder="City">
         </div>
 
         <div class="form-grid">
-          <div>
-            <div class="label">Prefix</div>
-            <select id="phonePrefix" class="select">
-              <option value="+27">+27 — South Africa</option>
-            </select>
-          </div>
-          <div><div class="label">Phone Number</div><input id="phoneNumber" class="input"></div>
+          <input id="emailInput" class="input" type="email" placeholder="Email">
+          <input class="input" value="South Africa" disabled>
         </div>
 
-        <input id="nameInput" class="input" style="display:none">
-
-        <button id="nextBtn" class="btn" type="button">Continue</button>
-
-        <div class="logos">
-          <img src="/visa.png"><img src="/mastercard.png"><img src="/amex.png"><img src="/discover.jpg">
+        <div class="form-grid">
+          <select id="phonePrefix" class="select">
+            <option value="+27">+27 — South Africa</option>
+          </select>
+          <input id="phoneNumber" class="input" placeholder="Phone number">
         </div>
+
+        <input id="nameInput" type="hidden">
+        <button id="nextBtn" class="btn">Continue</button>
       </section>
 
       <!-- STEP 2 -->
-      <section id="step2" class="step" aria-hidden="true">
-        <div class="h2">2. Platba</div>
-        <p class="sub">Card details are encrypted and securely processed by our provider.</p>
+      <section id="step2" class="step" aria-hidden="v>
+        <div class="h2">2. Payment</div>
+        <p class="sub">Card details are encrypted and processed by Stripe.</p>
 
-        <div class="form-grid-1">
-          <div>
-            <div class="label">Card Number</div>
-            <div id="cardNumber" class="el"></div>
-          </div>
-          <div>
-            <div class="label">Valid Untill</div>
-            <div id="expiry" class="el"></div>
-          </div>
-          <div>
-            <div class="label">CVC</div>
-            <div id="cvc" class="el"></div>
+        <div>
+          <div id="card-number" class="el"></div>
+          <div class="form-grid">
+            <div id="card-expiry" class="el"></div>
+            <div id="card-cvc" class="el"></div>
           </div>
         </div>
 
         <div id="err" class="err" aria-hidden="true"></div>
 
-        <div style="display:flex; gap:10px; margin-top:12px">
-          <button id="backBtn" class="btn muted" style="width:40%" type="button">← Back</button>
-          <button id="payNow" class="btn" style="width:60%" type="button">Pay safely</button>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button id="backBtn" class="btn" style="width:40%">← Back</button>
+          <button id="payNow" class="btn" style="width:60%">Pay safely</button>
         </div>
       </section>
 
     </div>
 
-    <!-- RIGHT SIDEBAR -->
-    <aside>
-      <div class="widget">
-        <div class="w-title" style="text-align:center">What Our Customers Are Saying</div>
-        <div style="text-align:center;font-weight:700;">Fenella Lara</div>
-        <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-        <p class="tiny" style="text-align:center">I received my product yesterday. Great experience!</p>
-      </div>
-
-      <div class="widget">
-        <div class="delivery">
-          <img id="sidebarImg">
-          <div><div style="font-weight:800">Fast delivery</div><div class="tiny">3–5 business days</div></div>
-          <div style="margin-left:auto;font-weight:800">Free</div>
-        </div>
-
-        <div class="w-title" style="margin-top:14px">Order Summary</div>
-        <div class="order-row"><span>Total</span><span id="orderTotal">R35</span></div>
-      </div>
-
-      <div class="widget">
-        <div class="w-title">RELIABLE BUSINESS</div>
-        <div class="trust">
-          <div class="box"><div class="big">99%</div><div class="small">Satisfaction</div></div>
-          <div class="box"><div class="big">SSL</div><div class="small">Security</div></div>
-          <div class="box"><div class="big">250k Kč</div><div class="small">Protection</div></div>
-        </div>
+    <aside class="card">
+      <strong>Order Summary</strong>
+      <div style="display:flex;justify-content:space-between;margin-top:10px">
+        <span>Total</span><span>R35</span>
       </div>
     </aside>
   </div>
 </div>
 
-<div id="loading-overlay" class="loading-overlay" aria-hidden="true" style="display:none">
-  <div class="loading-box">
-    <div class="loading-title">We are processing the payment…</div>
-    <div class="progress-wrap"><div class="progress-bar"></div></div>
-    <p class="sub" style="margin-top:10px">Please wait, this may take a few seconds…</p>
-  </div>
-</div>
+<script src="https://js.stripe.com/v3"></script>
 
 <script>
-window.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener("DOMContentLoaded", () => {
 
-  const step1 = document.getElementById('step1');
-  const step2 = document.getElementById('step2');
-  const nextBtn = document.getElementById('nextBtn');
-  const backBtn = document.getElementById('backBtn');
-  const payBtn = document.getElementById('payNow');
-  const errBox = document.getElementById('err');
+  const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
+  const elements = stripe.elements();
 
-  const firstName = document.getElementById('firstName');
-  const lastName = document.getElementById('lastName');
+  const cardNumber = elements.create("cardNumber");
+  const cardExpiry = elements.create("cardExpiry");
+  const cardCvc = elements.create("cardCvc");
 
-  function show(o){ o.setAttribute('aria-hidden','false'); }
-  function hide(o){ o.setAttribute('aria-hidden','true'); }
+  cardNumber.mount("#card-number");
+  cardExpiry.mount("#card-expiry");
+  cardCvc.mount("#card-cvc");
 
-  nextBtn.addEventListener('click', () => {
-    document.getElementById('nameInput').value =
-      `${firstName.value} ${lastName.value}`.trim();
-    nextBtn.blur();
-    hide(step1); show(step2);
-  });
+  nextBtn.onclick = () => {
+    nameInput.value = `${firstName.value} ${lastName.value}`.trim();
+    step1.setAttribute("aria-hidden","true");
+    step2.setAttribute("aria-hidden","false");
+  };
 
-  backBtn.addEventListener('click', () => {
-    backBtn.blur();
-    hide(step2); show(step1);
-  });
+  backBtn.onclick = () => {
+    step2.setAttribute("aria-hidden","true");
+    step1.setAttribute("aria-hidden","false");
+  };
 
-  // ================================
-  // ✅ Initialize Airwallex
-  // ================================
-  let cardNumber, expiry, cvc;
-
-  try {
-    await Airwallex.init({
-      env: "prod",
-      origin: window.location.origin
-    });
-
-    const style = {
-      base: {
-        fontSize: "16px",
-        fontFamily: "Inter, sans-serif",
-        color: "#0a2540",
-        "::placeholder": { color: "#5b6b82" }
-      }
-    };
-
-    cardNumber = Airwallex.createElement('cardNumber', { style });
-    expiry = Airwallex.createElement('expiry', { style });
-    cvc = Airwallex.createElement('cvc', { style });
-
-    cardNumber.mount('cardNumber');
-    expiry.mount('expiry');
-    cvc.mount('cvc');
-
-  } catch(err) {
-    console.error('Airwallex initialization failed:', err);
-  }
-
-  payBtn.addEventListener('click', async () => {
-    payBtn.disabled = true;
-    payBtn.style.opacity = "0.6";
-    errBox.setAttribute("aria-hidden","true");
-
-    const overlay = document.getElementById('loading-overlay');
-    overlay.style.display = "flex";
-    overlay.setAttribute("aria-hidden","false");
-
-    const customer = {
-      first_name: firstName.value,
-      last_name: lastName.value,
-      email: document.getElementById('emailInput').value,
-      phone_number: document.getElementById('phonePrefix').value + document.getElementById('phoneNumber').value,
-      address: {
-        country_code: "CZ",
-        state: document.getElementById('billingCity').value,
-        city: document.getElementById('billingCity').value,
-        street: document.getElementById('billingStreet').value,
-        postcode: document.getElementById('billingPostcode').value
-      }
-    };
+  payNow.onclick = async () => {
+    err.setAttribute("aria-hidden","true");
 
     try {
-      console.log('Creating payment intent...');
-
-      const resp = await fetch("/api/airwallex/create-payment-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: 23.95,
-          currency: "USD",
-          customer
-        })
-      });
-
-      if (!resp.ok) {
-        const errorData = await resp.json();
-        throw new Error(errorData.error || 'Backend error');
-      }
-
-      const data = await resp.json();
-      console.log('Payment intent created:', data);
-
-      if (!data.client_secret || !data.id) {
-        throw new Error("Nepodařilo se vytvořit platbu.");
-      }
-
-      console.log('Confirming payment...');
-
-      const result = await Airwallex.confirmPaymentIntent({
-        element: cardNumber,
-        id: data.id,
-        client_secret: data.client_secret,
-        payment_method_options: {
-          card: {
-            auto_capture: true
+      const pm = await stripe.createPaymentMethod({
+        type:"card",
+        card:cardNumber,
+        billing_details:{
+          name:nameInput.value,
+          email:emailInput.value,
+          phone:phonePrefix.value + phoneNumber.value,
+          address:{
+            line1:billingStreet.value,
+            city:billingCity.value,
+            postal_code:billingPostcode.value,
+            country:"ZA"
           }
         }
       });
 
-      console.log('Payment result:', result);
+      if (pm.error) throw pm.error;
 
-      if (result.status === "SUCCEEDED") {
-        window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
-        return;
-      }
+      const r = await fetch("/api/stripe/one-time-23-95",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ paymentMethodId: pm.paymentMethod.id })
+      });
 
-      throw new Error(result.error?.message || "Platba selhala.");
+      const d = await r.json();
+      const conf = await stripe.confirmCardPayment(d.clientSecret,{ payment_method: pm.paymentMethod.id });
 
-    } catch(err) {
-      console.error('Payment error:', err);
-      errBox.textContent = err.message;
-      errBox.setAttribute("aria-hidden","false");
-      payBtn.disabled = false;
-      payBtn.style.opacity = "1";
-      overlay.style.display = "none";
-      overlay.setAttribute("aria-hidden","true");
+      if (conf.error) throw conf.error;
+
+      window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
+
+    } catch(e){
+      err.textContent = e.message;
+      err.setAttribute("aria-hidden","false");
     }
-  });
+  };
 
 });
 </script>
-<!-- GoAffPro loader (kept) -->
-  <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+
 </body>
 </html>
