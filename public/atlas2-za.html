@@ -133,7 +133,7 @@
   sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
 </script>
 
-<!-- GoAffPro affiliate persistence -->
+<!-- GoAffPro tracking -->
 <script>
 (function(){
   const qs = new URLSearchParams(location.search);
@@ -199,11 +199,6 @@
 
         <input id="nameInput" type="hidden">
         <button id="nextBtn" class="btn">Continue</button>
-
-        <div class="logos">
-          <img src="/visa.png"><img src="/mastercard.png">
-          <img src="/amex.png"><img src="/discover.jpg">
-        </div>
       </section>
 
       <section id="step2" class="step" aria-hidden="true">
@@ -297,20 +292,40 @@ window.addEventListener('DOMContentLoaded', () => {
   };
 
   payNow.onclick = async () => {
+
     payNow.disabled = true;
     err.setAttribute("aria-hidden","true");
 
     const overlay = document.getElementById("loading-overlay");
     overlay.setAttribute("aria-hidden","false");
 
+    const billingDetails = {
+      name: nameInput.value,
+      email: emailInput.value,
+      phone: phonePrefix.value + phoneNumber.value,
+      address: {
+        line1: billingStreet.value,
+        city: billingCity.value,
+        postal_code: billingPostcode.value,
+        country: "ZA"
+      }
+    };
+
     try {
-      const pm = await stripe.createPaymentMethod({ type:'card', card:cardNumber });
+      const pm = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardNumber,
+        billing_details: billingDetails
+      });
       if (pm.error) throw pm.error;
 
       const r = await fetch("/api/stripe/one-time-23-95",{
         method:"POST",
         headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ paymentMethodId: pm.paymentMethod.id })
+        body:JSON.stringify({
+          paymentMethodId: pm.paymentMethod.id,
+          billingDetails
+        })
       });
 
       const d = await r.json();
@@ -333,7 +348,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!-- GoAffPro loader -->
 <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 
 </body>
