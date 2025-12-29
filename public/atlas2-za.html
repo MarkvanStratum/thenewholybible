@@ -88,6 +88,42 @@
 
     .step{display:none}
     .step[aria-hidden="false"]{display:block}
+
+    /* Loading overlay */
+    .loading-overlay{
+      position:fixed;inset:0;
+      background:rgba(246,249,252,.92);
+      display:none;align-items:center;justify-content:center;
+      z-index:9999;
+    }
+    .loading-overlay[aria-hidden="false"]{display:flex}
+
+    .loading-box{
+      width:min(92vw,460px);
+      background:#fff;
+      border:1px solid #e6edf5;
+      border-radius:14px;
+      padding:24px;
+      text-align:center;
+      box-shadow:0 6px 18px rgba(0,0,0,0.06);
+    }
+    .loading-title{
+      font-size:20px;font-weight:800;margin-bottom:18px
+    }
+    .progress-wrap{
+      width:100%;height:12px;background:#ecf1f8;
+      border-radius:999px;overflow:hidden
+    }
+    .progress-bar{
+      width:0%;height:100%;
+      background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
+      animation:loadingBar 2.2s ease-in-out infinite
+    }
+    @keyframes loadingBar{
+      0%{width:0%}
+      60%{width:80%}
+      100%{width:100%}
+    }
   </style>
 </head>
 
@@ -95,6 +131,32 @@
 
 <script>
   sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
+</script>
+
+<!-- GoAffPro affiliate persistence -->
+<script>
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const keys = ["sub_id","subid","aff_sub","aff_sub4","click_id","cid","tid"];
+  for (const k of keys){
+    const v = qs.get(k);
+    if (v){
+      localStorage.setItem("aff_sub_id", v);
+      document.cookie = "aff_sub_id=" + v + "; path=/";
+    }
+  }
+})();
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const ref =
+    qs.get("ref") ||
+    localStorage.getItem("gaf_ref") ||
+    (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
+  if (ref){
+    localStorage.setItem("gaf_ref", ref);
+    document.cookie = "gaf_ref=" + ref + "; path=/";
+  }
+})();
 </script>
 
 <div class="safe">Secure SSL payment</div>
@@ -107,10 +169,8 @@
 
   <div class="grid">
 
-    <!-- LEFT -->
     <div class="card">
 
-      <!-- STEP 1 -->
       <section id="step1" class="step" aria-hidden="false">
         <div class="h2">1. Information</div>
 
@@ -141,14 +201,11 @@
         <button id="nextBtn" class="btn">Continue</button>
 
         <div class="logos">
-          <img src="/visa.png">
-          <img src="/mastercard.png">
-          <img src="/amex.png">
-          <img src="/discover.jpg">
+          <img src="/visa.png"><img src="/mastercard.png">
+          <img src="/amex.png"><img src="/discover.jpg">
         </div>
       </section>
 
-      <!-- STEP 2 -->
       <section id="step2" class="step" aria-hidden="true">
         <div class="h2">2. Payment</div>
         <p class="sub">Card details are encrypted and processed by Stripe.</p>
@@ -171,9 +228,7 @@
 
     </div>
 
-    <!-- RIGHT -->
     <aside>
-
       <div class="widget">
         <div style="text-align:center;font-weight:800">What our customers say</div>
         <div style="text-align:center;font-weight:700;">Fenella Lara</div>
@@ -195,33 +250,23 @@
       </div>
 
       <div class="widget">
-  <div style="font-weight:800;margin-bottom:10px">
-    Why you can trust us
-  </div>
-
-  <div class="trust">
-    <div class="box">
-      <div style="font-size:22px">⭐</div>
-      <div style="font-weight:800">99% positive</div>
-      <div class="sub">Customer satisfaction</div>
-    </div>
-
-    <div class="box">
-      <div style="font-size:22px">🔒</div>
-      <div style="font-weight:800">SSL secured</div>
-      <div class="sub">Encrypted checkout</div>
-    </div>
-
-    <div class="box">
-      <div style="font-size:22px">🛡️</div>
-      <div style="font-weight:800">ZAR 250,000</div>
-      <div class="sub">Purchase protection</div>
-    </div>
+        <div style="font-weight:800;margin-bottom:10px">Why you can trust us</div>
+        <div class="trust">
+          <div class="box"><div>⭐</div><div>99% positive</div></div>
+          <div class="box"><div>🔒</div><div>SSL secured</div></div>
+          <div class="box"><div>🛡️</div><div>ZAR 250,000</div></div>
+        </div>
+      </div>
+    </aside>
   </div>
 </div>
 
-
-    </aside>
+<!-- Loading overlay -->
+<div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+  <div class="loading-box">
+    <div class="loading-title">Processing payment…</div>
+    <div class="progress-wrap"><div class="progress-bar"></div></div>
+    <p class="sub" style="margin-top:10px">Please wait, this may take a few seconds…</p>
   </div>
 </div>
 
@@ -252,7 +297,12 @@ window.addEventListener('DOMContentLoaded', () => {
   };
 
   payNow.onclick = async () => {
-    err.setAttribute('aria-hidden','true');
+    payNow.disabled = true;
+    err.setAttribute("aria-hidden","true");
+
+    const overlay = document.getElementById("loading-overlay");
+    overlay.setAttribute("aria-hidden","false");
+
     try {
       const pm = await stripe.createPaymentMethod({ type:'card', card:cardNumber });
       if (pm.error) throw pm.error;
@@ -275,12 +325,16 @@ window.addEventListener('DOMContentLoaded', () => {
 
     } catch(e){
       err.textContent = e.message;
-      err.setAttribute('aria-hidden','false');
+      err.setAttribute("aria-hidden","false");
+      payNow.disabled = false;
+      overlay.setAttribute("aria-hidden","true");
     }
   };
-
 });
 </script>
+
+<!-- GoAffPro loader -->
+<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 
 </body>
 </html>
