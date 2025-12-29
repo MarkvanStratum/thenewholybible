@@ -20,40 +20,76 @@
       --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb;
     }
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;background:var(--bg);color:var(--text);
       font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
     }
+
     .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
     .safe{background:#0a0a0a;color:#fff;font-size:12px;padding:6px 10px}
-    .grid{display:grid;grid-template-columns:1fr 360px;gap:18px}
+
+    .grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px}
     @media(max-width:980px){.grid{grid-template-columns:1fr}}
+
     .card{background:#fff;border:1px solid var(--line);padding:22px;border-radius:12px}
-    .page-title{font-size:28px;font-weight:900;display:flex;gap:8px;margin:6px 0 14px}
+
+    .page-title{
+      font-size:28px;font-weight:900;display:flex;gap:8px;margin:6px 0 14px
+    }
+    .stars{color:#f6b80c}
+    .reviews{color:#5b6b82;font-size:13px}
+
     .h2{font-size:18px;font-weight:800;margin:10px 0 14px}
-    .sub{font-size:13px;color:var(--muted)}
+    .sub{font-size:13px;color:#5b6b82}
+
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(max-width:620px){.form-grid{grid-template-columns:1fr}}
+
     .input,.select,.el{
       width:100%;border:1px solid #cfd6e4;border-radius:10px;
       padding:12px;font-size:15px;background:#fff
     }
+
     .btn{
       width:100%;padding:12px;border:none;border-radius:12px;
       background:#16a34a;color:#fff;font-weight:900;cursor:pointer
     }
+
+    .logos{display:flex;gap:10px;margin-top:12px}
+    .logos img{height:20px}
+
     .err{
       display:none;background:#fff1f1;border:1px solid #f5bcbc;
       padding:10px;border-radius:10px;margin-top:10px;color:#9a1a1a
     }
     .err[aria-hidden="false"]{display:block}
+
+    .widget{
+      background:#fff;border:1px solid var(--line);
+      padding:16px;border-radius:12px
+    }
+    .widget + .widget{margin-top:12px}
+
+    .order-row{
+      display:flex;justify-content:space-between;
+      padding:6px 0;border-top:1px dashed #e6eaf1
+    }
+
+    .delivery{
+      display:flex;gap:12px;padding:12px;
+      border:1px dashed #d9e2ef;border-radius:10px;background:#f7fbff
+    }
+
+    .trust{
+      display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center
+    }
+    .trust .box{border:1px solid var(--line);padding:8px;border-radius:10px}
+
     .step{display:none}
     .step[aria-hidden="false"]{display:block}
   </style>
 </head>
-
-<!-- GoAffPro loader (kept) -->
-  <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 
 <body>
 
@@ -65,11 +101,13 @@
 
 <div class="wrap">
   <div class="page-title">
-    Secure Checkout 🔒 <span style="color:#f6b80c">★★★★★</span>
-    <span style="color:#5b6b82">(2777 reviews)</span>
+    Secure Checkout 🔒 <span class="stars">★★★★★</span>
+    <span class="reviews">(2777 reviews)</span>
   </div>
 
   <div class="grid">
+
+    <!-- LEFT -->
     <div class="card">
 
       <!-- STEP 1 -->
@@ -101,10 +139,17 @@
 
         <input id="nameInput" type="hidden">
         <button id="nextBtn" class="btn">Continue</button>
+
+        <div class="logos">
+          <img src="/visa.png">
+          <img src="/mastercard.png">
+          <img src="/amex.png">
+          <img src="/discover.jpg">
+        </div>
       </section>
 
       <!-- STEP 2 -->
-      <section id="step2" class="step" aria-hidden="v>
+      <section id="step2" class="step" aria-hidden="true">
         <div class="h2">2. Payment</div>
         <p class="sub">Card details are encrypted and processed by Stripe.</p>
 
@@ -126,62 +171,90 @@
 
     </div>
 
-    <aside class="card">
-      <strong>Order Summary</strong>
-      <div style="display:flex;justify-content:space-between;margin-top:10px">
-        <span>Total</span><span>R35</span>
+    <!-- RIGHT -->
+    <aside>
+
+      <div class="widget">
+        <div style="text-align:center;font-weight:800">What our customers say</div>
+        <div style="text-align:center;font-weight:700;">Fenella Lara</div>
+        <div style="text-align:center;color:#f6b80c;">★★★★★</div>
+        <p style="text-align:center">I received my product yesterday. Great experience!</p>
       </div>
+
+      <div class="widget">
+        <div class="delivery">
+          <div>
+            <div style="font-weight:800">Fast delivery</div>
+            <div class="sub">3–5 business days</div>
+          </div>
+          <div style="margin-left:auto;font-weight:800">Free</div>
+        </div>
+
+        <div style="margin-top:14px;font-weight:800">Order Summary</div>
+        <div class="order-row"><span>Total</span><span>R35</span></div>
+      </div>
+
+      <div class="widget">
+  <div style="font-weight:800;margin-bottom:10px">
+    Why you can trust us
+  </div>
+
+  <div class="trust">
+    <div class="box">
+      <div style="font-size:22px">⭐</div>
+      <div style="font-weight:800">99% positive</div>
+      <div class="sub">Customer satisfaction</div>
+    </div>
+
+    <div class="box">
+      <div style="font-size:22px">🔒</div>
+      <div style="font-weight:800">SSL secured</div>
+      <div class="sub">Encrypted checkout</div>
+    </div>
+
+    <div class="box">
+      <div style="font-size:22px">🛡️</div>
+      <div style="font-weight:800">ZAR 250,000</div>
+      <div class="sub">Purchase protection</div>
+    </div>
+  </div>
+</div>
+
+
     </aside>
   </div>
 </div>
 
 <script src="https://js.stripe.com/v3"></script>
-
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+window.addEventListener('DOMContentLoaded', () => {
 
   const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
   const elements = stripe.elements();
 
-  const cardNumber = elements.create("cardNumber");
-  const cardExpiry = elements.create("cardExpiry");
-  const cardCvc = elements.create("cardCvc");
+  const cardNumber = elements.create('cardNumber');
+  const cardExpiry = elements.create('cardExpiry');
+  const cardCvc = elements.create('cardCvc');
 
-  cardNumber.mount("#card-number");
-  cardExpiry.mount("#card-expiry");
-  cardCvc.mount("#card-cvc");
+  cardNumber.mount('#card-number');
+  cardExpiry.mount('#card-expiry');
+  cardCvc.mount('#card-cvc');
 
   nextBtn.onclick = () => {
     nameInput.value = `${firstName.value} ${lastName.value}`.trim();
-    step1.setAttribute("aria-hidden","true");
-    step2.setAttribute("aria-hidden","false");
+    step1.setAttribute('aria-hidden','true');
+    step2.setAttribute('aria-hidden','false');
   };
 
   backBtn.onclick = () => {
-    step2.setAttribute("aria-hidden","true");
-    step1.setAttribute("aria-hidden","false");
+    step2.setAttribute('aria-hidden','true');
+    step1.setAttribute('aria-hidden','false');
   };
 
   payNow.onclick = async () => {
-    err.setAttribute("aria-hidden","true");
-
+    err.setAttribute('aria-hidden','true');
     try {
-      const pm = await stripe.createPaymentMethod({
-        type:"card",
-        card:cardNumber,
-        billing_details:{
-          name:nameInput.value,
-          email:emailInput.value,
-          phone:phonePrefix.value + phoneNumber.value,
-          address:{
-            line1:billingStreet.value,
-            city:billingCity.value,
-            postal_code:billingPostcode.value,
-            country:"ZA"
-          }
-        }
-      });
-
+      const pm = await stripe.createPaymentMethod({ type:'card', card:cardNumber });
       if (pm.error) throw pm.error;
 
       const r = await fetch("/api/stripe/one-time-23-95",{
@@ -191,15 +264,18 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       const d = await r.json();
-      const conf = await stripe.confirmCardPayment(d.clientSecret,{ payment_method: pm.paymentMethod.id });
+      const c = await stripe.confirmCardPayment(d.clientSecret,{
+        payment_method: pm.paymentMethod.id
+      });
 
-      if (conf.error) throw conf.error;
+      if (c.error) throw c.error;
 
-      window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
+      window.location.href =
+        "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
 
     } catch(e){
       err.textContent = e.message;
-      err.setAttribute("aria-hidden","false");
+      err.setAttribute('aria-hidden','false');
     }
   };
 
