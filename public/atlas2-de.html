@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Sicherer Checkout</title>
+  <meta name="referrer" content="no-referrer">
 
   <!-- Google tag (unchanged) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
@@ -84,7 +85,7 @@
       display:flex; align-items:center; gap:12px; border:1px dashed #d9e2ef; background:#f7fbff; padding:12px; border-radius:10px;
     }
     .delivery img{ width:52px; height:52px; border-radius:8px; object-fit:cover; border:1px solid #e6eaf1; background:#fff }
-    .tiny{ font-size:12px; color:#muted }
+    .tiny{ font-size:12px; color:var(--muted) } /* FIX: was color:#muted */
 
     .trust{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; text-align:center; }
     .trust .box{ border:1px solid var(--line); border-radius:10px; padding:8px }
@@ -105,8 +106,29 @@
     .progress-wrap{ width:100%; height:10px; background:#ecf1f8; border-radius:999px; overflow:hidden; }
     .progress-bar{ width:0%; height:100%; background:linear-gradient(90deg,#7aa3ff,#2dd4bf); animation: loadingBar 2.2s ease-in-out infinite; }
     @keyframes loadingBar{ 0%{width:0%} 60%{width:80%} 100%{width:100%} }
+
+    /* German hero normalized to match the stable behavior from the Swedish page */
+    .hero{
+      display:none;
+      margin-bottom:10px;
+      padding:10px;
+      border:1px solid #e6eaf1;
+      border-radius:12px;
+      background:#fff;
+      align-items:center;
+      gap:10px;
+    }
+    .hero img{
+      width:44px;height:44px;border-radius:10px;border:1px solid #e6eaf1;object-fit:cover;background:#fff
+    }
+    .hero .title{ font-weight:900; font-size:14px; line-height:1.2 }
+    .hero .subline{ font-size:12px; color:var(--muted); margin-top:2px }
   </style>
 </head>
+
+<!-- GoAffPro loader (kept; placed like Swedish file) -->
+<script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
+
 <body>
   <div class="safe">SSL-gesicherte Zahlung</div>
 
@@ -123,9 +145,12 @@
         <!-- STEP 1: Information -->
         <section id="step1" class="step" aria-hidden="false">
           <!-- Affiliate dynamic hero (optional) -->
-          <div id="hero" style="display:none; margin-bottom:8px; display:flex; align-items:center; gap:10px">
-            <img id="heroImg" alt="" style="width:44px;height:44px;border-radius:8px;border:1px solid #e6eaf1;object-fit:cover">
-            <div id="heroTitle" style="font-weight:900"></div>
+          <div id="hero" class="hero">
+            <img id="heroImg" alt="">
+            <div>
+              <div id="heroTitle" class="title"></div>
+              <div class="subline">Produktinformation aus deinem Link</div>
+            </div>
           </div>
 
           <div class="h2">1. Angaben</div>
@@ -184,7 +209,7 @@
           <!-- Hidden full name field (keeps your existing payment code exactly the same) -->
           <input id="nameInput" class="input" style="display:none">
 
-          <button id="nextBtn" class="btn">Weiter</button>
+          <button id="nextBtn" class="btn" type="button">Weiter</button>
 
           <div class="logos">
             <img src="/visa.png" alt="Visa">
@@ -219,8 +244,8 @@
           <div id="err" class="err" role="alert" aria-hidden="true"></div>
 
           <div style="display:flex; gap:10px; margin-top:12px">
-            <button id="backBtn" class="btn muted" style="width:40%">← Zurück</button>
-            <button id="payNow" class="btn" style="width:60%">Sicher bezahlen</button>
+            <button id="backBtn" class="btn muted" style="width:40%" type="button">← Zurück</button>
+            <button id="payNow" class="btn" style="width:60%" type="button">Sicher bezahlen</button>
           </div>
 
           <p class="sub" style="text-align:center; margin-top:10px">🔒 256-Bit SSL-geschützt · Powered by Stripe</p>
@@ -315,9 +340,9 @@
       const orderTotal = document.getElementById('orderTotal');
       const sidebarImg = document.getElementById('sidebarImg');
 
-      // Endpunkte / Keys (UNVERÄNDERT)
-      const SUBSCRIBE_URL = "https://charmr-jfmc.onrender.com/api/stripe/intro-charge-20";
-      const PUBLISHABLE_KEY = "pk_live_51Rhm4sEJXIhiKzYGIPVjXwZTzuKmqU7EOA6EpDIkrNTmtm4ooWHbDcSaBlyglSdJYhCyU4VgcI8Qo09Acc8upCUD00ekSRuN4q";
+      // Endpunkte / Keys (NOW match Swedish file)
+      const SUBSCRIBE_URL = "/api/stripe/one-time-33-95";
+      const PUBLISHABLE_KEY = "pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t";
       const FIXED_PRICE_ID = "price_1Rzdp0EJXIhiKzYGlVxHGH7W"; // ungenutzt
       const API_BASE = (location.protocol.startsWith('http') ? location.origin : 'http://localhost:10000');
       const MONTHLY_PRICE_ID = "price_1RvJmqEJXIhiKzYGE0IJQp7t";
@@ -335,18 +360,22 @@
       function hideLoading(){ overlay.setAttribute('aria-hidden','true'); overlay.style.display='none'; }
       hideLoading();
 
-      // Dynamischer Hero per URL (unverändert)
+      // Dynamischer Hero per URL (stable)
       (function hydrateHeroFromURL(){
         const qs = new URLSearchParams(window.location.search);
         const title = qs.get('sub1') || qs.get('title') || qs.get('t') || '';
-               const imgUrlRaw = qs.get('sub2') || qs.get('img') || qs.get('image') || '';
+        const imgUrlRaw = qs.get('sub2') || qs.get('img') || qs.get('image') || '';
 
         const hero = document.getElementById('hero');
         const heroTitle = document.getElementById('heroTitle');
         const heroImg = document.getElementById('heroImg');
 
         let showHero = false;
-        if (title){ heroTitle.textContent = decodeURIComponent(title); showHero = true; }
+        if (title){
+          try { heroTitle.textContent = decodeURIComponent(title); }
+          catch { heroTitle.textContent = title; }
+          showHero = true;
+        }
         if (imgUrlRaw){
           try{
             const decoded = decodeURIComponent(imgUrlRaw);
@@ -380,7 +409,7 @@
       });
       backBtn?.addEventListener('click', ()=>{ hide(step2); show(step1); });
 
-      // ===== Stripe (unverändert) =====
+      // ===== Stripe (unchanged logic) =====
       let stripe, elements, cardNumber, cardExpiry, cardCvc;
       try{
         if(window.Stripe){
