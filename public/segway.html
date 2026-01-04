@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Google tag -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover" />
+<title>Secure Payment • Segway-Ninebot MAX G2</title>
+
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -10,94 +13,76 @@
   gtag('config', 'G-FDQ6REQWS8');
 </script>
 
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover" />
-<title>Secure Payment • Segway-Ninebot MAX G2</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet"/>
 
 <style>
-  :root{
-    --brand:#0f6bd6;
-    --ink:#000;
-    --radius:18px;
-    --line:rgba(0,0,0,.1);
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;
-    font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial;
-    color:var(--ink);
-    background:url("segway.png") center/cover no-repeat fixed;
-    display:flex;
-    justify-content:center;
-  }
-  .wrap{max-width:860px;width:100%;padding:20px 16px 40px}
-  .card{
-    background:rgba(255,255,255,.95);
-    border-radius:18px;
-    box-shadow:0 10px 28px rgba(0,0,0,.2);
-    padding:24px;
-  }
-  .title{font-size:24px;font-weight:800;margin:0 0 6px}
-  .sub{margin:0 0 16px}
-  .step{display:none}
-  .step[aria-hidden="false"]{display:block}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  @media(max-width:640px){.grid{grid-template-columns:1fr}}
-  .input,.el,select{
-    width:100%;
-    padding:12px 14px;
-    border:2px solid var(--line);
-    border-radius:12px;
-  }
-  .btn{
-    padding:12px 18px;
-    border-radius:12px;
-    font-weight:800;
-    cursor:pointer;
-    border:2px solid #000;
-    background:#fff;
-  }
-  .btn.primary{
-    background:var(--brand);
-    color:#fff;
-    border-color:var(--brand);
-  }
-  .btn-row{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
-  .el{background:#fff}
-  #err{
-    display:none;
-    background:#fde9eb;
-    border:1px solid #e5b2b8;
-    padding:8px;
-    border-radius:10px;
-    margin-top:10px;
-    color:#b00020;
-  }
-  #err[aria-hidden="false"]{display:block}
-  .loading-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.65);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:100;
-  }
-  .loading-overlay[aria-hidden="false"]{display:flex}
-  .loading-box{
-    background:#fff;
-    padding:22px;
-    border-radius:16px;
-    text-align:center;
-    width:92vw;
-    max-width:460px;
-  }
-  .progress{height:12px;background:#ddd;border-radius:999px;overflow:hidden}
-  .bar{height:100%;width:0;background:linear-gradient(90deg,#0f6bd6,#67b3ff);animation:load 2.2s infinite}
-  @keyframes load{0%{width:0}60%{width:80%}100%{width:100%}}
+:root{--brand:#0f6bd6;--line:rgba(0,0,0,.1)}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,system-ui,Arial;
+  background:url("segway.png") center/cover no-repeat fixed;
+  display:flex;
+  justify-content:center;
+}
+.wrap{max-width:860px;width:100%;padding:20px}
+.card{
+  background:rgba(255,255,255,.96);
+  border-radius:18px;
+  padding:24px;
+  box-shadow:0 10px 28px rgba(0,0,0,.2);
+}
+.step{display:none}
+.step[aria-hidden="false"]{display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.grid{grid-template-columns:1fr}}
+.input,.el{
+  width:100%;
+  padding:12px;
+  border:2px solid var(--line);
+  border-radius:12px;
+}
+.btn{
+  padding:12px 18px;
+  border-radius:12px;
+  font-weight:800;
+  cursor:pointer;
+  border:2px solid #000;
+  background:#fff;
+}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+.btn-row{display:flex;gap:12px;margin-top:14px}
+#err{
+  display:none;
+  margin-top:10px;
+  background:#fde9eb;
+  border:1px solid #e5b2b8;
+  padding:8px;
+  border-radius:10px;
+  color:#b00020;
+}
+#err[aria-hidden="false"]{display:block}
+.loading-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.65);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+.loading-overlay[aria-hidden="false"]{display:flex}
+.loading-box{
+  background:#fff;
+  padding:22px;
+  border-radius:16px;
+  width:90%;
+  max-width:420px;
+  text-align:center;
+}
+.progress{height:12px;background:#ddd;border-radius:999px;overflow:hidden}
+.bar{height:100%;width:0;background:linear-gradient(90deg,#0f6bd6,#67b3ff);animation:load 2.2s infinite}
+@keyframes load{0%{width:0}60%{width:80%}100%{width:100%}}
 </style>
 
 <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
@@ -108,26 +93,19 @@
 <div class="wrap">
 
 <section id="step1" class="card step" aria-hidden="false">
-  <h1 class="title">Reserve your Segway-Ninebot MAX G2</h1>
-  <p class="sub">Step 1: Contact details</p>
-
+  <h2>Reserve your Segway-Ninebot MAX G2</h2>
   <div class="grid">
     <input id="nameInput" class="input" placeholder="Full name">
     <input id="emailInput" class="input" type="email" placeholder="Email">
-    <select id="phonePrefix" class="input">
-      <option value="+27">+27 — South Africa</option>
-    </select>
     <input id="phoneNumber" class="input" placeholder="Phone number">
   </div>
-
   <div class="btn-row">
-    <button id="nextBtn" class="btn primary">Next step →</button>
+    <button id="nextBtn" class="btn primary" type="button">Next step →</button>
   </div>
 </section>
 
 <section id="step2" class="card step" aria-hidden="true">
-  <h2 class="title">Secure Payment</h2>
-  <p class="sub">Card details are encrypted by Stripe</p>
+  <h2>Secure Payment</h2>
 
   <div class="grid">
     <input id="billingStreet" class="input" placeholder="Street address">
@@ -145,8 +123,8 @@
   <div id="err" aria-hidden="true"></div>
 
   <div class="btn-row">
-    <button id="backBtn" class="btn">← Back</button>
-    <button id="payNow" class="btn primary">Pay securely</button>
+    <button id="backBtn" class="btn" type="button">← Back</button>
+    <button id="payNow" class="btn primary" type="button">Pay securely</button>
   </div>
 </section>
 
@@ -161,75 +139,80 @@
 
 <script src="https://js.stripe.com/v3"></script>
 <script>
-const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
-const elements = stripe.elements();
+document.addEventListener("DOMContentLoaded", () => {
 
-const cardNumber = elements.create('cardNumber');
-const cardExpiry = elements.create('cardExpiry');
-const cardCvc    = elements.create('cardCvc');
+  const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
+  const elements = stripe.elements();
 
-cardNumber.mount('#card-number');
-cardExpiry.mount('#card-expiry');
-cardCvc.mount('#card-cvc');
+  const cardNumber = elements.create("cardNumber");
+  const cardExpiry = elements.create("cardExpiry");
+  const cardCvc = elements.create("cardCvc");
 
-nextBtn.onclick = () => {
-  step1.setAttribute('aria-hidden','true');
-  step2.setAttribute('aria-hidden','false');
-};
+  cardNumber.mount("#card-number");
+  cardExpiry.mount("#card-expiry");
+  cardCvc.mount("#card-cvc");
 
-backBtn.onclick = () => {
-  step2.setAttribute('aria-hidden','true');
-  step1.setAttribute('aria-hidden','false');
-};
+  const step1 = document.getElementById("step1");
+  const step2 = document.getElementById("step2");
+  const nextBtn = document.getElementById("nextBtn");
+  const backBtn = document.getElementById("backBtn");
+  const payNow = document.getElementById("payNow");
+  const err = document.getElementById("err");
+  const overlay = document.getElementById("loading-overlay");
 
-payNow.onclick = async () => {
-  loadingOverlay.setAttribute('aria-hidden','false');
-  err.setAttribute('aria-hidden','true');
+  nextBtn.addEventListener("click", () => {
+    step1.setAttribute("aria-hidden","true");
+    step2.setAttribute("aria-hidden","false");
+  });
 
-  const billingDetails = {
-    name: nameInput.value,
-    email: emailInput.value,
-    phone: phonePrefix.value + phoneNumber.value,
-    address:{
-      line1: billingStreet.value,
-      city: billingCity.value,
-      postal_code: billingPostcode.value,
-      country: "ZA"
+  backBtn.addEventListener("click", () => {
+    step2.setAttribute("aria-hidden","true");
+    step1.setAttribute("aria-hidden","false");
+  });
+
+  payNow.addEventListener("click", async () => {
+    payNow.disabled = true;
+    overlay.setAttribute("aria-hidden","false");
+    err.setAttribute("aria-hidden","true");
+
+    try{
+      const pm = await stripe.createPaymentMethod({
+        type:"card",
+        card:cardNumber,
+        billing_details:{
+          name: document.getElementById("nameInput").value,
+          email: document.getElementById("emailInput").value,
+          address:{
+            line1: document.getElementById("billingStreet").value,
+            city: document.getElementById("billingCity").value,
+            postal_code: document.getElementById("billingPostcode").value,
+            country:"ZA"
+          }
+        }
+      });
+      if(pm.error) throw pm.error;
+
+      const res = await fetch("/api/stripe/one-time-23-95",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ paymentMethodId: pm.paymentMethod.id })
+      });
+
+      const data = await res.json();
+      const conf = await stripe.confirmCardPayment(data.clientSecret);
+      if(conf.error) throw conf.error;
+
+      window.location.href = "thankyou.html";
+
+    }catch(e){
+      err.textContent = e.message;
+      err.setAttribute("aria-hidden","false");
+      overlay.setAttribute("aria-hidden","true");
+      payNow.disabled = false;
     }
-  };
+  });
 
-  try{
-    const pm = await stripe.createPaymentMethod({
-      type:"card",
-      card:cardNumber,
-      billing_details:billingDetails
-    });
-    if(pm.error) throw pm.error;
-
-    const r = await fetch("/api/stripe/one-time-23-95",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        paymentMethodId: pm.paymentMethod.id,
-        billingDetails
-      })
-    });
-
-    const d = await r.json();
-    const c = await stripe.confirmCardPayment(d.clientSecret,{
-      payment_method: pm.paymentMethod.id
-    });
-
-    if(c.error) throw c.error;
-
-    window.location.href = "thankyou.html";
-
-  }catch(e){
-    err.textContent = e.message;
-    err.setAttribute('aria-hidden','false');
-    loadingOverlay.setAttribute('aria-hidden','true');
-  }
-};
+});
 </script>
 
 </body>
