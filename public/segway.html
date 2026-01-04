@@ -105,6 +105,40 @@ body{
 .progress{height:12px;background:#ddd;border-radius:999px;overflow:hidden}
 .bar{height:100%;width:0;background:linear-gradient(90deg,#0f6bd6,#67b3ff);animation:load 2.2s infinite}
 @keyframes load{0%{width:0}60%{width:80%}100%{width:100%}}
+
+/* Card logos */
+.logos{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  margin-top:16px;
+  flex-wrap:wrap;
+}
+.logos img{
+  height:22px;
+  opacity:.9;
+}
+
+/* Trust blocks */
+.trust{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:12px;
+  margin-top:14px;
+  text-align:center;
+}
+.trust .box{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px;
+  font-size:13px;
+  background:#fafafa;
+}
+@media(max-width:640px){
+  .trust{grid-template-columns:1fr}
+}
+
+
 </style>
 </head>
 
@@ -155,6 +189,22 @@ body{
     <div id="card-expiry" class="el"></div>
     <div id="card-cvc" class="el"></div>
   </div>
+
+<!-- Card logos -->
+<div class="logos">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa">
+  <img src="https://charmr.xyz/logos/mc2.png" alt="Mastercard">
+  <img src="https://charmr.xyz/logos/amex.png" alt="American Express">
+  <img src="https://www.gstatic.com/instantbuy/svg/dark_gpay.svg" alt="Google Pay">
+</div>
+
+<!-- Trust indicators -->
+<div class="trust">
+  <div class="box">⭐<br><strong>99 % positiva omdömen</strong></div>
+  <div class="box">🔒<br><strong>SSL-säkrad</strong></div>
+  <div class="box">🛡️<br><strong>Upp till 150 000 kr</strong></div>
+</div>
+
 
   <div id="err" aria-hidden="true"></div>
 
