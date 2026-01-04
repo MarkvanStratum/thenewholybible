@@ -54,17 +54,6 @@ body{
 .btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
 .btn-row{display:flex;gap:12px;margin-top:14px}
 
-.badge{
-  display:inline-block;
-  background:#16a34a;
-  color:#fff;
-  padding:6px 10px;
-  border-radius:999px;
-  font-size:13px;
-  font-weight:800;
-  margin-bottom:10px;
-}
-
 #err{
   display:none;
   margin-top:10px;
@@ -75,31 +64,6 @@ body{
   color:#b00020;
 }
 #err[aria-hidden="false"]{display:block}
-
-/* Card logos */
-.logos{
-  display:flex;
-  gap:12px;
-  justify-content:center;
-  margin-top:14px;
-}
-.logos img{height:22px}
-
-/* Trust blocks */
-.trust{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:12px;
-  margin-top:14px;
-  text-align:center;
-}
-.trust .box{
-  border:1px solid var(--line);
-  border-radius:12px;
-  padding:10px;
-  font-size:13px;
-  background:#fafafa;
-}
 
 .loading-overlay{
   position:fixed;
@@ -123,24 +87,19 @@ body{
 .bar{height:100%;width:0;background:linear-gradient(90deg,#0f6bd6,#67b3ff);animation:load 2.2s infinite}
 @keyframes load{0%{width:0}60%{width:80%}100%{width:100%}}
 </style>
-
-<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 </head>
 
 <body>
 
 <div class="wrap">
 
-<!-- STEG 1 -->
 <section id="step1" class="card step" aria-hidden="false">
-  <span class="badge">🎉 Spara 300 kr idag</span>
   <h2>Reservera din Segway-Ninebot MAX G2</h2>
-  <p>Begränsat erbjudande – säkra din rabatt innan den försvinner.</p>
 
   <div class="grid">
-    <input id="nameInput" class="input" placeholder="Fullständigt namn" autocomplete="name">
-    <input id="emailInput" class="input" type="email" placeholder="E-postadress" autocomplete="email">
-    <input id="phoneNumber" class="input" placeholder="Telefonnummer" autocomplete="tel">
+    <input id="nameInput" class="input" placeholder="Fullständigt namn">
+    <input id="emailInput" class="input" type="email" placeholder="E-postadress">
+    <input id="phoneNumber" class="input" placeholder="Telefonnummer">
   </div>
 
   <div class="btn-row">
@@ -148,10 +107,8 @@ body{
   </div>
 </section>
 
-<!-- STEG 2 -->
 <section id="step2" class="card step" aria-hidden="true">
   <h2>Säker betalning</h2>
-  <p>Alla kortuppgifter krypteras och behandlas av Stripe.</p>
 
   <div class="grid">
     <input id="billingStreet" class="input" placeholder="Gatuadress">
@@ -166,32 +123,16 @@ body{
     <div id="card-cvc" class="el"></div>
   </div>
 
-  <!-- Card logos -->
-  <div class="logos">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa">
-    <img src="https://charmr.xyz/logos/mc2.png" alt="Mastercard">
-    <img src="https://charmr.xyz/logos/amex.png" alt="American Express">
-    <img src="https://www.gstatic.com/instantbuy/svg/dark_gpay.svg" alt="Google Pay">
-  </div>
-
-  <!-- Trust -->
-  <div class="trust">
-    <div class="box">⭐<br><strong>99 % positiva omdömen</strong></div>
-    <div class="box">🔒<br><strong>SSL-säkrad</strong></div>
-    <div class="box">🛡️<br><strong>Upp till 150 000 kr</strong></div>
-  </div>
-
   <div id="err" aria-hidden="true"></div>
 
   <div class="btn-row">
-    <button id="backBtn" class="btn" type="button">← Tillbaka</button>
-    <button id="payNow" class="btn primary" type="button">Betala säkert</button>
+    <button id="backBtn" class="btn">← Tillbaka</button>
+    <button id="payNow" class="btn primary">Betala säkert</button>
   </div>
 </section>
 
 </div>
 
-<!-- Loading overlay -->
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
   <div class="loading-box">
     <strong>Behandlar betalning…</strong>
@@ -203,23 +144,32 @@ body{
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
+  /* 🔑 Stripe */
   const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
   const elements = stripe.elements();
 
   const cardNumber = elements.create("cardNumber");
   const cardExpiry = elements.create("cardExpiry");
-  const cardCvc = elements.create("cardCvc");
+  const cardCvc    = elements.create("cardCvc");
 
   cardNumber.mount("#card-number");
   cardExpiry.mount("#card-expiry");
   cardCvc.mount("#card-cvc");
 
+  /* ✅ EXPLICIT DOM BINDINGS (THIS WAS MISSING) */
+  const nameInput       = document.getElementById("nameInput");
+  const emailInput      = document.getElementById("emailInput");
+  const phoneNumber     = document.getElementById("phoneNumber");
+  const billingStreet   = document.getElementById("billingStreet");
+  const billingCity     = document.getElementById("billingCity");
+  const billingPostcode = document.getElementById("billingPostcode");
+
   const step1 = document.getElementById("step1");
   const step2 = document.getElementById("step2");
   const nextBtn = document.getElementById("nextBtn");
   const backBtn = document.getElementById("backBtn");
-  const payNow = document.getElementById("payNow");
-  const err = document.getElementById("err");
+  const payNow  = document.getElementById("payNow");
+  const err     = document.getElementById("err");
   const overlay = document.getElementById("loading-overlay");
 
   nextBtn.onclick = () => {
@@ -237,14 +187,15 @@ document.addEventListener("DOMContentLoaded", () => {
     overlay.setAttribute("aria-hidden","false");
     err.setAttribute("aria-hidden","true");
 
+    /* ✅ FULL CUSTOMER DETAILS SENT TO STRIPE */
     const billingDetails = {
-      name: nameInput.value,
-      email: emailInput.value,
-      phone: phoneNumber.value,
+      name: nameInput.value.trim(),
+      email: emailInput.value.trim(),
+      phone: phoneNumber.value.trim(),
       address:{
-        line1: billingStreet.value,
-        city: billingCity.value,
-        postal_code: billingPostcode.value,
+        line1: billingStreet.value.trim(),
+        city: billingCity.value.trim(),
+        postal_code: billingPostcode.value.trim(),
         country:"SE"
       }
     };
@@ -252,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try{
       const pm = await stripe.createPaymentMethod({
         type:"card",
-        card:cardNumber,
+        card: cardNumber,
         billing_details: billingDetails
       });
       if(pm.error) throw pm.error;
@@ -260,13 +211,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await fetch("/api/stripe/one-time-23-95",{
         method:"POST",
         headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({
+        body: JSON.stringify({
           paymentMethodId: pm.paymentMethod.id,
           billingDetails
         })
       });
 
       const data = await res.json();
+
       const conf = await stripe.confirmCardPayment(data.clientSecret,{
         payment_method: pm.paymentMethod.id
       });
@@ -281,7 +233,6 @@ document.addEventListener("DOMContentLoaded", () => {
       payNow.disabled = false;
     }
   };
-
 });
 </script>
 
