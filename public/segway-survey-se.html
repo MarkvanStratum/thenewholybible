@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Segway-Ninebot MAX G2 – Undersökning</title>
+<style>
+  :root{
+    --brand:#0f6bd6;
+    --ink:#000;
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+    color:var(--ink);
+    background:url("segway.png") center/cover no-repeat fixed;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+  }
+
+  .wrap{
+    width:100%;
+    max-width:860px;
+    padding:0 16px;
+    margin-top:60px;
+  }
+  .card{
+    background:rgba(255,255,255,0.88);
+    border-radius:var(--radius);
+    box-shadow:0 10px 28px rgba(17,24,39,.15);
+    padding:28px;
+    text-align:center;
+  }
+  .title{
+    margin:0 0 18px;
+    font-size:22px;
+    color:#000;
+    font-weight:700;
+  }
+  .q{
+    min-height:160px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    justify-content:center;
+  }
+  .q h2{margin:0;font-size:20px;color:#000;}
+  .answers{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-top:8px;
+    justify-content:center;
+  }
+
+  .btn{
+    appearance:none;
+    border:2px solid #000;
+    background:#fff;
+    color:#000;
+    padding:12px 20px;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:700;
+    transition:all .2s ease;
+  }
+  .btn:hover{
+    background:#000;
+    color:#fff;
+  }
+  .btn.primary{
+    background:var(--brand);
+    color:#fff;
+    border-color:var(--brand);
+  }
+  .btn.primary:hover{
+    background:#094da2;
+  }
+
+  .muted{color:#222;font-size:14px}
+
+  .progress{
+    width:100%;
+    height:14px;
+    border-radius:999px;
+    background:rgba(0,0,0,0.1);
+    overflow:hidden;
+  }
+  .bar{
+    height:100%;
+    width:0;
+    background:linear-gradient(90deg,var(--brand),#67b3ff);
+    border-radius:inherit;
+  }
+
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.65);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    z-index:100;
+  }
+  .modal{
+    background:rgba(255,255,255,0.95);
+    border-radius:16px;
+    max-width:560px;
+    width:100%;
+    padding:22px;
+    text-align:center;
+    box-shadow:0 10px 28px rgba(0,0,0,.3);
+  }
+  .modal h3{margin:0 0 8px;font-size:22px;color:#000}
+  .modal p{margin:8px 0 16px;color:#000}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" id="card">
+      <p class="title">Ta reda på om du kvalificerar dig!</p>
+      <div class="q" id="q"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h3>Välkommen!</h3>
+      <p>Du kan ha möjlighet att testa den nya <strong>Segway-Ninebot MAX G2</strong> helt GRATIS!</p>
+      <p>
+        Vi väljer regelbundet deltagare som får testa och recensera våra senaste elscootrar.
+        Din feedback hjälper oss att förbättra och marknadsföra våra produkter.
+        Om du vill bli utvald, fortsätt nedan.
+      </p>
+      <button class="btn primary" id="startBtn" type="button">STARTA UNDERSÖKNINGEN</button>
+    </div>
+  </div>
+
+<script>
+  const STEPS = [
+    { prompt: "Bor du i Sverige?", options: ["Ja", "Nej"] },
+    { prompt: "Har du tidigare ägt eller testat en elscooter, till exempel en Segway?", options: ["Ja", "Nej, men jag skulle gärna vilja testa"] },
+    { prompt: "Efter deltagandet, när skulle du kunna dela din feedback?", options: ["Efter en vecka", "Efter en månad"] }
+  ];
+
+  const FINAL_DESTINATION = "https://cudsr.bemobtrcks.com/click";
+
+  const overlay = document.getElementById("overlay");
+  const startBtn = document.getElementById("startBtn");
+  const qEl = document.getElementById("q");
+
+  startBtn.addEventListener("click", ()=> overlay.style.display = "none");
+
+  let step = 0;
+  const answers = [];
+
+  function renderQuestion(){
+    const s = STEPS[step];
+    qEl.innerHTML = `
+      <h2>${s.prompt}</h2>
+      <div class="answers">
+        ${s.options.map(o=>`<button class="btn" data-answer="${o}">${o}</button>`).join("")}
+      </div>
+      <div class="muted">Steg ${step+1} av ${STEPS.length}</div>
+    `;
+    qEl.querySelectorAll("[data-answer]").forEach(b=>{
+      b.addEventListener("click",()=>{
+        answers.push({q:s.prompt,a:b.dataset.answer});
+        step++;
+        if(step<STEPS.length) renderQuestion();
+        else renderProcessing();
+      });
+    });
+  }
+
+  function renderProcessing(){
+    qEl.innerHTML = `
+      <h2>BEHANDLAR DINA SVAR</h2>
+      <div class="progress"><div class="bar" id="procBar"></div></div>
+      <p class="muted">Detta tar cirka 4 sekunder…</p>
+    `;
+    const bar=document.getElementById("procBar");
+    bar.style.transition="width 4s linear";
+    requestAnimationFrame(()=>bar.style.width="100%");
+    setTimeout(renderSuccess,4050);
+  }
+
+  function renderSuccess(){
+    qEl.innerHTML = `
+      <h2 style="margin-bottom:6px;">GRATTIS!</h2>
+      <p style="margin:0 0 10px">
+        Du kvalificerar dig för att delta i vår testgrupp för Segway-Ninebot MAX G2!
+        För att ta emot din scooter, ange dina leveransuppgifter på nästa sida och
+        betala PostNords expressfraktavgift på <strong>60 kr</strong>.
+      </p>
+      <div class="answers">
+        <a class="btn primary" href="${FINAL_DESTINATION}" target="_blank" rel="noopener noreferrer">
+          FORTSÄTT
+        </a>
+      </div>
+    `;
+    console.log("Survey answers:",answers);
+  }
+
+  renderQuestion();
+</script>
+</body>
+</html>
