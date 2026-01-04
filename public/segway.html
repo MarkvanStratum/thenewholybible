@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover" />
 <title>Secure Payment • Segway-Ninebot MAX G2</title>
 
+<!-- Google tag -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -92,25 +93,29 @@ body{
 
 <div class="wrap">
 
+<!-- STEP 1 -->
 <section id="step1" class="card step" aria-hidden="false">
   <h2>Reserve your Segway-Ninebot MAX G2</h2>
+
   <div class="grid">
-    <input id="nameInput" class="input" placeholder="Full name">
-    <input id="emailInput" class="input" type="email" placeholder="Email">
-    <input id="phoneNumber" class="input" placeholder="Phone number">
+    <input id="nameInput" class="input" placeholder="Full name" autocomplete="name">
+    <input id="emailInput" class="input" type="email" placeholder="Email" autocomplete="email">
+    <input id="phoneNumber" class="input" placeholder="Phone number" autocomplete="tel">
   </div>
+
   <div class="btn-row">
     <button id="nextBtn" class="btn primary" type="button">Next step →</button>
   </div>
 </section>
 
+<!-- STEP 2 -->
 <section id="step2" class="card step" aria-hidden="true">
   <h2>Secure Payment</h2>
 
   <div class="grid">
-    <input id="billingStreet" class="input" placeholder="Street address">
-    <input id="billingCity" class="input" placeholder="City">
-    <input id="billingPostcode" class="input" placeholder="Post code">
+    <input id="billingStreet" class="input" placeholder="Street address" autocomplete="address-line1">
+    <input id="billingCity" class="input" placeholder="City" autocomplete="address-level2">
+    <input id="billingPostcode" class="input" placeholder="Post code" autocomplete="postal-code">
     <input class="input" value="South Africa" disabled>
   </div>
 
@@ -130,6 +135,7 @@ body{
 
 </div>
 
+<!-- Loading overlay -->
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
   <div class="loading-box">
     <strong>Processing payment…</strong>
@@ -146,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const cardNumber = elements.create("cardNumber");
   const cardExpiry = elements.create("cardExpiry");
-  const cardCvc = elements.create("cardCvc");
+  const cardCvc    = elements.create("cardCvc");
 
   cardNumber.mount("#card-number");
   cardExpiry.mount("#card-expiry");
@@ -175,37 +181,49 @@ document.addEventListener("DOMContentLoaded", () => {
     overlay.setAttribute("aria-hidden","false");
     err.setAttribute("aria-hidden","true");
 
-    try{
-      const pm = await stripe.createPaymentMethod({
-        type:"card",
-        card:cardNumber,
-        billing_details:{
-          name: document.getElementById("nameInput").value,
-          email: document.getElementById("emailInput").value,
-          address:{
-            line1: document.getElementById("billingStreet").value,
-            city: document.getElementById("billingCity").value,
-            postal_code: document.getElementById("billingPostcode").value,
-            country:"ZA"
-          }
-        }
-      });
-      if(pm.error) throw pm.error;
+    const billingDetails = {
+      name: document.getElementById("nameInput").value.trim(),
+      email: document.getElementById("emailInput").value.trim(),
+      phone: document.getElementById("phoneNumber").value.trim(),
+      address: {
+        line1: document.getElementById("billingStreet").value.trim(),
+        city: document.getElementById("billingCity").value.trim(),
+        postal_code: document.getElementById("billingPostcode").value.trim(),
+        country: "ZA"
+      }
+    };
 
+    try{
+      // 1️⃣ Create PaymentMethod with FULL identity
+      const pm = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardNumber,
+        billing_details: billingDetails
+      });
+      if (pm.error) throw pm.error;
+
+      // 2️⃣ Send EVERYTHING to backend
       const res = await fetch("/api/stripe/one-time-23-95",{
         method:"POST",
         headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ paymentMethodId: pm.paymentMethod.id })
+        body:JSON.stringify({
+          paymentMethodId: pm.paymentMethod.id,
+          billingDetails
+        })
       });
 
       const data = await res.json();
-      const conf = await stripe.confirmCardPayment(data.clientSecret);
-      if(conf.error) throw conf.error;
+
+      // 3️⃣ Confirm payment
+      const conf = await stripe.confirmCardPayment(data.clientSecret,{
+        payment_method: pm.paymentMethod.id
+      });
+      if (conf.error) throw conf.error;
 
       window.location.href = "thankyou.html";
 
     }catch(e){
-      err.textContent = e.message;
+      err.textContent = e.message || "Payment failed";
       err.setAttribute("aria-hidden","false");
       overlay.setAttribute("aria-hidden","true");
       payNow.disabled = false;
