@@ -63,6 +63,31 @@ body{
   color:#b00020;
 }
 #err[aria-hidden="false"]{display:block}
+
+/* Trust blocks (from ZA checkout) */
+.logos{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  margin-top:14px;
+}
+.logos img{height:22px}
+
+.trust{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:12px;
+  margin-top:14px;
+  text-align:center;
+}
+.trust .box{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px;
+  font-size:13px;
+  background:#fafafa;
+}
+
 .loading-overlay{
   position:fixed;
   inset:0;
@@ -113,9 +138,9 @@ body{
   <h2>Secure Payment</h2>
 
   <div class="grid">
-    <input id="billingStreet" class="input" placeholder="Street address" autocomplete="address-line1">
-    <input id="billingCity" class="input" placeholder="City" autocomplete="address-level2">
-    <input id="billingPostcode" class="input" placeholder="Post code" autocomplete="postal-code">
+    <input id="billingStreet" class="input" placeholder="Street address">
+    <input id="billingCity" class="input" placeholder="City">
+    <input id="billingPostcode" class="input" placeholder="Post code">
     <input class="input" value="South Africa" disabled>
   </div>
 
@@ -123,6 +148,21 @@ body{
   <div class="grid">
     <div id="card-expiry" class="el"></div>
     <div id="card-cvc" class="el"></div>
+  </div>
+
+  <!-- Card logos -->
+  <div class="logos">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa">
+    <img src="https://charmr.xyz/logos/mc2.png" alt="Mastercard">
+    <img src="https://charmr.xyz/logos/amex.png" alt="Amex">
+    <img src="https://www.gstatic.com/instantbuy/svg/dark_gpay.svg" alt="Google Pay">
+  </div>
+
+  <!-- Trust indicators -->
+  <div class="trust">
+    <div class="box">⭐<br><strong>99% positive</strong></div>
+    <div class="box">🔒<br><strong>SSL secured</strong></div>
+    <div class="box">🛡️<br><strong>ZAR 250,000</strong></div>
   </div>
 
   <div id="err" aria-hidden="true"></div>
@@ -152,7 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const cardNumber = elements.create("cardNumber");
   const cardExpiry = elements.create("cardExpiry");
-  const cardCvc    = elements.create("cardCvc");
+  const cardCvc = elements.create("cardCvc");
 
   cardNumber.mount("#card-number");
   cardExpiry.mount("#card-expiry");
@@ -182,27 +222,25 @@ document.addEventListener("DOMContentLoaded", () => {
     err.setAttribute("aria-hidden","true");
 
     const billingDetails = {
-      name: document.getElementById("nameInput").value.trim(),
-      email: document.getElementById("emailInput").value.trim(),
-      phone: document.getElementById("phoneNumber").value.trim(),
-      address: {
-        line1: document.getElementById("billingStreet").value.trim(),
-        city: document.getElementById("billingCity").value.trim(),
-        postal_code: document.getElementById("billingPostcode").value.trim(),
-        country: "ZA"
+      name: nameInput.value,
+      email: emailInput.value,
+      phone: phoneNumber.value,
+      address:{
+        line1: billingStreet.value,
+        city: billingCity.value,
+        postal_code: billingPostcode.value,
+        country:"ZA"
       }
     };
 
     try{
-      // 1️⃣ Create PaymentMethod with FULL identity
       const pm = await stripe.createPaymentMethod({
-        type: "card",
-        card: cardNumber,
+        type:"card",
+        card:cardNumber,
         billing_details: billingDetails
       });
-      if (pm.error) throw pm.error;
+      if(pm.error) throw pm.error;
 
-      // 2️⃣ Send EVERYTHING to backend
       const res = await fetch("/api/stripe/one-time-23-95",{
         method:"POST",
         headers:{ "Content-Type":"application/json" },
@@ -213,12 +251,10 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       const data = await res.json();
-
-      // 3️⃣ Confirm payment
       const conf = await stripe.confirmCardPayment(data.clientSecret,{
         payment_method: pm.paymentMethod.id
       });
-      if (conf.error) throw conf.error;
+      if(conf.error) throw conf.error;
 
       window.location.href = "thankyou.html";
 
