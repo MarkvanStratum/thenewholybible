@@ -31,7 +31,7 @@
     .main{width:100%;max-width:var(--maxw);flex:1;display:flex;flex-direction:column;align-items:center;gap:14px;padding:0 16px 14px}
     .pointer{position:relative;width:100%;display:flex;justify-content:center;margin-bottom:0;z-index:10}
     .pointer:after{content:"";position:absolute;top:0;width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-bottom:30px solid var(--gold);filter:drop-shadow(0 3px 6px rgba(0,0,0,.9))}
-    .pointer:before{content:"";position:absolute;top:28px;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 30% 20%,#fefce8,#fed7aa,#b45309);box-shadow:0 2px 4px rgba(0,0,0,.7)}
+    .pointer:before{content:"";position:absolute;top:28px;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 30% 20%,#fefce8,#fed7aa,#b45309);box-shadow:0 2px 4px rgba(0,0,0,.7))}
     .wheel-wrap{position:relative;width:min(74vw,var(--maxw));height:min(74vw,var(--maxw));display:flex;align-items:center;justify-content:center}
     .wheel-halo{position:absolute;inset:-14px;border-radius:50%;background:radial-gradient(circle,rgba(250,250,210,.16),transparent 70%);filter:blur(2px);z-index:0}
     .wheel{position:absolute;inset:0;margin:auto;border-radius:50%;overflow:hidden;border:var(--ring) solid #fef3c7;box-shadow:0 18px 40px rgba(0,0,0,.95),0 0 0 5px #a16207,0 0 0 8px #facc15;background:#111827;transform:rotate(0deg);z-index:2}
@@ -60,9 +60,30 @@
     .card{width:100%;max-width:var(--maxw);background:radial-gradient(circle at top,#020817,#000814);border-radius:22px;padding:26px 20px;box-shadow:0 18px 40px rgba(0,0,0,.9);border:1px solid rgba(250,250,250,.08)}
     .cta{display:block;margin-top:16px;padding:14px 18px;border-radius:16px;font-weight:800;background:linear-gradient(to right,#22c55e,#a3e635);color:#020817;text-decoration:none;box-shadow:0 10px 24px rgba(34,197,94,.6)}
     .hide{display:none}
+
+    /* === POPUP CSS (ADDED) === */
+    .sg-intro-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,8,23,.85);backdrop-filter:blur(6px);z-index:9999}
+    .sg-intro-modal{width:calc(100% - 32px);max-width:var(--maxw);background:radial-gradient(circle at top,#020817,#000814);border-radius:22px;padding:26px 20px;box-shadow:0 18px 40px rgba(0,0,0,.9);border:1px solid rgba(250,250,250,.08);position:relative;text-align:center}
+    .sg-intro-modal h2{margin:0 0 8px;font-size:24px;font-weight:900;color:#fef9c3;text-shadow:0 3px 14px rgba(0,0,0,.9)}
+    .sg-intro-modal p{margin:6px 0;font-size:15px;color:#e5e7eb}
+    .sg-intro-modal .sg-intro-highlight{margin-top:10px;font-size:16px;color:#22c55e;font-weight:800}
+    .sg-intro-close{position:absolute;top:10px;right:12px;border:none;background:transparent;color:#9ca3af;font-size:26px;line-height:1;cursor:pointer}
+    .sg-intro-close:hover{color:#f9fafb}
   </style>
 </head>
 <body>
+
+  <!-- === POPUP HTML (ADDED) === -->
+  <div id="sgIntro" class="sg-intro-overlay" role="dialog" aria-modal="true" aria-label="Promotion">
+    <div class="sg-intro-modal">
+      <button type="button" class="sg-intro-close" aria-label="Close">&times;</button>
+      <h2>Congratulations</h2>
+      <p>Congratulations, you have been randomly selected by Sagway for a chance to win the new Sagway e-scooter.</p>
+      <p class="sg-intro-highlight">Claim your three free spins now.</p>
+      <button id="sgIntroSpinNow" type="button" class="btn">Spin now</button>
+    </div>
+  </div>
+
   <section id="game" class="wrap">
     <header>
       <h1>Segway Spin</h1>
@@ -99,6 +120,47 @@
   </section>
 
   <script>
+
+function introChime(){
+  const ctx = getAudioCtx();
+  if(!ctx) return;
+
+  const notes = [784, 988, 1319]; // pleasant bell tones
+  notes.forEach((freq, i) => {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = "sine";
+    o.frequency.value = freq;
+    g.gain.value = 0.0001;
+
+    o.connect(g);
+    g.connect(ctx.destination);
+
+    const t = ctx.currentTime + i * 0.12;
+    g.gain.exponentialRampToValueAtTime(0.25, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+
+    o.start(t);
+    o.stop(t + 0.4);
+  });
+}
+
+(function enableIntroChimeOnFirstInteraction(){
+  let played = false;
+
+  function playOnce(){
+    if(played) return;
+    played = true;
+    introChime();
+    document.removeEventListener("pointerdown", playOnce);
+    document.removeEventListener("keydown", playOnce);
+  }
+
+  document.addEventListener("pointerdown", playOnce, { once:true });
+  document.addEventListener("keydown", playOnce, { once:true });
+})();
+
+
     /* === all your original JS stays, wheel generation unchanged === */
     const segments=[{amount:"R100",sub:"discount!",type:"discount"},{type:"zero"},{amount:"R200",sub:"discount!",type:"discount"},{type:"zero"},{amount:"R300",sub:"discount!",type:"discount"},{type:"zero"},{amount:"R400",sub:"discount!",type:"discount"},{type:"zero"},{amount:"R500",sub:"discount!",type:"discount"},{type:"zero"},{amount:"R200",sub:"discount!",type:"discount"},{label:"Segway Ninebot MAX G2",type:"jackpot",img:"segway.jpg"}];
     const SEGMENT_COUNT=segments.length,DEG_PER=360/SEGMENT_COUNT;
@@ -136,6 +198,19 @@
         btn.disabled=spinCount>=3;btn.textContent=spinCount>=3?"Spins used":"Spin the wheel";});
     }
     btn.addEventListener("click",spin);
+
+    /* === POPUP JS (ADDED) === */
+    (function(){
+      const overlay=document.getElementById("sgIntro");
+      if(!overlay) return;
+      const closeBtn=overlay.querySelector(".sg-intro-close");
+      const spinNow=document.getElementById("sgIntroSpinNow");
+      const close=()=>{overlay.style.display="none";};
+      if(closeBtn) closeBtn.addEventListener("click",close);
+      if(spinNow) spinNow.addEventListener("click",close);
+      overlay.addEventListener("click",(e)=>{if(e.target===overlay) close();});
+      document.addEventListener("keydown",(e)=>{if(e.key==="Escape") close();});
+    })();
   </script>
 </body>
 </html>
