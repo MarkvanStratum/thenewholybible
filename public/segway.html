@@ -54,6 +54,25 @@ body{
 .btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
 .btn-row{display:flex;gap:12px;margin-top:14px}
 
+/* 💰 Price box */
+.price-box{
+  margin:16px 0;
+  padding:14px;
+  border-radius:14px;
+  background:#f0f7ff;
+  border:2px solid #cfe4ff;
+  text-align:center;
+}
+.price-box .amount{
+  font-size:28px;
+  font-weight:900;
+  color:#0f6bd6;
+}
+.price-box .note{
+  font-size:13px;
+  color:#333;
+}
+
 #err{
   display:none;
   margin-top:10px;
@@ -89,14 +108,19 @@ body{
 </style>
 </head>
 
-<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
-
 <body>
 
 <div class="wrap">
 
+<!-- STEG 1 -->
 <section id="step1" class="card step" aria-hidden="false">
   <h2>Reservera din Segway-Ninebot MAX G2</h2>
+
+  <!-- PRICE -->
+  <div class="price-box">
+    <div class="amount">24 kr</div>
+    <div class="note">Engångsbetalning • Inga dolda avgifter</div>
+  </div>
 
   <div class="grid">
     <input id="nameInput" class="input" placeholder="Fullständigt namn">
@@ -109,8 +133,15 @@ body{
   </div>
 </section>
 
+<!-- STEG 2 -->
 <section id="step2" class="card step" aria-hidden="true">
   <h2>Säker betalning</h2>
+
+  <!-- PRICE (repeated for clarity) -->
+  <div class="price-box">
+    <div class="amount">Totalt att betala: 24 kr</div>
+    <div class="note">Säker Stripe-betalning</div>
+  </div>
 
   <div class="grid">
     <input id="billingStreet" class="input" placeholder="Gatuadress">
@@ -129,7 +160,7 @@ body{
 
   <div class="btn-row">
     <button id="backBtn" class="btn">← Tillbaka</button>
-    <button id="payNow" class="btn primary">Betala säkert</button>
+    <button id="payNow" class="btn primary">Betala säkert 24 kr</button>
   </div>
 </section>
 
@@ -146,7 +177,6 @@ body{
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
-  /* 🔑 Stripe */
   const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
   const elements = stripe.elements();
 
@@ -158,7 +188,6 @@ document.addEventListener("DOMContentLoaded", () => {
   cardExpiry.mount("#card-expiry");
   cardCvc.mount("#card-cvc");
 
-  /* ✅ EXPLICIT DOM BINDINGS (THIS WAS MISSING) */
   const nameInput       = document.getElementById("nameInput");
   const emailInput      = document.getElementById("emailInput");
   const phoneNumber     = document.getElementById("phoneNumber");
@@ -189,7 +218,6 @@ document.addEventListener("DOMContentLoaded", () => {
     overlay.setAttribute("aria-hidden","false");
     err.setAttribute("aria-hidden","true");
 
-    /* ✅ FULL CUSTOMER DETAILS SENT TO STRIPE */
     const billingDetails = {
       name: nameInput.value.trim(),
       email: emailInput.value.trim(),
