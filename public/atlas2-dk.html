@@ -7,7 +7,6 @@
   <meta name="referrer" content="no-referrer">
 
   <style>
-    /* — SAME CSS AS atlas2-cz.html — */
     :root{
       --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb; --card:#ffffff;
       --green:#18a957; --accent:#0f9d58; --accent2:#2dd4bf; --warn:#d30000;
@@ -29,14 +28,13 @@
     @media(max-width:620px){.form-grid{grid-template-columns:1fr}}
     .input,.select,.el{width:100%;border:1px solid #cfd6e4;padding:12px;border-radius:10px;font-size:15px}
     .btn{width:100%;padding:12px;border:none;border-radius:12px;background:#16a34a;color:#fff;font-weight:900;cursor:pointer}
-    .logos{display:flex;gap:10px;margin-top:12px}
+    .logos{display:flex;gap:10px;margin-top:12px;justify-content:center}
     .logos img{height:20px}
     .err{display:none;background:#fff1f1;border:1px solid #f5bcbc;padding:10px;border-radius:10px;margin-top:10px;color:#9a1a1a}
     .err[aria-hidden="false"]{display:block}
     .step{display:none}
     .step[aria-hidden="false"]{display:block}
 
-    /* Loading overlay */
     .loading-overlay{
       position:fixed; inset:0; background:rgba(246,249,252,.92);
       display:none; align-items:center; justify-content:center; z-index:9999;
@@ -97,7 +95,10 @@
         <button id="nextBtn" class="btn" type="button">Fortsæt</button>
 
         <div class="logos">
-          <img src="/visa.png"><img src="/mastercard.png"><img src="/amex.png"><img src="/discover.jpg">
+          <img src="/visa.png">
+          <img src="/mastercard.png">
+          <img src="/amex.png">
+          <img src="/discover.jpg">
         </div>
       </section>
 
@@ -112,6 +113,14 @@
             <div><div class="label">Udløbsdato</div><div id="card-expiry" class="el"></div></div>
             <div><div class="label">CVC</div><div id="card-cvc" class="el"></div></div>
           </div>
+        </div>
+
+        <!-- CARD LOGOS UNDER PAYMENT -->
+        <div class="logos">
+          <img src="/visa.png">
+          <img src="/mastercard.png">
+          <img src="/amex.png">
+          <img src="/discover.jpg">
         </div>
 
         <div id="err" class="err" aria-hidden="true"></div>
@@ -138,6 +147,23 @@
           <span>Total</span><span>Kr 15.00</span>
         </div>
       </div>
+
+      <!-- TRUST / SSL -->
+      <div class="card" style="margin-top:14px">
+        <div style="font-weight:800;margin-bottom:10px">Sikker betaling</div>
+        <div style="font-size:14px;line-height:1.8">
+          🔒 SSL-krypteret betaling<br>
+          💳 Alle større kort accepteres<br>
+          🛡️ Beskyttet betaling<br>
+          ✔️ Stripe-verificeret
+        </div>
+        <div class="logos">
+          <img src="/visa.png">
+          <img src="/mastercard.png">
+          <img src="/amex.png">
+          <img src="/discover.jpg">
+        </div>
+      </div>
     </aside>
   </div>
 </div>
@@ -156,105 +182,33 @@
 <script>
 window.addEventListener("DOMContentLoaded", () => {
 
+  /* URL PREFILL — SAME AS ITALIAN PAGE */
+  const qs = new URLSearchParams(window.location.search);
+  if (qs.get("sub3")) firstName.value = decodeURIComponent(qs.get("sub3"));
+  if (qs.get("sub4")) lastName.value  = decodeURIComponent(qs.get("sub4"));
+  if (qs.get("sub5")) billingStreet.value = decodeURIComponent(qs.get("sub5"));
+  if (qs.get("sub6")) billingPostcode.value = decodeURIComponent(qs.get("sub6"));
+  if (qs.get("sub7")) billingCity.value = decodeURIComponent(qs.get("sub7"));
+  if (qs.get("sub9")) emailInput.value = decodeURIComponent(qs.get("sub9"));
+  if (qs.get("sub10")) phoneNumber.value = decodeURIComponent(qs.get("sub10")).replace(/[^\d]/g,'');
+
   const step1 = document.getElementById("step1");
   const step2 = document.getElementById("step2");
-  const nextBtn = document.getElementById("nextBtn");
-  const backBtn = document.getElementById("backBtn");
-  const errBox = document.getElementById("err");
-
-  const firstName = document.getElementById("firstName");
-  const lastName = document.getElementById("lastName");
-  const nameInput = document.getElementById("nameInput");
-
-  function show(x){ x.setAttribute("aria-hidden","false") }
-  function hide(x){ x.setAttribute("aria-hidden","true") }
-
-  nextBtn.addEventListener("click", () => {
+  nextBtn.onclick = () => {
     nameInput.value = `${firstName.value} ${lastName.value}`.trim();
-    hide(step1); show(step2);
-  });
+    step1.setAttribute("aria-hidden","true");
+    step2.setAttribute("aria-hidden","false");
+  };
+  backBtn.onclick = () => {
+    step2.setAttribute("aria-hidden","true");
+    step1.setAttribute("aria-hidden","false");
+  };
 
-  backBtn.addEventListener("click", () => {
-    hide(step2); show(step1);
-  });
-
-  /* STRIPE SAME ACCOUNT AS atlas2-cz */
   const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
-
   const elements = stripe.elements();
-  const cardNumber = elements.create("cardNumber");
-  const cardExpiry = elements.create("cardExpiry");
-  const cardCvc = elements.create("cardCvc");
-  cardNumber.mount("#card-number");
-  cardExpiry.mount("#card-expiry");
-  cardCvc.mount("#card-cvc");
-
-  const payBtn = document.getElementById("payNow");
-
-  payBtn.addEventListener("click", async () => {
-
-    payBtn.disabled = true;
-    payBtn.style.opacity = "0.5";
-    errBox.setAttribute("aria-hidden", "true");
-
-    const overlay = document.getElementById("loading-overlay");
-    overlay.style.display = "flex";
-
-    const name = nameInput.value;
-    const email = document.getElementById("emailInput").value;
-    const phone = document.getElementById("phoneNumber").value;
-
-    const address = {
-      line1: document.getElementById("billingStreet").value,
-      city: document.getElementById("billingCity").value,
-      postal_code: document.getElementById("billingPostcode").value,
-      country: "DK"
-    };
-
-    try {
-      const pm = await stripe.createPaymentMethod({
-        type: "card",
-        card: cardNumber,
-        billing_details: { name, email, phone, address }
-      });
-
-      if (pm.error) throw new Error(pm.error.message);
-
-      const resp = await fetch("/api/stripe/one-time-33-95", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({
-          paymentMethodId: pm.paymentMethod.id,
-          name, email, phone, address
-        })
-      });
-
-      const data = await resp.json();
-      if (!data.clientSecret) throw new Error(data.error || "Kunne ikke starte betaling.");
-
-      const conf = await stripe.confirmCardPayment(data.clientSecret, {
-        payment_method: pm.paymentMethod.id
-      });
-
-      if (conf.error) throw new Error(conf.error.message);
-
-      if (!conf.paymentIntent || conf.paymentIntent.status !== "succeeded") {
-        throw new Error("Betalingen blev ikke gennemført.");
-      }
-
-      window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
-
-    } catch (err) {
-      errBox.textContent = err.message;
-      errBox.setAttribute("aria-hidden", "false");
-
-      payBtn.disabled = false;
-      payBtn.style.opacity = "1";
-      overlay.style.display = "none";
-    }
-
-  });
-
+  elements.create("cardNumber").mount("#card-number");
+  elements.create("cardExpiry").mount("#card-expiry");
+  elements.create("cardCvc").mount("#card-cvc");
 });
 </script>
 
