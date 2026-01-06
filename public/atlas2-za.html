@@ -89,7 +89,6 @@
     .step{display:none}
     .step[aria-hidden="false"]{display:block}
 
-    /* Loading overlay */
     .loading-overlay{
       position:fixed;inset:0;
       background:rgba(246,249,252,.92);
@@ -256,7 +255,6 @@
   </div>
 </div>
 
-<!-- Loading overlay -->
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
   <div class="loading-box">
     <div class="loading-title">Processing payment…</div>
@@ -268,6 +266,40 @@
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
+
+  const qs = new URLSearchParams(window.location.search);
+
+  /* ===== SOP1 TITLE + PREFILL (ONLY ADDITION) ===== */
+  try{
+    const sop1 = qs.get('sub1');
+    if (sop1){
+      const title = decodeURIComponent(sop1);
+
+      // top title
+      const pt = document.querySelector('.page-title');
+      if (pt){
+        for (const n of pt.childNodes){
+          if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()){
+            n.textContent = title + ' ';
+            break;
+          }
+        }
+      }
+
+      // right-side delivery title
+      const d = document.querySelector('.delivery div div');
+      if (d) d.textContent = title;
+    }
+
+    if (qs.get('sub3')) firstName.value = decodeURIComponent(qs.get('sub3'));
+    if (qs.get('sub4')) lastName.value  = decodeURIComponent(qs.get('sub4'));
+    if (qs.get('sub5')) billingStreet.value = decodeURIComponent(qs.get('sub5'));
+    if (qs.get('sub6')) billingPostcode.value = decodeURIComponent(qs.get('sub6'));
+    if (qs.get('sub7')) billingCity.value = decodeURIComponent(qs.get('sub7'));
+    if (qs.get('sub9')) emailInput.value = decodeURIComponent(qs.get('sub9'));
+    if (qs.get('sub10')) phoneNumber.value = decodeURIComponent(qs.get('sub10'));
+  }catch(e){}
+  /* ===== END ADDITION ===== */
 
   const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
   const elements = stripe.elements();
@@ -292,7 +324,6 @@ window.addEventListener('DOMContentLoaded', () => {
   };
 
   payNow.onclick = async () => {
-
     payNow.disabled = true;
     err.setAttribute("aria-hidden","true");
 
