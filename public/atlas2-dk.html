@@ -339,6 +339,34 @@
 
       // ===== URL prefill (same as IT) =====
       const qs = new URLSearchParams(window.location.search);
+
+      // ===== SOP1 title replace (ONLY CHANGE ADDED) =====
+      try{
+        const sop1Raw = qs.get('sub1');
+        if (sop1Raw){
+          const sop1 = decodeURIComponent(sop1Raw);
+
+          // Top title: replace ONLY the leading text node (keeps 🔒 + stars + reviews exactly)
+          const pageTitleEl = document.querySelector('.page-title');
+          if (pageTitleEl){
+            for (const n of pageTitleEl.childNodes){
+              if (n && n.nodeType === Node.TEXT_NODE && n.textContent.trim().length){
+                n.textContent = sop1 + ' ';
+                break;
+              }
+            }
+          }
+
+          // Sidebar title next to image: target the exact "Hurtig levering..." line
+          const img = document.getElementById('sidebarImg');
+          if (img && img.parentElement && img.parentElement.classList.contains('delivery')){
+            const textWrap = img.nextElementSibling; // the <div> containing the two lines
+            const titleLine = textWrap && textWrap.firstElementChild; // the <div style="font-weight:800">...</div>
+            if (titleLine) titleLine.textContent = sop1;
+          }
+        }
+      }catch(e){}
+
       const urlPrefs = {
         first:   qs.get('sub3') || '',
         last:    qs.get('sub4') || '',
