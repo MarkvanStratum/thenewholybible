@@ -369,25 +369,6 @@
 })();
 
 
-        const hero = document.getElementById('hero');
-        const heroTitle = document.getElementById('heroTitle');
-        const heroImg = document.getElementById('heroImg');
-
-        let showHero = false;
-        if (title){ heroTitle.textContent = decodeURIComponent(title); showHero = true; }
-        if (imgUrlRaw){
-          try{
-            const decoded = decodeURIComponent(imgUrlRaw);
-            if (/^https?:\/\//i.test(decoded)){
-              heroImg.src = decoded;
-              sidebarImg.src = decoded;
-              showHero = true;
-            }
-          }catch{}
-        }
-        if (showHero) hero.style.display = 'flex';
-      })();
-
 (function applyPrefillFromURL(){
   const qs = new URLSearchParams(window.location.search);
 
