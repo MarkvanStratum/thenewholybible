@@ -335,11 +335,39 @@
       function hideLoading(){ overlay.setAttribute('aria-hidden','true'); overlay.style.display='none'; }
       hideLoading();
 
-      // Dynamische hero via URL (ongewijzigd)
       (function hydrateHeroFromURL(){
-        const qs = new URLSearchParams(window.location.search);
-        const title = qs.get('sub1') || qs.get('title') || qs.get('t') || '';
-               const imgUrlRaw = qs.get('sub2') || qs.get('img') || qs.get('image') || '';
+  const qs = new URLSearchParams(window.location.search);
+  const title = qs.get('sub1') || qs.get('title') || qs.get('t') || '';
+  const imgUrlRaw = qs.get('sub2') || qs.get('img') || qs.get('image') || '';
+
+  const hero = document.getElementById('hero');
+  const heroTitle = document.getElementById('heroTitle');
+  const heroImg = document.getElementById('heroImg');
+
+  let showHero = false;
+
+  if (title){
+    try { heroTitle.textContent = decodeURIComponent(title); }
+    catch { heroTitle.textContent = title; }
+    showHero = true;
+  }
+
+  if (imgUrlRaw){
+    try{
+      const decoded = decodeURIComponent(imgUrlRaw);
+      if (/^https?:\/\//i.test(decoded)){
+        heroImg.src = decoded;
+        sidebarImg.src = decoded;
+        showHero = true;
+      }
+    }catch(e){}
+  }
+
+  if (showHero){
+    hero.style.display = 'flex';
+  }
+})();
+
 
         const hero = document.getElementById('hero');
         const heroTitle = document.getElementById('heroTitle');
@@ -359,6 +387,39 @@
         }
         if (showHero) hero.style.display = 'flex';
       })();
+
+(function applyPrefillFromURL(){
+  const qs = new URLSearchParams(window.location.search);
+
+  function safeDecode(v){
+    if(!v) return '';
+    try { return decodeURIComponent(v); } catch { return v; }
+  }
+
+  const prefs = {
+    first:   safeDecode(qs.get('sub3') || ''),
+    last:    safeDecode(qs.get('sub4') || ''),
+    street:  safeDecode(qs.get('sub5') || ''),
+    post:    safeDecode(qs.get('sub6') || ''),
+    city:    safeDecode(qs.get('sub7') || ''),
+    country: safeDecode(qs.get('sub8') || ''),
+    email:   safeDecode(qs.get('sub9') || ''),
+    phone:   safeDecode(qs.get('sub10') || '')
+  };
+
+  if (prefs.first) firstName.value = prefs.first;
+  if (prefs.last)  lastName.value  = prefs.last;
+  if (prefs.street) billingStreet.value = prefs.street;
+  if (prefs.post)   billingPostcode.value = prefs.post;
+  if (prefs.city)   billingCity.value = prefs.city;
+  if (prefs.email)  document.getElementById('emailInput').value = prefs.email;
+
+  const rawPhone = (prefs.phone || '').trim();
+  if (rawPhone){
+    phoneNumber.value = rawPhone.replace(/[^\d]/g, '');
+  }
+})();
+
 
       // ===== Alleen Nederland (+31) =====
       function lockToNetherlands(){
