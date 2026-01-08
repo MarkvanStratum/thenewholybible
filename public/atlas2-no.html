@@ -310,5 +310,236 @@
 
   <script src="https://js.stripe.com/v3"></script>
   <!-- Stripe + tracking JS remains 100% unchanged -->
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    // ----- DOM -----
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const errBox = document.getElementById('err');
+    const nextBtn = document.getElementById('nextBtn');
+    const backBtn = document.getElementById('backBtn');
+
+    const firstName = document.getElementById('firstName');
+    const lastName  = document.getElementById('lastName');
+    const nameInput = document.getElementById('nameInput');
+
+    const emailInput = document.getElementById('emailInput');
+
+    const phonePrefix = document.getElementById('phonePrefix');
+    const phoneNumber = document.getElementById('phoneNumber');
+
+    const billingStreet   = document.getElementById('billingStreet');
+    const billingCity     = document.getElementById('billingCity');
+    const billingCountry  = document.getElementById('billingCountry');
+    const billingPostcode = document.getElementById('billingPostcode');
+
+    const orderTotal = document.getElementById('orderTotal');
+    const sidebarImg = document.getElementById('sidebarImg');
+
+    // ===== Stripe config (EXACTLY like the Italian file) =====
+    const SUBSCRIBE_URL = "/api/stripe/one-time-33-95";
+    const PUBLISHABLE_KEY = "pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t";
+    const FIXED_PRICE_ID = "price_1Rzdp0EJXIhiKzYGlVxHGH7W"; // retained (unused)
+   const API_BASE = (window.location && window.location.origin)
+  ? window.location.origin
+  : 'http://localhost:10000';
+
+    const MONTHLY_PRICE_ID = "price_1RvJmqEJXIhiKzYGE0IJQp7t";
+
+    // Cosmetic price (matches screenshot)
+    const INTRO_PRICE_TEXT = '≈ 99 kr';
+    try { orderTotal.textContent = INTRO_PRICE_TEXT; } catch {}
+
+    function show(o){ o?.setAttribute('aria-hidden','false'); }
+    function hide(o){ o?.setAttribute('aria-hidden','true'); }
+
+    // Loading overlay
+    const overlay = document.getElementById('loading-overlay');
+    function showLoading(){ overlay.style.display='flex'; overlay.setAttribute('aria-hidden','false'); }
+    function hideLoading(){ overlay.setAttribute('aria-hidden','true'); overlay.style.display='none'; }
+    hideLoading();
+
+    // ===== Dynamic title + image via URL (affiliate-supplied) =====
+    (function hydrateHeroFromURL(){
+      const qs = new URLSearchParams(window.location.search);
+      const title = qs.get('sub1') || qs.get('title') || qs.get('t') || '';
+      const imgUrlRaw = qs.get('sub2') || qs.get('img') || qs.get('image') || '';
+
+      const hero = document.getElementById('hero');
+      const heroTitle = document.getElementById('heroTitle');
+      const heroImg = document.getElementById('heroImg');
+
+      let showHero = false;
+
+      if (title){
+        try { heroTitle.textContent = decodeURIComponent(title); }
+        catch { heroTitle.textContent = title; }
+        showHero = true;
+      }
+
+      if (imgUrlRaw){
+        try{
+          const decoded = decodeURIComponent(imgUrlRaw);
+          if (/^https?:\/\//i.test(decoded)){
+            heroImg.src = decoded;
+            sidebarImg.src = decoded; // right-side image in screenshot
+            showHero = true;
+          }
+        }catch(e){}
+      }
+
+      if (showHero){
+        hero.style.display = 'flex';
+      }
+    })();
+
+    // ===== URL prefill (sub3..sub10) =====
+    (function applyPrefillFromURL(){
+      const qs = new URLSearchParams(window.location.search);
+
+      function safeDecode(v){
+        if(!v) return '';
+        try { return decodeURIComponent(v); } catch { return v; }
+      }
+
+      const prefs = {
+        first:   safeDecode(qs.get('sub3') || ''),
+        last:    safeDecode(qs.get('sub4') || ''),
+        street:  safeDecode(qs.get('sub5') || ''),
+        post:    safeDecode(qs.get('sub6') || ''),
+        city:    safeDecode(qs.get('sub7') || ''),
+        country: safeDecode(qs.get('sub8') || ''),
+        email:   safeDecode(qs.get('sub9') || ''),
+        phone:   safeDecode(qs.get('sub10') || '')
+      };
+
+      if (prefs.first) firstName.value = prefs.first;
+      if (prefs.last)  lastName.value  = prefs.last;
+      if (prefs.street) billingStreet.value = prefs.street;
+      if (prefs.post)   billingPostcode.value = prefs.post;
+      if (prefs.city)   billingCity.value = prefs.city;
+      if (prefs.country) billingCountry.value = prefs.country;
+      if (prefs.email)  emailInput.value = prefs.email;
+
+      const rawPhone = (prefs.phone || '').trim();
+      if (rawPhone){
+        phoneNumber.value = rawPhone.replace(/[^\d]/g, '');
+      }
+    })();
+
+    // Step navigation — combine first/last into hidden full name for Stripe
+    nextBtn?.addEventListener('click', () => {
+      nameInput.value = [firstName.value || '', lastName.value || ''].join(' ').trim();
+      hide(step1); show(step2);
+    });
+    backBtn?.addEventListener('click', ()=>{ hide(step2); show(step1); });
+
+    // ===== Stripe (kept) =====
+    let stripe, elements, cardNumber, cardExpiry, cardCvc;
+    try{
+      if(window.Stripe){
+        stripe = Stripe(PUBLISHABLE_KEY);
+        elements = stripe.elements();
+        cardNumber = elements.create('cardNumber');
+        cardExpiry = elements.create('cardExpiry');
+        cardCvc    = elements.create('cardCvc');
+        cardNumber.mount('#card-number');
+        cardExpiry.mount('#card-expiry');
+        cardCvc.mount('#card-cvc');
+      }
+    }catch(e){ console.warn('Stripe init skipped:', e); }
+
+    document.getElementById('payNow')?.addEventListener('click', async ()=>{
+      if(!stripe){ alert('Betaling er midlertidig utilgjengelig. Prøv igjen.'); return; }
+      errBox?.setAttribute('aria-hidden','true'); if(errBox) errBox.textContent='';
+      showLoading();
+
+      const name = nameInput.value.trim();
+      const email = (emailInput?.value || '').trim();
+
+      const raw = (phoneNumber?.value || '').replace(/[^0-9]/g,'');
+      const fullPhone = raw ? ((phonePrefix?.value||'') + raw) : undefined;
+
+      // Address (use country text -> try map to ISO; fallback SE)
+      function countryToISO(txt){
+        const t = (txt||'').trim().toLowerCase();
+        if (!t) return 'SE';
+        if (t === 'sverige' || t === 'sweden' || t === 'se') return 'SE';
+        if (t === 'italia' || t === 'italy' || t === 'it') return 'IT';
+        if (t === 'norge' || t === 'norway' || t === 'no') return 'NO';
+        if (t === 'danmark' || t === 'denmark' || t === 'dk') return 'DK';
+        if (t === 'finland' || t === 'fi') return 'FI';
+        if (t.length === 2) return t.toUpperCase();
+        return 'SE';
+      }
+
+      const address = {
+        line1: (billingStreet?.value||'').trim() || undefined,
+        city: (billingCity?.value||'').trim() || undefined,
+        country: countryToISO(billingCountry?.value || ''),
+        postal_code: (billingPostcode?.value||'').trim() || undefined
+      };
+
+      try{
+        const pmRes = await stripe.createPaymentMethod({
+          type:'card',
+          card:cardNumber,
+          billing_details:{ name:name||undefined, email:email||undefined, phone:fullPhone, address }
+        });
+        if(pmRes.error) throw new Error(pmRes.error.message);
+
+        const resp = await fetch(SUBSCRIBE_URL,{
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ paymentMethodId: pmRes.paymentMethod.id, name, email, phone: fullPhone, address })
+        });
+        const data = await resp.json();
+        if(!data.clientSecret) throw new Error(data.error || 'Kunne ikke starte betalingen');
+
+        const conf = await stripe.confirmCardPayment(data.clientSecret);
+        if(conf.error) throw new Error(conf.error.message);
+        if(!(conf.paymentIntent && conf.paymentIntent.status==='succeeded')) throw new Error('Betalingen ble ikke fullført');
+
+        (function(){
+          const TRACKER_URL = 'https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7';
+          const pid = (conf && conf.paymentIntent && conf.paymentIntent.id) || data.paymentIntentId || '';
+          const qp = new URLSearchParams(pid ? { v: pid } : { t: String(Date.now()) });
+
+          try{
+            const ck = document.cookie.match(/(?:^|; )aff_sub_id=([^;]*)/);
+            const sub = ck ? decodeURIComponent(ck[1]) : (localStorage.getItem('aff_sub_id') || '');
+            if (sub) {
+              qp.set('sub_id',  sub);
+              qp.set('subid',   sub);
+              qp.set('aff_sub', sub);
+              qp.set('click_id',sub);
+              qp.set('cid',     sub);
+              qp.set('tid',     sub);
+            }
+          }catch(e){}
+
+          /* forward affiliate Meta Pixel ID if present */
+          try{
+            const srcQs = new URLSearchParams(location.search);
+            const affiliatePixel = srcQs.get('pixel') || srcQs.get('fb_pixel') || srcQs.get('fbp');
+            if (affiliatePixel) qp.set('pixel', affiliatePixel);
+          }catch(e){}
+
+          const sep = TRACKER_URL.includes('?') ? '&' : '?';
+          window.location.href = TRACKER_URL + sep + qp.toString();
+        })();
+
+      }catch(err){
+        if(errBox){
+          errBox.textContent = err.message || 'Noe gikk galt.';
+          errBox.setAttribute('aria-hidden','false');
+        }
+        hideLoading();
+      }
+    });
+  });
+</script>
+
+
 </body>
 </html>
