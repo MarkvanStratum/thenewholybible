@@ -326,7 +326,7 @@ const fbPixel = mainQS.get('pixel') || "";
 
       // Keep your existing endpoints / keys (UNCHANGED)
       const SUBSCRIBE_URL = "/api/stripe/one-time-33-95";
-      const PUBLISHABLE_KEY = "pk_live_51Rhm4const PUBLISHABLE_KEY =
+      const PUBLISHABLE_KEY =
   "pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t";
       const FIXED_PRICE_ID = "price_1Rzdp0EJXIhiKzYGlVxHGH7W"; // retained (unused)
       const API_BASE = (location.protocol.startsWith('http') ? location.origin : 'http://localhost:10000');
@@ -372,14 +372,16 @@ const fbPixel = mainQS.get('pixel') || "";
 
       // ===== Country choices + calling codes =====
       const COUNTRY_CHOICES = {
-        SE:'Norge'
-      };
-      const CALLING_CODES = {
-        SE:'+46'
-      };
+  NO: 'Norge'
+};
+
+const CALLING_CODES = {
+  NO: '+47'
+};
+
       function populatePrefixOptions(){
         phonePrefix.innerHTML = '';
-        const priority = ['SE'];
+        const priority = ['NO'];
         const seen = new Set();
         const add = (cc) => {
           if (seen.has(cc) || !CALLING_CODES[cc]) return;
@@ -390,7 +392,7 @@ const fbPixel = mainQS.get('pixel') || "";
         };
         priority.forEach(add);
         Object.keys(CALLING_CODES).filter(cc => !priority.includes(cc)).sort().forEach(add);
-        if (!phonePrefix.value) phonePrefix.value = CALLING_CODES.SE;
+        if (!phonePrefix.value) phonePrefix.value = CALLING_CODES.NO;
       }
       function setPrefixFromISO(cc){ const code = CALLING_CODES[cc]; if(!code) return;
         const exists = Array.from(phonePrefix.options).some(o=>o.value===code);
