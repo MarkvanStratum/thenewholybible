@@ -128,8 +128,9 @@
           <div>
             <div class="label">Ländervorwahl</div>
             <select id="phonePrefix" class="select">
-              <option value="+49">+49 — Deutschland</option>
-            </select>
+  <option value="+49">+49 — Deutschland</option>
+</select>
+
           </div>
           <div><div class="label">Telefonnummer</div><input id="phoneNumber" class="input"></div>
         </div>
@@ -213,6 +214,11 @@
 window.addEventListener('DOMContentLoaded', () => {
 
   const qs=new URLSearchParams(location.search);
+const hero = document.getElementById('hero');
+const heroTitle = document.getElementById('heroTitle');
+const heroImg = document.getElementById('heroImg');
+const sidebarImg = document.getElementById('sidebarImg');
+
   const d=v=>{try{return decodeURIComponent(v||'')}catch{return v||''}};
 
   if(qs.get('sub1')){heroTitle.textContent=d(qs.get('sub1'));hero.style.display='flex'}
@@ -232,7 +238,22 @@ window.addEventListener('DOMContentLoaded', () => {
     payNow.disabled=true; err.setAttribute('aria-hidden','true');
     overlay.style.display='flex'; overlay.setAttribute('aria-hidden','false');
     try{
-      const pm=await stripe.createPaymentMethod({type:'card',card:cn});
+      const pm = await stripe.createPaymentMethod({
+  type: 'card',
+  card: cn,
+  billing_details: {
+    name: nameInput.value || undefined,
+    email: emailInput.value || undefined,
+    phone: (phonePrefix.value + phoneNumber.value) || undefined,
+    address: {
+      line1: billingStreet.value || undefined,
+      city: billingCity.value || undefined,
+      postal_code: billingPostcode.value || undefined,
+      country: 'DE'
+    }
+  }
+});
+
       const r=await fetch("/api/stripe/one-time-33-95",{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentMethodId:pm.paymentMethod.id})});
       const dta=await r.json();
       await stripe.confirmCardPayment(dta.clientSecret);
