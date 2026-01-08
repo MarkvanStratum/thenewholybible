@@ -283,7 +283,106 @@
 
   <!-- Skripty nezmenené -->
   <script src="https://js.stripe.com/v3"></script>
-  <script>/* (JavaScript nezmenený) */</script>
+  <script>
+window.addEventListener('DOMContentLoaded', () => {
+
+  const step1 = document.getElementById('step1');
+  const step2 = document.getElementById('step2');
+  const nextBtn = document.getElementById('nextBtn');
+  const backBtn = document.getElementById('backBtn');
+  const payNow = document.getElementById('payNow');
+  const err = document.getElementById('err');
+
+  const firstName = document.getElementById('firstName');
+  const lastName  = document.getElementById('lastName');
+  const nameInput = document.getElementById('nameInput');
+
+  const emailInput = document.getElementById('emailInput');
+  const phonePrefix = document.getElementById('phonePrefix');
+  const phoneNumber = document.getElementById('phoneNumber');
+
+  const billingStreet   = document.getElementById('billingStreet');
+  const billingCity     = document.getElementById('billingCity');
+  const billingPostcode = document.getElementById('billingPostcode');
+
+  /* ================= STRIPE (FROM ZA PAGE) ================= */
+
+  const stripe = Stripe(
+    "pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t"
+  );
+
+  const elements = stripe.elements();
+  const cardNumber = elements.create('cardNumber');
+  const cardExpiry = elements.create('cardExpiry');
+  const cardCvc    = elements.create('cardCvc');
+
+  cardNumber.mount('#card-number');
+  cardExpiry.mount('#card-expiry');
+  cardCvc.mount('#card-cvc');
+
+  /* ================= STEP NAVIGATION ================= */
+
+  nextBtn.onclick = () => {
+    nameInput.value = `${firstName.value} ${lastName.value}`.trim();
+    step1.setAttribute('aria-hidden','true');
+    step2.setAttribute('aria-hidden','false');
+  };
+
+  backBtn.onclick = () => {
+    step2.setAttribute('aria-hidden','true');
+    step1.setAttribute('aria-hidden','false');
+  };
+
+  /* ================= PAYMENT ================= */
+
+  payNow.onclick = async () => {
+    err.setAttribute("aria-hidden","true");
+
+    const billingDetails = {
+      name: nameInput.value,
+      email: emailInput.value,
+      phone: phonePrefix.value + phoneNumber.value,
+      address: {
+        line1: billingStreet.value,
+        city: billingCity.value,
+        postal_code: billingPostcode.value,
+        country: "SK"
+      }
+    };
+
+    try {
+      const pm = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardNumber,
+        billing_details: billingDetails
+      });
+      if (pm.error) throw pm.error;
+
+      const r = await fetch("/api/stripe/one-time-23-95", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paymentMethodId: pm.paymentMethod.id,
+          billingDetails
+        })
+      });
+
+      const d = await r.json();
+      const c = await stripe.confirmCardPayment(d.clientSecret);
+
+      if (c.error) throw c.error;
+
+      window.location.href =
+        "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
+
+    } catch(e) {
+      err.textContent = e.message;
+      err.setAttribute("aria-hidden","false");
+    }
+  };
+});
+</script>
+
   <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 </body>
 </html>
