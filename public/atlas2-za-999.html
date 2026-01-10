@@ -78,7 +78,8 @@
 
     .delivery{
       display:flex;gap:12px;padding:12px;
-      border:1px dashed #d9e2ef;border-radius:10px;background:#f7fbff
+      border:1px dashed #d9e2ef;border-radius:10px;background:#f7fbff;
+      align-items:center;
     }
 
     .trust{
@@ -88,6 +89,20 @@
 
     .step{display:none}
     .step[aria-hidden="false"]{display:block}
+
+    .hero{
+      display:none;
+      margin-bottom:12px;
+      padding:10px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      gap:10px;
+      align-items:center;
+    }
+    .hero img{
+      width:44px;height:44px;border-radius:10px;
+      border:1px solid var(--line);object-fit:cover
+    }
 
     .loading-overlay{
       position:fixed;inset:0;
@@ -171,6 +186,16 @@
     <div class="card">
 
       <section id="step1" class="step" aria-hidden="false">
+
+        <!-- ✅ ADDED HERO (hidden unless sub params exist) -->
+        <div id="hero" class="hero">
+          <img id="heroImg" alt="">
+          <div>
+            <div id="heroTitle" style="font-weight:900;font-size:14px"></div>
+            <div class="sub">Product from your link</div>
+          </div>
+        </div>
+
         <div class="h2">1. Information</div>
 
         <div class="form-grid">
@@ -232,6 +257,7 @@
 
       <div class="widget">
         <div class="delivery">
+          <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none">
           <div>
             <div style="font-weight:800">Fast delivery</div>
             <div class="sub">3–5 business days</div>
@@ -269,13 +295,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const qs = new URLSearchParams(window.location.search);
 
-  /* ===== SOP1 TITLE + PREFILL (ONLY ADDITION) ===== */
+  /* ===== EXISTING TITLE LOGIC (UNCHANGED) ===== */
   try{
     const sop1 = qs.get('sub1');
     if (sop1){
       const title = decodeURIComponent(sop1);
 
-      // top title
       const pt = document.querySelector('.page-title');
       if (pt){
         for (const n of pt.childNodes){
@@ -286,19 +311,30 @@ window.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // right-side delivery title
       const d = document.querySelector('.delivery div div');
       if (d) d.textContent = title;
     }
-
-    if (qs.get('sub3')) firstName.value = decodeURIComponent(qs.get('sub3'));
-    if (qs.get('sub4')) lastName.value  = decodeURIComponent(qs.get('sub4'));
-    if (qs.get('sub5')) billingStreet.value = decodeURIComponent(qs.get('sub5'));
-    if (qs.get('sub6')) billingPostcode.value = decodeURIComponent(qs.get('sub6'));
-    if (qs.get('sub7')) billingCity.value = decodeURIComponent(qs.get('sub7'));
-    if (qs.get('sub9')) emailInput.value = decodeURIComponent(qs.get('sub9'));
-    if (qs.get('sub10')) phoneNumber.value = decodeURIComponent(qs.get('sub10'));
   }catch(e){}
+
+  /* ===== ✅ IMAGE SUPPORT (SAFE ADDITION) ===== */
+  const hero = document.getElementById('hero');
+  const heroImg = document.getElementById('heroImg');
+  const heroTitle = document.getElementById('heroTitle');
+  const sidebarImg = document.getElementById('sidebarImg');
+
+  const d = v => { try { return decodeURIComponent(v||''); } catch { return v||'' } };
+
+  if (qs.get('sub1')) {
+    heroTitle.textContent = d(qs.get('sub1'));
+    hero.style.display = 'flex';
+  }
+
+  if (qs.get('sub2')) {
+    heroImg.src = d(qs.get('sub2'));
+    sidebarImg.src = d(qs.get('sub2'));
+    sidebarImg.style.display = 'block';
+    hero.style.display = 'flex';
+  }
   /* ===== END ADDITION ===== */
 
   const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
