@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Secure Checkout Page</title>
+  <title>Varna stran za plačilo</title>
   <meta name="referrer" content="no-referrer">
 
   <!-- Google tag (unchanged) -->
@@ -16,7 +16,7 @@
   </script>
 
   <style>
-    /* ✅ CSS 100% IDENTICAL */
+    /* ✅ CSS IS 100% IDENTICAL TO ORIGINAL */
     :root{
       --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb; --card:#ffffff;
       --green:#18a957; --accent:#0f9d58; --accent2:#2dd4bf; --warn:#d30000;
@@ -58,6 +58,7 @@
     .w-title{font-weight:800;font-size:16px;margin:2px 0 10px}
     .order-row{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-top:1px dashed #e6eaf1}
     .order-row:first-of-type{border-top:none}
+    .green{color:var(--green)}
     .delivery{display:flex;align-items:center;gap:12px;border:1px dashed #d9e2ef;background:#f7fbff;padding:12px;border-radius:10px}
     .delivery img{width:52px;height:52px;border-radius:8px;object-fit:cover;border:1px solid #e6eaf1;background:#fff}
     .tiny{font-size:12px;color:var(--muted)}
@@ -74,77 +75,77 @@
 <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 
 <body>
-  <div class="safe">SSL-secured payment</div>
+  <div class="safe">Varno plačilo s SSL zaščito</div>
 
   <div class="wrap">
     <div class="page-title">
-      Secure Checkout Page <span style="font-size:18px">🔒</span>
+      Varna stran za plačilo <span style="font-size:18px">🔒</span>
       <span class="stars">★★★★★</span>
-      <span class="reviews">(2777 Reviews)</span>
+      <span class="reviews">(2777 ocen)</span>
     </div>
 
     <div class="grid">
       <div class="card">
         <section id="step1" class="step" aria-hidden="false">
-          <div class="h2">1. Information</div>
+          <div class="h2">1. Podatki</div>
 
           <div class="form-grid">
             <div>
-              <div class="label">First name</div>
-              <input id="firstName" class="input" placeholder="Anna">
+              <div class="label">Ime</div>
+              <input id="firstName" class="input" placeholder="Ana">
             </div>
             <div>
-              <div class="label">Last name</div>
-              <input id="lastName" class="input" placeholder="Murphy">
+              <div class="label">Priimek</div>
+              <input id="lastName" class="input" placeholder="Novak">
             </div>
           </div>
 
           <div class="form-grid">
             <div style="grid-column:1 / -1">
-              <div class="label">Address</div>
-              <input id="billingStreet" class="input" placeholder="Street and house number">
+              <div class="label">Naslov</div>
+              <input id="billingStreet" class="input" placeholder="Ulica in hišna številka">
             </div>
             <div>
-              <div class="label">Postcode</div>
-              <input id="billingPostcode" class="input" placeholder="D02">
+              <div class="label">Poštna številka</div>
+              <input id="billingPostcode" class="input" placeholder="1000">
             </div>
             <div>
-              <div class="label">City</div>
-              <input id="billingCity" class="input" placeholder="Dublin">
-            </div>
-          </div>
-
-          <div class="form-grid">
-            <div>
-              <div class="label">Email</div>
-              <input id="emailInput" class="input" type="email" placeholder="you@example.com">
-            </div>
-            <div>
-              <div class="label">Country</div>
-              <input id="billingCountry" class="input" value="Ireland">
+              <div class="label">Mesto</div>
+              <input id="billingCity" class="input" placeholder="Ljubljana">
             </div>
           </div>
 
           <div class="form-grid">
             <div>
-              <div class="label">Country code</div>
+              <div class="label">E-pošta</div>
+              <input id="emailInput" class="input" type="email" placeholder="vi@primer.si">
+            </div>
+            <div>
+              <div class="label">Država</div>
+              <input id="billingCountry" class="input" value="Slovenija">
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div>
+              <div class="label">Telefonska koda</div>
               <select id="phonePrefix" class="select">
-                <option value="+353">+353 — Ireland</option>
+                <option value="+386">+386 — Slovenija</option>
               </select>
             </div>
             <div>
-              <div class="label">Phone number</div>
-              <input id="phoneNumber" class="input" placeholder="Your number">
+              <div class="label">Telefonska številka</div>
+              <input id="phoneNumber" class="input" placeholder="Vaša številka">
             </div>
           </div>
 
           <input id="nameInput" style="display:none">
-          <button id="nextBtn" class="btn">Continue</button>
+          <button id="nextBtn" class="btn">Naprej</button>
         </section>
 
         <section id="step2" class="step" aria-hidden="true">
-          <div class="h2">2. Payment</div>
-          <p class="sub">Card details are securely processed by Stripe.</p>
+          <div class="h2">2. Plačilo</div>
+          <p class="sub">Podatki o kartici so varno obdelani prek Stripe.</p>
 
           <div id="card-number" class="el"></div>
           <div class="form-grid">
@@ -155,20 +156,20 @@
           <div id="err" class="err"></div>
 
           <div style="display:flex;gap:10px;margin-top:12px">
-            <button id="backBtn" class="btn muted" style="width:40%">← Back</button>
-            <button id="payNow" class="btn" style="width:60%">Pay securely</button>
+            <button id="backBtn" class="btn muted" style="width:40%">← Nazaj</button>
+            <button id="payNow" class="btn" style="width:60%">Varno plačaj</button>
           </div>
         </section>
       </div>
 
-      <!-- RIGHT SIDEBAR -->
+      <!-- RIGHT SIDEBAR — SAME AS PT/LU -->
       <aside>
         <div class="widget">
-          <div class="w-title" style="text-align:center">What our customers say</div>
+          <div class="w-title" style="text-align:center">Kaj pravijo naše stranke</div>
           <div style="text-align:center; font-weight:700; margin-bottom:4px">Fenella Lara</div>
           <div style="text-align:center; color:#f6b80c; letter-spacing:1px">★★★★★</div>
           <p class="tiny" style="text-align:center; margin-top:8px">
-            I received my product yesterday. Fast delivery and excellent customer service. Thank you so much!
+            Izdelek sem prejela včeraj. Hitra dostava in odlična podpora strankam. Najlepša hvala!
           </p>
         </div>
 
@@ -176,40 +177,40 @@
           <div class="delivery">
             <img id="sidebarImg" alt="">
             <div>
-              <div style="font-weight:800">Fast delivery to your address</div>
-              <div class="tiny">3–5 business days</div>
+              <div style="font-weight:800">Hitra dostava na vaš naslov</div>
+              <div class="tiny">3–5 delovnih dni</div>
             </div>
-            <div style="margin-left:auto; font-weight:800">Free</div>
+            <div style="margin-left:auto; font-weight:800">Brezplačno</div>
           </div>
 
-          <div class="w-title" style="margin-top:14px">Order summary</div>
+          <div class="w-title" style="margin-top:14px">Povzetek naročila</div>
           <div class="order-row">
-            <span>Total</span>
+            <span>Skupaj</span>
             <span id="orderTotal">2 €</span>
           </div>
 
           <div class="tiny" style="margin-top:10px; line-height:1.5">
-            🗃️ Only a few left in stock<br>
-            👀 Several people are viewing this right now<br>
-            ✅ Someone purchased this recently<br>
-            💳 Popular purchase in recent days
+            🗃️ Na zalogi je le še nekaj kosov<br>
+            👀 Več ljudi si trenutno ogleduje ta izdelek<br>
+            ✅ Nekdo je ta izdelek nedavno kupil<br>
+            💳 Veliko nakupov v zadnjih dneh
           </div>
         </div>
 
         <div class="widget">
-          <div class="w-title">TRUSTED STORE</div>
+          <div class="w-title">ZAUPANJA VREDNA TRGOVINA</div>
           <div class="trust">
             <div class="box">
               <div class="big">99 %</div>
-              <div class="small">Satisfied customers</div>
+              <div class="small">Zadovoljne stranke</div>
             </div>
             <div class="box">
-              <div class="big">Secure</div>
-              <div class="small">SSL encrypted</div>
+              <div class="big">Varno</div>
+              <div class="small">SSL zaščita</div>
             </div>
             <div class="box">
-              <div class="big">€10,000</div>
-              <div class="small">Buyer protection</div>
+              <div class="big">10.000 €</div>
+              <div class="small">Zaščita kupca</div>
             </div>
           </div>
         </div>
