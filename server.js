@@ -272,6 +272,49 @@ app.post("/api/stripe/one-time-39-95", async (req, res) => {
   }
 });
 
+/* ========================================
+   STRIPE: ONE-TIME PAYMENT $28.95
+======================================== */
+app.post("/api/stripe/one-time-28-95", async (req, res) => {
+  try {
+    const { name, email, phone, address, paymentMethodId } = req.body;
+
+    if (!paymentMethodId) {
+      return res.status(400).json({ error: "Missing paymentMethodId" });
+    }
+
+    const intent = await stripe.paymentIntents.create({
+      amount: Math.round(28.95 * 100), // $28.95 in cents
+      currency: "usd",
+      payment_method: paymentMethodId,
+      confirmation_method: "automatic",
+      confirm: false,
+      receipt_email: sanitize(email),
+      description: "One-time purchase: $28.95",
+      metadata: {
+        customer_name: sanitize(name),
+        customer_phone: sanitize(phone),
+      },
+      shipping: {
+        name: sanitize(name),
+        phone: sanitize(phone),
+        address: {
+          line1: sanitize(address?.line1),
+          postal_code: sanitize(address?.postal_code),
+          city: sanitize(address?.city),
+          country: sanitize(address?.country),
+        },
+      },
+    });
+
+    res.json({ clientSecret: intent.client_secret });
+  } catch (err) {
+    console.error("Stripe $28.95 payment error:", err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+
 
 
 /* ========================================
