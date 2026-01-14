@@ -7,6 +7,8 @@ import { fileURLToPath } from "url";
 import paypal from "@paypal/paypal-server-sdk";
 import orderNumberPkg from "./orderNumber.js";
 const { getNextOrderNumber } = orderNumberPkg;
+import fs from "fs";
+
 
 
 const app = express();
@@ -36,6 +38,27 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 function sanitize(str) {
   return typeof str === "string" ? str.trim() : undefined;
 }
+
+function formatOrderDate(date) {
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function getDeliveryRange(date) {
+  const start = new Date(date);
+  start.setDate(start.getDate() + 13);
+
+  const end = new Date(date);
+  end.setDate(end.getDate() + 17);
+
+  const month = start.toLocaleDateString("en-US", { month: "long" });
+  return `${month} ${start.getDate()}–${end.getDate()}`;
+}
+
 
 /* ========================================
    PAYPAL CLIENT SETUP
@@ -509,7 +532,7 @@ app.get("/test-order-number", (req, res) => {
 app.post(
   "/api/stripe/webhook",
   express.raw({ type: "application/json" }),
-  (req, res) => {
+  async (req, res) => {
     const sig = req.headers["stripe-signature"];
     let event;
 
@@ -526,17 +549,81 @@ app.post(
 
     // We only care about successful payments
     if (event.type === "payment_intent.succeeded") {
-      const intent = event.data.object;
+  const intent = event.data.object;
 
-      // Get next order number
-      const orderNumber = getNextOrderNumber();
+  const orderNumber = getNextOrderNumber();
+  const orderDate = new Date();
+  const deliveryRange = getDeliveryRange(orderDate);
 
-      console.log("✅ PAYMENT SUCCEEDED");
-      console.log("Order number:", orderNumber);
-      console.log("Amount:", intent.amount_received / 100);
-      console.log("Customer name:", intent.shipping?.name);
-      console.log("Shipping address:", intent.shipping?.address);
+  const { PDFDocument, rgb } = await import("pdf-lib");
+
+  // Paths
+  const templatePath = path.join(
+    __dirname,
+    "public",
+    "pdf-templates",
+    "2895.pdf"
+  );
+
+  const ordersDir = path.join(__dirname, "orders");
+  const outputPath = path.join(ordersDir, `order-${orderNumber}.pdf`);
+
+  // Ensure /orders exists
+  if (!fs.existsSync(ordersDir)) {
+    fs.mkdirSync(ordersDir);
+  }
+
+  // Load template
+  const templateBytes = fs.readFileSync(templatePath);
+  const pdfDoc = await PDFDocument.load(templateBytes);
+  const page = pdfDoc.getPages()[0];
+
+  const textColor = rgb(0.35, 0.35, 0.35);
+
+  // Order number (top right + header)
+  page.drawText(String(orderNumber), { x: 430, y: 760, size: 12, color: textColor });
+  page.drawText(String(orderNumber), { x: 180, y: 735, size: 10, color: textColor });
+
+  // Order date
+  page.drawText(formatOrderDate(orderDate), {
+    x: 80,
+    y: 715,
+    size: 10,
+    color: textColor,
+  });
+
+  // Delivery range
+  page.drawText(deliveryRange, {
+    x: 80,
+    y: 690,
+    size: 10,
+    color: textColor,
+  });
+
+  // Shipping address
+  const ship = intent.shipping;
+  if (ship && ship.address) {
+    const lines = [
+      ship.name,
+      ship.address.line1,
+      `${ship.address.city}, ${ship.address.postal_code}`,
+      ship.address.country,
+    ];
+
+    let y = 520;
+    for (const line of lines) {
+      if (!line) continue;
+      page.drawText(line, { x: 80, y, size: 10, color: textColor });
+      y -= 14;
     }
+  }
+
+  const pdfBytes = await pdfDoc.save();
+  fs.writeFileSync(outputPath, pdfBytes);
+
+  console.log(`📄 PDF created: orders/order-${orderNumber}.pdf`);
+}
+
 
     res.json({ received: true });
   }
@@ -547,6 +634,61 @@ app.post(
    START SERVER
 ======================================== */
 const PORT = process.env.PORT || 10000;
+app.get("/admin/orders", (req, res) => {
+  const password = req.query.password;
+
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).send("Unauthorized");
+  }
+
+  const ordersDir = path.join(__dirname, "orders");
+
+  if (!fs.existsSync(ordersDir)) {
+    return res.send("<h1>No orders yet</h1>");
+  }
+
+  const files = fs
+    .readdirSync(ordersDir)
+    .filter(file => file.endsWith(".pdf"));
+
+  let html = `
+    <h1>Order PDFs</h1>
+    <ul>
+  `;
+
+  for (const file of files) {
+    html += `
+      <li>
+        ${file}
+        <a href="/admin/orders/download/${file}?password=${password}">
+          [Download]
+        </a>
+      </li>
+    `;
+  }
+
+  html += "</ul>";
+
+  res.send(html);
+});
+
+app.get("/admin/orders/download/:filename", (req, res) => {
+  const password = req.query.password;
+
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).send("Unauthorized");
+  }
+
+  const filePath = path.join(__dirname, "orders", req.params.filename);
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).send("File not found");
+  }
+
+  res.download(filePath);
+});
+
+
 app.listen(PORT, () =>
   console.log(`Server running on port ${PORT}`)
 );
