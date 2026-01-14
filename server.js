@@ -5,7 +5,8 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import paypal from "@paypal/paypal-server-sdk";
-import { getNextOrderNumber } from "./orderNumber.js";
+import orderNumberPkg from "./orderNumber.js";
+const { getNextOrderNumber } = orderNumberPkg;
 
 
 const app = express();
