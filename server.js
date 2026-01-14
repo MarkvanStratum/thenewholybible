@@ -5,6 +5,8 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import paypal from "@paypal/paypal-server-sdk";
+import { getNextOrderNumber } from "./orderNumber.js";
+
 
 const app = express();
 app.use(express.json());
@@ -482,6 +484,15 @@ app.post('/api/airwallex/create-payment-intent', async (req, res) => {
 app.get("/health", (req, res) => {
   res.json({ status: "Payment server running (Stripe + Airwallex + PayPal)" });
 });
+
+/* ========================================
+   TEST ORDER NUMBER (TEMP)
+======================================== */
+app.get("/test-order-number", (req, res) => {
+  const number = getNextOrderNumber();
+  res.send(`Next order number is ${number}`);
+});
+
 
 /* ========================================
    START SERVER
