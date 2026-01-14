@@ -1,13 +1,9 @@
-
-Put **exactly this** inside:
-
-```js
-import fs from "fs";
-import path from "path";
+const fs = require("fs");
+const path = require("path");
 
 const COUNTER_PATH = path.join(process.cwd(), "data", "order-counter.json");
 
-export function getNextOrderNumber() {
+function getNextOrderNumber() {
   const data = JSON.parse(fs.readFileSync(COUNTER_PATH, "utf8"));
   const nextNumber = data.lastOrderNumber + 1;
 
@@ -18,3 +14,7 @@ export function getNextOrderNumber() {
 
   return nextNumber;
 }
+
+module.exports = {
+  getNextOrderNumber
+};
