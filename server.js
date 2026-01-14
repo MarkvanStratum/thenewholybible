@@ -10,7 +10,14 @@ const { getNextOrderNumber } = orderNumberPkg;
 
 
 const app = express();
-app.use(express.json());
+app.use((req, res, next) => {
+  if (req.originalUrl === "/api/stripe/webhook") {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
+
 app.use(cors());
 
 // Enable __dirname for ES modules
@@ -493,6 +500,47 @@ app.get("/test-order-number", (req, res) => {
   const number = getNextOrderNumber();
   res.send(`Next order number is ${number}`);
 });
+
+/* ========================================
+   STRIPE WEBHOOK
+======================================== */
+
+// Stripe requires the raw body for webhooks
+app.post(
+  "/api/stripe/webhook",
+  express.raw({ type: "application/json" }),
+  (req, res) => {
+    const sig = req.headers["stripe-signature"];
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+    } catch (err) {
+      console.error("Webhook signature verification failed:", err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // We only care about successful payments
+    if (event.type === "payment_intent.succeeded") {
+      const intent = event.data.object;
+
+      // Get next order number
+      const orderNumber = getNextOrderNumber();
+
+      console.log("✅ PAYMENT SUCCEEDED");
+      console.log("Order number:", orderNumber);
+      console.log("Amount:", intent.amount_received / 100);
+      console.log("Customer name:", intent.shipping?.name);
+      console.log("Shipping address:", intent.shipping?.address);
+    }
+
+    res.json({ received: true });
+  }
+);
 
 
 /* ========================================
