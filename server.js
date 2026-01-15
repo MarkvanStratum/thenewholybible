@@ -159,7 +159,6 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
     const { name, email, phone, address, paymentMethodId } = req.body;
 
     const intent = await stripe.paymentIntents.create({
-
       amount: Math.round(23.95 * 100),
       currency: "usd",
       payment_method: paymentMethodId,
@@ -172,20 +171,19 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
         customer_phone: sanitize(phone),
       },
       shipping: address ? {
-  name: sanitize(name),
-  phone: sanitize(phone),
-  address: {
-    line1: sanitize(address.line1),
-    line2: sanitize(address.line2),
-    city: sanitize(address.city),
-    postal_code: sanitize(address.postal_code),
-    country: sanitize(address.country),
-  }
-} : undefined,
+        name: sanitize(name),
+        phone: sanitize(phone),
+        address: {
+          line1: sanitize(address.line1),
+          line2: sanitize(address.line2),
+          city: sanitize(address.city),
+          postal_code: sanitize(address.postal_code),
+          country: sanitize(address.country),
+        }
+      } : undefined,
+    });
 
-});
-
- res.json({ clientSecret: intent.client_secret });
+    res.json({ clientSecret: intent.client_secret });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -643,16 +641,6 @@ if (ship && ship.address) {
   }
 }
 
-
-        let y = page2Height - 9.0 * cm;
-        const x = 3.0 * cm;
-
-        for (const line of addressLines) {
-          if (!line) continue;
-          page2.drawText(line, { x, y, size: 10, color: textColor });
-          y -= 0.55 * cm;
-        }
-      }
 
       const pdfBytes = await pdfDoc.save();
       fs.writeFileSync(outputPath, pdfBytes);
