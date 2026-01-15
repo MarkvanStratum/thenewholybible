@@ -717,14 +717,24 @@ const x = 117;
       const pdfBytes = await pdfDoc.save();
       const fileName = `order-${orderNumber}.pdf`;
 
-await r2.send(
-  new PutObjectCommand({
-    Bucket: process.env.R2_BUCKET_NAME,
-    Key: fileName,
-    Body: pdfBytes,
-    ContentType: "application/pdf",
-  })
-);
+try {
+  console.log("🚀 Attempting R2 upload:", fileName);
+
+  await r2.send(
+    new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME,
+      Key: fileName,
+      Body: pdfBytes,
+      ContentType: "application/pdf",
+    })
+  );
+
+  console.log("✅ PDF UPLOADED TO R2:", fileName);
+} catch (r2Error) {
+  console.error("❌ R2 UPLOAD FAILED:", r2Error);
+  // DO NOT throw
+  // Webhook must still return 200 to Stripe
+}
 
 console.log("✅ PDF UPLOADED TO R2:", fileName);
 
