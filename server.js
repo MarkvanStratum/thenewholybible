@@ -556,6 +556,13 @@ if (event.type === "payment_intent.succeeded") {
 const intent = event.data.object;
 const orderNumber = getNextOrderNumber();
 const orderDate = new Date(intent.created * 1000);
+const templatePath = path.join(
+  __dirname,
+  "public",
+  "pdf-templates",
+  "2895.pdf"
+);
+
 
 
 
