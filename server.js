@@ -159,6 +159,7 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
     const { name, email, phone, address, paymentMethodId } = req.body;
 
     const intent = await stripe.paymentIntents.create({
+
       amount: Math.round(23.95 * 100),
       currency: "usd",
       payment_method: paymentMethodId,
@@ -180,15 +181,15 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
     postal_code: sanitize(address.postal_code),
     country: sanitize(address.country),
   },
-} : undefined,
+},
 });
-res.json({ clientSecret: intent.client_secret });
 
-
+ res.json({ clientSecret: intent.client_secret });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
+
 
 /* ========================================
    STRIPE: ONE-TIME PAYMENT $33.95
@@ -197,7 +198,7 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
   try {
     const { name, email, phone, address, paymentMethodId } = req.body;
 
-    const intent = await stripe.paymentIntents.create({
+    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   const intent = await stripe.paymentIntents.create({
       amount: Math.round(33.95 * 100),
       currency: "usd",
       payment_method: paymentMethodId,
@@ -608,14 +609,39 @@ app.post("/api/stripe/webhook", async (req, res) => {
         color: textColor,
       });
 
-      const ship = intent.shipping;
-      if (ship && ship.address) {
-        const addressLines = [
-          ship.name,
-          ship.address.line1,
-          `${ship.address.city}, ${ship.address.postal_code}`,
-          ship.address.country,
-        ];
+      // 1️⃣ Prefer shipping address
+let ship = intent.shipping;
+
+// 2️⃣ Fallback to billing address if shipping is missing
+if (!ship) {
+  const charge = intent.charges?.data?.[0];
+  if (charge?.billing_details?.address) {
+    ship = {
+      name: charge.billing_details.name,
+      address: charge.billing_details.address,
+    };
+  }
+}
+
+// 3️⃣ Draw address if we have one
+if (ship && ship.address) {
+  const addressLines = [
+    ship.name,
+    ship.address.line1,
+    ship.address.line2,
+    `${ship.address.city}, ${ship.address.postal_code}`,
+    ship.address.country,
+  ].filter(Boolean);
+
+  let y = page2Height - 9.0 * cm;
+  const x = 3.0 * cm;
+
+  for (const line of addressLines) {
+    page2.drawText(line, { x, y, size: 10, color: textColor });
+    y -= 0.55 * cm;
+  }
+}
+
 
         let y = page2Height - 9.0 * cm;
         const x = 3.0 * cm;
