@@ -170,19 +170,21 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
         customer_name: sanitize(name),
         customer_phone: sanitize(phone),
       },
-      shipping: {
-        name: sanitize(name),
-        phone: sanitize(phone),
-        address: {
-          line1: sanitize(address?.line1),
-          postal_code: sanitize(address?.postal_code),
-          city: sanitize(address?.city),
-          country: sanitize(address?.country),
-        },
-      },
-    });
+      shipping: address ? {
+  name: sanitize(name),
+  phone: sanitize(phone),
+  address: {
+    line1: sanitize(address.line1),
+    line2: sanitize(address.line2),
+    city: sanitize(address.city),
+    postal_code: sanitize(address.postal_code),
+    country: sanitize(address.country),
+  },
+} : undefined,
+});
+res.json({ clientSecret: intent.client_secret });
 
-    res.json({ clientSecret: intent.client_secret });
+
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
