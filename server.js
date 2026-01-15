@@ -9,6 +9,8 @@ import orderNumberPkg from "./orderNumber.js";
 const { getNextOrderNumber } = orderNumberPkg;
 import fs from "fs";
 import { PDFDocument, rgb } from "pdf-lib";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+
 
 
 
@@ -60,6 +62,14 @@ function formatShortDate(date) {
   });
 }
 
+const r2 = new S3Client({
+  region: "auto",
+  endpoint: process.env.R2_ENDPOINT,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  },
+});
 
 
 function getDeliveryRange(date) {
@@ -577,12 +587,7 @@ app.post("/api/stripe/webhook", async (req, res) => {
         "2895.pdf"
       );
 
-      const ordersDir = path.join(__dirname, "orders");
-      if (!fs.existsSync(ordersDir)) {
-        fs.mkdirSync(ordersDir);
-      }
-
-      const outputPath = path.join(ordersDir, `order-${orderNumber}.pdf`);
+      
 
       const templateBytes = fs.readFileSync(templatePath);
       const pdfDoc = await PDFDocument.load(templateBytes);
@@ -643,6 +648,16 @@ page1.drawText(getDeliveryRange(orderDate), {
   color: textColor,
 });
 
+// ORDER NUMBER INSIDE "Order ___ for your store..." SENTENCE
+page1.drawText(`#${orderNumber}`, {
+  x: 150,      // horizontal position of the blank space
+  y: 355,      // vertical position of that sentence
+  size: 10,
+  color: textColor,
+  characterSpacing: -0.2,
+});
+
+
 
 
 
@@ -675,18 +690,19 @@ if (billing && billing.address) {
   const pageWidth = page2.getWidth();
   const pageHeight = page2.getHeight();
 
-  let y = 665;
+  let y = 640;
 const x = 117;
 
 
   for (const line of addressLines) {
     page2.drawText(line, {
-      x,
-      y,
-       size: 10,
-color: textColor, // BIG RED
-    });
-    y -= 14;
+  x,
+  y,
+  size: 10,
+  color: textColor,
+  characterSpacing: -0.2,
+});
+    y -= 12;
   }
 } else {
   page2.drawText("NO BILLING ADDRESS FOUND", {
@@ -699,10 +715,21 @@ color: textColor, // BIG RED
 
 
       const pdfBytes = await pdfDoc.save();
-      fs.writeFileSync(outputPath, pdfBytes);
+      const fileName = `order-${orderNumber}.pdf`;
 
-      console.log("✅ PDF CREATED:", outputPath);
-    }
+await r2.send(
+  new PutObjectCommand({
+    Bucket: process.env.R2_BUCKET_NAME,
+    Key: fileName,
+    Body: pdfBytes,
+    ContentType: "application/pdf",
+  })
+);
+
+console.log("✅ PDF UPLOADED TO R2:", fileName);
+
+
+          }
 
     res.json({ received: true });
   } catch (err) {
