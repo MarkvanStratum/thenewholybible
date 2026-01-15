@@ -652,26 +652,6 @@ if (billing && billing.address) {
 }
 
 
-// 3️⃣ Draw address if we have one
-if (ship && ship.address) {
-  const addressLines = [
-    ship.name,
-    ship.address.line1,
-    ship.address.line2,
-    `${ship.address.city}, ${ship.address.postal_code}`,
-    ship.address.country,
-  ].filter(Boolean);
-
-  let y = page2Height - 9.0 * cm;
-  const x = 3.0 * cm;
-
-  for (const line of addressLines) {
-    page2.drawText(line, { x, y, size: 10, color: textColor });
-    y -= 0.55 * cm;
-  }
-}
-
-
       const pdfBytes = await pdfDoc.save();
       fs.writeFileSync(outputPath, pdfBytes);
 
