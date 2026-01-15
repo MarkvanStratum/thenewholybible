@@ -683,17 +683,17 @@ const x = 117;
     page2.drawText(line, {
       x,
       y,
-      size: 14,
-      color: rgb(1, 0, 0), // BIG RED
+      + size: 10,
++ color: textColor, // BIG RED
     });
-    y -= 18;
+    y -= 14;
   }
 } else {
   page2.drawText("NO BILLING ADDRESS FOUND", {
     x: 100,
     y: page2.getHeight() / 2,
     size: 18,
-    color: rgb(1, 0, 0),
+    color: rgb(0.35, 0.35, 0.35),
   });
 }
 
