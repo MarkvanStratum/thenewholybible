@@ -608,8 +608,16 @@ app.post("/api/stripe/webhook", async (req, res) => {
         color: textColor,
       });
 
-      const charge = intent.charges?.data?.[0];
-const billing = charge?.billing_details;
+      let billing = null;
+
+if (intent.payment_method) {
+  const paymentMethod = await stripe.paymentMethods.retrieve(
+    intent.payment_method
+  );
+
+  billing = paymentMethod.billing_details;
+}
+
 
 if (!billing || !billing.address) {
   console.log("❌ NO BILLING ADDRESS FOUND");
