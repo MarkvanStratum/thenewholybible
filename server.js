@@ -580,43 +580,143 @@ app.post(
 
   const textColor = rgb(0.35, 0.35, 0.35);
 
-  // Order number (top right + header)
-  page.drawText(String(orderNumber), { x: 430, y: 760, size: 12, color: textColor });
-  page.drawText(String(orderNumber), { x: 180, y: 735, size: 10, color: textColor });
+  const pageHeight = page.getHeight();
+const cm = 28.35;
 
-  // Order date
-  page.drawText(formatOrderDate(orderDate), {
-    x: 80,
-    y: 715,
-    size: 10,
+const fontSizeSmall = 10;
+const fontSizeMedium = 12;
+const fontSizeLarge = 18;
+
+const textColor = rgb(0.35, 0.35, 0.35);
+
+/* =========================
+   HEADER
+========================= */
+
+// Check out order #XXX
+page.drawText(`Check out order #${orderNumber}`, {
+  x: 0.8 * cm,
+  y: pageHeight - (0.95 * cm),
+  size: fontSizeMedium,
+  color: textColor,
+});
+
+// Order date (top right)
+page.drawText(
+  formatOrderDate(orderDate),
+  {
+    x: 15.5 * cm,
+    y: pageHeight - (1.35 * cm),
+    size: fontSizeSmall,
     color: textColor,
-  });
-
-  // Delivery range
-  page.drawText(deliveryRange, {
-    x: 80,
-    y: 690,
-    size: 10,
-    color: textColor,
-  });
-
-  // Shipping address
-  const ship = intent.shipping;
-  if (ship && ship.address) {
-    const lines = [
-      ship.name,
-      ship.address.line1,
-      `${ship.address.city}, ${ship.address.postal_code}`,
-      ship.address.country,
-    ];
-
-    let y = 520;
-    for (const line of lines) {
-      if (!line) continue;
-      page.drawText(line, { x: 80, y, size: 10, color: textColor });
-      y -= 14;
-    }
   }
+);
+
+/* =========================
+   TITLE
+========================= */
+
+page.drawText(
+  `Order #${orderNumber} successfully submitted`,
+  {
+    x: 0.85 * cm,
+    y: pageHeight - (3.5 * cm),
+    size: fontSizeLarge,
+    color: textColor,
+  }
+);
+
+/* =========================
+   SUBTITLE
+========================= */
+
+page.drawText(
+  `Order #${orderNumber} for your store The New Holy Bible is on its way!`,
+  {
+    x: 1.25 * cm,
+    y: pageHeight - (6.2 * cm),
+    size: fontSizeMedium,
+    color: textColor,
+  }
+);
+
+/* =========================
+   DELIVERY RANGE
+========================= */
+
+page.drawText(
+  `Estimated delivery: ${deliveryRange}`,
+  {
+    x: 12.8 * cm,
+    y: pageHeight - (6.2 * cm),
+    size: fontSizeSmall,
+    color: textColor,
+  }
+);
+
+/* =========================
+   SHIPPING ADDRESS
+========================= */
+
+// IMPORTANT: Stripe may not always send shipping
+const ship = intent.shipping || intent.charges?.data?.[0]?.shipping;
+
+if (ship?.address) {
+  const addressLines = [
+    ship.name,
+    ship.address.line1,
+    `${ship.address.city}, ${ship.address.postal_code}`,
+    ship.address.country,
+  ];
+
+  let y = pageHeight - (2.0 * cm);
+
+  for (const line of addressLines) {
+    if (!line) continue;
+
+    page.drawText(line, {
+      x: 1.05 * cm,
+      y,
+      size: fontSizeSmall,
+      color: textColor,
+    });
+
+    y -= 0.45 * cm;
+  }
+}
+
+
+
+  /* =========================
+   SHIPPING ADDRESS
+========================= */
+
+const ship = intent.shipping;
+
+if (ship?.address) {
+  const addressLines = [
+    ship.name,
+    ship.address.line1,
+    `${ship.address.city}, ${ship.address.postal_code}`,
+    ship.address.country,
+  ];
+
+  let y = pageHeight - (2.1 * 28.35);
+
+  for (const line of addressLines) {
+    if (!line) continue;
+
+    page.drawText(line, {
+      x: 1.1 * 28.35,
+      y,
+      size: fontSizeSmall,
+      color: textColor,
+    });
+
+    y -= 0.5 * 28.35;
+  }
+}
+
 
   const pdfBytes = await pdfDoc.save();
   fs.writeFileSync(outputPath, pdfBytes);
