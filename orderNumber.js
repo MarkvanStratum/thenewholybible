@@ -10,11 +10,11 @@ function getNextOrderNumber() {
     fs.mkdirSync(dataDir, { recursive: true });
   }
 
-  // If file does not exist, create it starting at 580
+  // If file does not exist, create it starting at 1116
   if (!fs.existsSync(COUNTER_PATH)) {
     fs.writeFileSync(
       COUNTER_PATH,
-      JSON.stringify({ lastOrderNumber: 580 }, null, 2)
+      JSON.stringify({ lastOrderNumber: 1116 }, null, 2)
     );
   }
 
