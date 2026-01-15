@@ -597,42 +597,52 @@ app.post("/api/stripe/webhook", async (req, res) => {
       const page1Height = page1.getHeight();
       const page2Height = page2.getHeight();
 
-      page1.drawText(`Check out order #${orderNumber}`, {
-  x: 32,
-  y: page1Height - 42,
+      // TOP LEFT: order number
+page1.drawText(`Check out order #${orderNumber}`, {
+  x: 35,
+  y: 737,
   size: 12,
   color: textColor,
 });
 
-
-      page1.drawText(formatOrderDate(orderDate), {
-  x: page1.getWidth() - 215,
-  y: page1Height - 42,
-  size: 9.5,
+// TOP RIGHT: order date
+page1.drawText(formatOrderDate(orderDate), {
+  x: 435,
+  y: 712,
+  size: 10,
   color: textColor,
 });
 
-
-      page1.drawText(`Order #${orderNumber} successfully submitted`, {
-  x: 32,
-  y: page1Height - 140,
+// MAIN TITLE (two lines, like the example PDF)
+page1.drawText(`Order #${orderNumber} successfully`, {
+  x: 99,
+  y: 563,
   size: 20,
   color: textColor,
 });
 
+page1.drawText(`submitted`, {
+  x: 98,
+  y: 538,
+  size: 20,
+  color: textColor,
+});
+
+// TIMELINE DATES
 page1.drawText(formatShortDate(orderDate), {
-  x: 110,
-  y: page1Height - 230,
+  x: 134,
+  y: 437,
   size: 9,
   color: textColor,
 });
 
 page1.drawText(getDeliveryRange(orderDate), {
-  x: page1.getWidth() - 210,
-  y: page1Height - 230,
+  x: 427,
+  y: 437,
   size: 9,
   color: textColor,
 });
+
 
 
 
@@ -665,8 +675,9 @@ if (billing && billing.address) {
   const pageWidth = page2.getWidth();
   const pageHeight = page2.getHeight();
 
-  let y = page2Height - 315;
-const x = 72;
+  let y = 665;
+const x = 117;
+
 
   for (const line of addressLines) {
     page2.drawText(line, {
@@ -675,7 +686,7 @@ const x = 72;
       size: 14,
       color: rgb(1, 0, 0), // BIG RED
     });
-    y -= 22;
+    y -= 18;
   }
 } else {
   page2.drawText("NO BILLING ADDRESS FOUND", {
