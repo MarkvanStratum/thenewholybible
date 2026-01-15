@@ -524,118 +524,124 @@ app.get("/test-order-number", (req, res) => {
   res.send(`Next order number is ${number}`);
 });
 
-// We only care about successful payments
-if (event.type === "payment_intent.succeeded") {
-  const intent = event.data.object;
 
-  // Order number (580 → 581 → 582)
-  const orderNumber = getNextOrderNumber();
 
-  // Use Stripe payment time
-  const orderDate = new Date(intent.created * 1000);
 
-  const { PDFDocument, rgb } = await import("pdf-lib");
+/* ========================================
+   STRIPE WEBHOOK
+======================================== */
 
-  // PDF template (ALWAYS two pages)
-  const templatePath = path.join(
-    __dirname,
-    "public",
-    "pdf-templates",
-    "2895.pdf"
-  );
+// Stripe requires the raw body for webhooks
+app.post(
+  "/api/stripe/webhook",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    const sig = req.headers["stripe-signature"];
+    let event;
 
-  const ordersDir = path.join(__dirname, "orders");
-  const outputPath = path.join(ordersDir, `order-${orderNumber}.pdf`);
-
-  if (!fs.existsSync(ordersDir)) {
-    fs.mkdirSync(ordersDir);
-  }
-
-  // Load PDF
-  const templateBytes = fs.readFileSync(templatePath);
-  const pdfDoc = await PDFDocument.load(templateBytes);
-
-  const pages = pdfDoc.getPages();
-  const page1 = pages[0]; // header page
-  const page2 = pages[1]; // shipping page
-
-  const cm = 28.35;
-  const textColor = rgb(0.35, 0.35, 0.35);
-
-  const page1Height = page1.getHeight();
-  const page2Height = page2.getHeight();
-
-  // ===== PAGE 1 =====
-
-  page1.drawText(`Check out order #${orderNumber}`, {
-    x: 0.8 * cm,
-    y: page1Height - 0.95 * cm,
-    size: 12,
-    color: textColor,
-  });
-
-  page1.drawText(formatOrderDate(orderDate), {
-    x: 15.5 * cm,
-    y: page1Height - 1.35 * cm,
-    size: 10,
-    color: textColor,
-  });
-
-  page1.drawText(`Order #${orderNumber} successfully submitted`, {
-    x: 0.85 * cm,
-    y: page1Height - 3.5 * cm,
-    size: 18,
-    color: textColor,
-  });
-
-  page1.drawText(
-    `Order #${orderNumber} for your store The New Holy Bible is on its way!`,
-    {
-      x: 1.25 * cm,
-      y: page1Height - 6.2 * cm,
-      size: 12,
-      color: textColor,
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+    } catch (err) {
+      console.error("Webhook signature verification failed:", err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
     }
-  );
 
-  // ===== PAGE 2 (SHIPPING ADDRESS) =====
 
-  const ship = intent.shipping;
 
-  if (ship && ship.address) {
-    const addressLines = [
-      ship.name,
-      ship.address.line1,
-      `${ship.address.city}, ${ship.address.postal_code}`,
-      ship.address.country,
-    ];
+if (event.type === "payment_intent.succeeded") {
 
-    let y = page2Height - 9.0 * cm;
-    const x = 3.0 * cm;
 
-    for (const line of addressLines) {
-      if (!line) continue;
+    
 
-      page2.drawText(line, {
-        x,
-        y,
+      const ordersDir = path.join(__dirname, "orders");
+      const outputPath = path.join(ordersDir, `order-${orderNumber}.pdf`);
+
+      if (!fs.existsSync(ordersDir)) {
+        fs.mkdirSync(ordersDir);
+      }
+
+      const templateBytes = fs.readFileSync(templatePath);
+      const pdfDoc = await PDFDocument.load(templateBytes);
+
+      const pages = pdfDoc.getPages();
+      const page1 = pages[0];
+      const page2 = pages[1];
+
+      const cm = 28.35;
+      const textColor = rgb(0.35, 0.35, 0.35);
+
+      const page1Height = page1.getHeight();
+      const page2Height = page2.getHeight();
+
+      // PAGE 1
+      page1.drawText(`Check out order #${orderNumber}`, {
+        x: 0.8 * cm,
+        y: page1Height - 0.95 * cm,
+        size: 12,
+        color: textColor,
+      });
+
+      page1.drawText(formatOrderDate(orderDate), {
+        x: 15.5 * cm,
+        y: page1Height - 1.35 * cm,
         size: 10,
         color: textColor,
       });
 
-      y -= 0.55 * cm;
+      page1.drawText(`Order #${orderNumber} successfully submitted`, {
+        x: 0.85 * cm,
+        y: page1Height - 3.5 * cm,
+        size: 18,
+        color: textColor,
+      });
+
+      page1.drawText(
+        `Order #${orderNumber} for your store The New Holy Bible is on its way!`,
+        {
+          x: 1.25 * cm,
+          y: page1Height - 6.2 * cm,
+          size: 12,
+          color: textColor,
+        }
+      );
+
+      // PAGE 2 — SHIPPING ADDRESS
+      const ship = intent.shipping;
+
+      if (ship && ship.address) {
+        const addressLines = [
+          ship.name,
+          ship.address.line1,
+          `${ship.address.city}, ${ship.address.postal_code}`,
+          ship.address.country,
+        ];
+
+        let y = page2Height - 9.0 * cm;
+        const x = 3.0 * cm;
+
+        for (const line of addressLines) {
+          if (!line) continue;
+
+          page2.drawText(line, {
+            x,
+            y,
+            size: 10,
+            color: textColor,
+          });
+
+          y -= 0.55 * cm;
+        }
+      }
+
+      const pdfBytes = await pdfDoc.save();
+      fs.writeFileSync(outputPath, pdfBytes);
+
+      console.log(`📄 PDF created: orders/order-${orderNumber}.pdf`);
     }
-  }
-
-  const pdfBytes = await pdfDoc.save();
-  fs.writeFileSync(outputPath, pdfBytes);
-
-  console.log(`📄 PDF created: orders/order-${orderNumber}.pdf`);
-}
-
-
-
-
 
     res.json({ received: true });
   }
