@@ -43,6 +43,7 @@ function sanitize(str) {
   return typeof str === "string" ? str.trim() : undefined;
 }
 
+
 function formatOrderDate(date) {
   return date.toLocaleDateString("en-US", {
     weekday: "long",
@@ -51,6 +52,15 @@ function formatOrderDate(date) {
     year: "numeric",
   });
 }
+
+function formatShortDate(date) {
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+
 
 function getDeliveryRange(date) {
   const start = new Date(date);
@@ -588,25 +598,43 @@ app.post("/api/stripe/webhook", async (req, res) => {
       const page2Height = page2.getHeight();
 
       page1.drawText(`Check out order #${orderNumber}`, {
-        x: 0.8 * cm,
-        y: page1Height - 0.95 * cm,
-        size: 12,
-        color: textColor,
-      });
+  x: 32,
+  y: page1Height - 42,
+  size: 12,
+  color: textColor,
+});
+
 
       page1.drawText(formatOrderDate(orderDate), {
-        x: 15.5 * cm,
-        y: page1Height - 1.35 * cm,
-        size: 10,
-        color: textColor,
-      });
+  x: page1.getWidth() - 215,
+  y: page1Height - 42,
+  size: 9.5,
+  color: textColor,
+});
+
 
       page1.drawText(`Order #${orderNumber} successfully submitted`, {
-        x: 0.85 * cm,
-        y: page1Height - 3.5 * cm,
-        size: 18,
-        color: textColor,
-      });
+  x: 32,
+  y: page1Height - 140,
+  size: 20,
+  color: textColor,
+});
+
+page1.drawText(formatShortDate(orderDate), {
+  x: 110,
+  y: page1Height - 230,
+  size: 9,
+  color: textColor,
+});
+
+page1.drawText(getDeliveryRange(orderDate), {
+  x: page1.getWidth() - 210,
+  y: page1Height - 230,
+  size: 9,
+  color: textColor,
+});
+
+
 
       let billing = null;
 
@@ -627,7 +655,6 @@ if (!billing || !billing.address) {
 
 if (billing && billing.address) {
   const addressLines = [
-    "BILLING ADDRESS (USED AS SHIPPING)",
     billing.name,
     billing.address.line1,
     billing.address.line2,
@@ -638,8 +665,8 @@ if (billing && billing.address) {
   const pageWidth = page2.getWidth();
   const pageHeight = page2.getHeight();
 
-  let y = pageHeight / 2;
-  const x = pageWidth / 2 - 180;
+  let y = page2Height - 315;
+const x = 72;
 
   for (const line of addressLines) {
     page2.drawText(line, {
