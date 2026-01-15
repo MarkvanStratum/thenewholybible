@@ -608,19 +608,49 @@ app.post("/api/stripe/webhook", async (req, res) => {
         color: textColor,
       });
 
-      // 1️⃣ Prefer shipping address
-let ship = intent.shipping;
+      const charge = intent.charges?.data?.[0];
+const billing = charge?.billing_details;
 
-// 2️⃣ Fallback to billing address if shipping is missing
-if (!ship) {
-  const charge = intent.charges?.data?.[0];
-  if (charge?.billing_details?.address) {
-    ship = {
-      name: charge.billing_details.name,
-      address: charge.billing_details.address,
-    };
-  }
+if (!billing || !billing.address) {
+  console.log("❌ NO BILLING ADDRESS FOUND");
+} else {
+  console.log("✅ BILLING ADDRESS FOUND:", billing);
 }
+
+if (billing && billing.address) {
+  const addressLines = [
+    "BILLING ADDRESS (USED AS SHIPPING)",
+    billing.name,
+    billing.address.line1,
+    billing.address.line2,
+    `${billing.address.city}, ${billing.address.postal_code}`,
+    billing.address.country,
+  ].filter(Boolean);
+
+  const pageWidth = page2.getWidth();
+  const pageHeight = page2.getHeight();
+
+  let y = pageHeight / 2;
+  const x = pageWidth / 2 - 180;
+
+  for (const line of addressLines) {
+    page2.drawText(line, {
+      x,
+      y,
+      size: 14,
+      color: rgb(1, 0, 0), // BIG RED
+    });
+    y -= 22;
+  }
+} else {
+  page2.drawText("NO BILLING ADDRESS FOUND", {
+    x: 100,
+    y: page2.getHeight() / 2,
+    size: 18,
+    color: rgb(1, 0, 0),
+  });
+}
+
 
 // 3️⃣ Draw address if we have one
 if (ship && ship.address) {
