@@ -553,6 +553,10 @@ app.post(
 
 
 if (event.type === "payment_intent.succeeded") {
+const intent = event.data.object;
+const orderNumber = getNextOrderNumber();
+const orderDate = new Date(intent.created * 1000);
+
 
 
     
