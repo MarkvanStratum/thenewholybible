@@ -180,8 +180,9 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
     city: sanitize(address.city),
     postal_code: sanitize(address.postal_code),
     country: sanitize(address.country),
-  },
-},
+  }
+} : undefined,
+
 });
 
  res.json({ clientSecret: intent.client_secret });
@@ -198,7 +199,7 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
   try {
     const { name, email, phone, address, paymentMethodId } = req.body;
 
-    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   const intent = await stripe.paymentIntents.create({
+      const intent = await stripe.paymentIntents.create({
       amount: Math.round(33.95 * 100),
       currency: "usd",
       payment_method: paymentMethodId,
