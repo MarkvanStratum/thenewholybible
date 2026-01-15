@@ -683,8 +683,8 @@ const x = 117;
     page2.drawText(line, {
       x,
       y,
-      + size: 10,
-+ color: textColor, // BIG RED
+       size: 10,
+color: textColor, // BIG RED
     });
     y -= 14;
   }
