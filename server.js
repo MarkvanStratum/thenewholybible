@@ -8,17 +8,21 @@ import paypal from "@paypal/paypal-server-sdk";
 import orderNumberPkg from "./orderNumber.js";
 const { getNextOrderNumber } = orderNumberPkg;
 import fs from "fs";
+import { PDFDocument, rgb } from "pdf-lib";
+
 
 
 
 const app = express();
-app.use((req, res, next) => {
-  if (req.originalUrl === "/api/stripe/webhook") {
-    next();
-  } else {
-    express.json()(req, res, next);
+// JSON parser for all NON-webhook routes
+app.use(express.json({
+  verify: (req, res, buf) => {
+    if (req.originalUrl.startsWith("/api/stripe/webhook")) {
+      req.rawBody = buf;
+    }
   }
-});
+}));
+
 
 app.use(cors());
 
@@ -532,48 +536,41 @@ app.get("/test-order-number", (req, res) => {
 ======================================== */
 
 // Stripe requires the raw body for webhooks
-app.post(
-  "/api/stripe/webhook",
-  express.raw({ type: "application/json" }),
-  async (req, res) => {
-    const sig = req.headers["stripe-signature"];
-    let event;
+app.post("/api/stripe/webhook", async (req, res) => {
+  const sig = req.headers["stripe-signature"];
+  let event;
 
-    try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        process.env.STRIPE_WEBHOOK_SECRET
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.rawBody,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (err) {
+    console.error("❌ Webhook signature verification failed:", err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  try {
+    if (event.type === "payment_intent.succeeded") {
+      const intent = event.data.object;
+
+      const orderNumber = getNextOrderNumber();
+      const orderDate = new Date(intent.created * 1000);
+
+      const templatePath = path.join(
+        __dirname,
+        "public",
+        "pdf-templates",
+        "2895.pdf"
       );
-    } catch (err) {
-      console.error("Webhook signature verification failed:", err.message);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-
-
-if (event.type === "payment_intent.succeeded") {
-const intent = event.data.object;
-const orderNumber = getNextOrderNumber();
-const orderDate = new Date(intent.created * 1000);
-const templatePath = path.join(
-  __dirname,
-  "public",
-  "pdf-templates",
-  "2895.pdf"
-);
-
-
-
-
-    
 
       const ordersDir = path.join(__dirname, "orders");
-      const outputPath = path.join(ordersDir, `order-${orderNumber}.pdf`);
-
       if (!fs.existsSync(ordersDir)) {
         fs.mkdirSync(ordersDir);
       }
+
+      const outputPath = path.join(ordersDir, `order-${orderNumber}.pdf`);
 
       const templateBytes = fs.readFileSync(templatePath);
       const pdfDoc = await PDFDocument.load(templateBytes);
@@ -588,7 +585,6 @@ const templatePath = path.join(
       const page1Height = page1.getHeight();
       const page2Height = page2.getHeight();
 
-      // PAGE 1
       page1.drawText(`Check out order #${orderNumber}`, {
         x: 0.8 * cm,
         y: page1Height - 0.95 * cm,
@@ -610,19 +606,7 @@ const templatePath = path.join(
         color: textColor,
       });
 
-      page1.drawText(
-        `Order #${orderNumber} for your store The New Holy Bible is on its way!`,
-        {
-          x: 1.25 * cm,
-          y: page1Height - 6.2 * cm,
-          size: 12,
-          color: textColor,
-        }
-      );
-
-      // PAGE 2 — SHIPPING ADDRESS
       const ship = intent.shipping;
-
       if (ship && ship.address) {
         const addressLines = [
           ship.name,
@@ -636,14 +620,7 @@ const templatePath = path.join(
 
         for (const line of addressLines) {
           if (!line) continue;
-
-          page2.drawText(line, {
-            x,
-            y,
-            size: 10,
-            color: textColor,
-          });
-
+          page2.drawText(line, { x, y, size: 10, color: textColor });
           y -= 0.55 * cm;
         }
       }
@@ -651,12 +628,16 @@ const templatePath = path.join(
       const pdfBytes = await pdfDoc.save();
       fs.writeFileSync(outputPath, pdfBytes);
 
-      console.log(`📄 PDF created: orders/order-${orderNumber}.pdf`);
+      console.log("✅ PDF CREATED:", outputPath);
     }
 
     res.json({ received: true });
+  } catch (err) {
+    console.error("❌ Webhook processing error:", err);
+    res.status(500).send("Webhook handler error");
   }
-);
+});
+
 
 
 /* ========================================
