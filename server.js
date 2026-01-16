@@ -577,7 +577,7 @@ app.post("/api/stripe/webhook", async (req, res) => {
     if (event.type === "payment_intent.succeeded") {
       const intent = event.data.object;
 
-      const orderNumber = getNextOrderNumber();
+      const orderNumber = await getNextOrderNumber();
       const orderDate = new Date(intent.created * 1000);
 
       const templatePath = path.join(
@@ -650,8 +650,8 @@ page1.drawText(getDeliveryRange(orderDate), {
 
 // ORDER NUMBER — precisely aligned inside sentence
 page1.drawText(`#${orderNumber}`, {
-  x: 92,    // more LEFT
-  y: 392,   // more UP
+  x: 110,    // more LEFT
+  y: 362,   // more UP
   size: 10,
   color: textColor,
   characterSpacing: -0.4,
