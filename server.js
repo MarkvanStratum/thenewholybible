@@ -650,8 +650,8 @@ page1.drawText(getDeliveryRange(orderDate), {
 
 // ORDER NUMBER INSIDE "Order ___ for your store..." SENTENCE
 page1.drawText(`#${orderNumber}`, {
-  x: 122,   // move LEFT
-  y: 368,   // move UP
+  x: 110,   // move more left
+  y: 380,   // move more up
   size: 10,
   color: textColor,
   characterSpacing: -0.2,
