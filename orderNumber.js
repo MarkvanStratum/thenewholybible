@@ -14,7 +14,7 @@ function getNextOrderNumber() {
   if (!fs.existsSync(COUNTER_PATH)) {
     fs.writeFileSync(
       COUNTER_PATH,
-      JSON.stringify({ lastOrderNumber: 1116 }, null, 2)
+      JSON.stringify({ lastOrderNumber: 1137 }, null, 2)
     );
   }
 
