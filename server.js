@@ -692,7 +692,7 @@ if (billing && billing.address) {
   const pageHeight = page2.getHeight();
 
   // SHIPPING ADDRESS — aligned to template box
-let y = 600;   // top of your black rectangle
+let y = 550;   // top of your black rectangle
 const x = 96;  // left edge of your black rectangle
 
 for (const line of addressLines) {
