@@ -691,22 +691,20 @@ if (billing && billing.address) {
   const pageWidth = page2.getWidth();
   const pageHeight = page2.getHeight();
 
-  // SHIPPING ADDRESS — aligned to template box
-let y = 550;   // top of your black rectangle
-const x = 96;  // left edge of your black rectangle
+  let y = 640;
+const x = 117;
 
-for (const line of addressLines) {
-  page2.drawText(line, {
-    x,
-    y,
-    size: 10,
-    color: textColor,
-    characterSpacing: -0.4,
-    lineHeight: 12,
-  });
-  y -= 12;
-}
 
+  for (const line of addressLines) {
+    page2.drawText(line, {
+  x,
+  y,
+  size: 10,
+  color: textColor,
+  characterSpacing: -0.2,
+});
+    y -= 12;
+  }
 } else {
   page2.drawText("NO BILLING ADDRESS FOUND", {
     x: 100,
