@@ -691,7 +691,7 @@ if (billing && billing.address) {
   const pageWidth = page2.getWidth();
   const pageHeight = page2.getHeight();
 
-  let y = 650;
+  let y = 670;
 const x = 117;
 
 
