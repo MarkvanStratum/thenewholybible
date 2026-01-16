@@ -648,14 +648,15 @@ page1.drawText(getDeliveryRange(orderDate), {
   color: textColor,
 });
 
-// ORDER NUMBER INSIDE "Order ___ for your store..." SENTENCE
+// ORDER NUMBER — precisely aligned inside sentence
 page1.drawText(`#${orderNumber}`, {
-  x: 110,   // move more left
-  y: 380,   // move more up
+  x: 92,    // more LEFT
+  y: 392,   // more UP
   size: 10,
   color: textColor,
-  characterSpacing: -0.2,
+  characterSpacing: -0.4,
 });
+
 
 
 
@@ -690,20 +691,22 @@ if (billing && billing.address) {
   const pageWidth = page2.getWidth();
   const pageHeight = page2.getHeight();
 
-  let y = 640;
-const x = 117;
+  // SHIPPING ADDRESS — aligned to template box
+let y = 612;   // top of your black rectangle
+const x = 96;  // left edge of your black rectangle
 
+for (const line of addressLines) {
+  page2.drawText(line, {
+    x,
+    y,
+    size: 10,
+    color: textColor,
+    characterSpacing: -0.4,
+    lineHeight: 12,
+  });
+  y -= 12;
+}
 
-  for (const line of addressLines) {
-    page2.drawText(line, {
-  x,
-  y,
-  size: 10,
-  color: textColor,
-  characterSpacing: -0.2,
-});
-    y -= 12;
-  }
 } else {
   page2.drawText("NO BILLING ADDRESS FOUND", {
     x: 100,
