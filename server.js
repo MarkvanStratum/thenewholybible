@@ -641,7 +641,7 @@ page1.drawText(formatShortDate(orderDate), {
 });
 
 page1.drawText(getDeliveryRange(orderDate), {
-  x: 427,
+  x: 437,
   y: 437,
   size: 9,
   color: textColor,
