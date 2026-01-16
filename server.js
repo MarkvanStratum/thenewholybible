@@ -5,7 +5,7 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import paypal from "@paypal/paypal-server-sdk";
-import orderNumberPkg from "./orderNumber.js";
+import { getNextOrderNumber } from "./orderNumber.js";
 import fs from "fs";
 import { PDFDocument, rgb } from "pdf-lib";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
