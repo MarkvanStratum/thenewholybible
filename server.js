@@ -72,13 +72,14 @@ const r2 = new S3Client({
 
 
 function getDeliveryRange(date) {
-  const deliveryDate = new Date(date);
-  deliveryDate.setDate(deliveryDate.getDate() + 7);
+  const start = new Date(date);
+  start.setDate(start.getDate() + 13);
 
-  return deliveryDate.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-  });
+  const end = new Date(date);
+  end.setDate(end.getDate() + 17);
+
+  const month = start.toLocaleDateString("en-US", { month: "long" });
+  return `${month} ${start.getDate()}–${end.getDate()}`;
 }
 
 
