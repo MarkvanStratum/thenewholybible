@@ -649,7 +649,7 @@ page1.drawText(getDeliveryRange(orderDate), {
 
 // ORDER NUMBER — precisely aligned inside sentence
 page1.drawText(`#${orderNumber}`, {
-  x: 250,    // more LEFT
+  x: 100,    // more LEFT
   y: 362,   // more UP
   size: 10,
   color: textColor,
