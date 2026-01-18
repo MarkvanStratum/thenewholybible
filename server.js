@@ -623,7 +623,7 @@ console.log(
 
       // TOP LEFT: order number
 page1.drawText(`Check out order #${orderNumber}`, {
-  x: 100,
+  x: 35,
   y: 737,
   size: 12,
   color: textColor,
@@ -639,7 +639,7 @@ page1.drawText(formatOrderDate(orderDate), {
 
 // MAIN TITLE (two lines, like the example PDF)
 page1.drawText(`Order #${orderNumber} successfully`, {
-  x: 99,
+  x: 110,
   y: 563,
   size: 20,
   color: textColor,
