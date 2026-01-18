@@ -5,20 +5,25 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import paypal from "@paypal/paypal-server-sdk";
-import orderNumberPkg from "./orderNumber.js";
-const { getNextOrderNumber } = orderNumberPkg;
+import { getNextOrderNumber } from "./orderNumber.js";
 import fs from "fs";
+import { PDFDocument, rgb } from "pdf-lib";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+
+
 
 
 
 const app = express();
-app.use((req, res, next) => {
-  if (req.originalUrl === "/api/stripe/webhook") {
-    next();
-  } else {
-    express.json()(req, res, next);
+// JSON parser for all NON-webhook routes
+app.use(express.json({
+  verify: (req, res, buf) => {
+    if (req.originalUrl.startsWith("/api/stripe/webhook")) {
+      req.rawBody = buf;
+    }
   }
-});
+}));
+
 
 app.use(cors());
 
@@ -39,6 +44,7 @@ function sanitize(str) {
   return typeof str === "string" ? str.trim() : undefined;
 }
 
+
 function formatOrderDate(date) {
   return date.toLocaleDateString("en-US", {
     weekday: "long",
@@ -48,16 +54,33 @@ function formatOrderDate(date) {
   });
 }
 
-function getDeliveryRange(date) {
-  const start = new Date(date);
-  start.setDate(start.getDate() + 13);
-
-  const end = new Date(date);
-  end.setDate(end.getDate() + 17);
-
-  const month = start.toLocaleDateString("en-US", { month: "long" });
-  return `${month} ${start.getDate()}–${end.getDate()}`;
+function formatShortDate(date) {
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
 }
+
+const r2 = new S3Client({
+  region: "auto",
+  endpoint: process.env.R2_ENDPOINT,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  },
+});
+
+
+function getDeliveryRange(date) {
+  const deliveryDate = new Date(date);
+  deliveryDate.setDate(deliveryDate.getDate() + 7);
+
+  return deliveryDate.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+  });
+}
+
 
 
 /* ========================================
@@ -166,16 +189,17 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
         customer_name: sanitize(name),
         customer_phone: sanitize(phone),
       },
-      shipping: {
+      shipping: address ? {
         name: sanitize(name),
         phone: sanitize(phone),
         address: {
-          line1: sanitize(address?.line1),
-          postal_code: sanitize(address?.postal_code),
-          city: sanitize(address?.city),
-          country: sanitize(address?.country),
-        },
-      },
+          line1: sanitize(address.line1),
+          line2: sanitize(address.line2),
+          city: sanitize(address.city),
+          postal_code: sanitize(address.postal_code),
+          country: sanitize(address.country),
+        }
+      } : undefined,
     });
 
     res.json({ clientSecret: intent.client_secret });
@@ -184,6 +208,7 @@ app.post("/api/stripe/one-time-23-95", async (req, res) => {
   }
 });
 
+
 /* ========================================
    STRIPE: ONE-TIME PAYMENT $33.95
 ======================================== */
@@ -191,7 +216,7 @@ app.post("/api/stripe/one-time-33-95", async (req, res) => {
   try {
     const { name, email, phone, address, paymentMethodId } = req.body;
 
-    const intent = await stripe.paymentIntents.create({
+      const intent = await stripe.paymentIntents.create({
       amount: Math.round(33.95 * 100),
       currency: "usd",
       payment_method: paymentMethodId,
@@ -524,116 +549,286 @@ app.get("/test-order-number", (req, res) => {
   res.send(`Next order number is ${number}`);
 });
 
+
+
+
 /* ========================================
    STRIPE WEBHOOK
 ======================================== */
 
 // Stripe requires the raw body for webhooks
-app.post(
-  "/api/stripe/webhook",
-  express.raw({ type: "application/json" }),
-  (req, res) => {
-    const sig = req.headers["stripe-signature"];
-    let event;
+app.post("/api/stripe/webhook", async (req, res) => {
+  const sig = req.headers["stripe-signature"];
+  let event;
 
-    try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        process.env.STRIPE_WEBHOOK_SECRET
-      );
-    } catch (err) {
-      console.error("Webhook signature verification failed:", err.message);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.rawBody,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (err) {
+    console.error("❌ Webhook signature verification failed:", err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
 
-    // We only care about successful payments
+  try {
     if (event.type === "payment_intent.succeeded") {
-  const intent = event.data.object;
+      const intent = event.data.object;
 
-  const orderNumber = getNextOrderNumber();
-  const orderDate = new Date();
-  const deliveryRange = getDeliveryRange(orderDate);
+      const orderNumber = await getNextOrderNumber();
+      const orderDate = new Date(intent.created * 1000);
 
-  const { PDFDocument, rgb } = await import("pdf-lib");
+      const amountCents = intent.amount;
 
-  // Paths
-  const templatePath = path.join(
-    __dirname,
-    "public",
-    "pdf-templates",
-    "2895.pdf"
+const templatesDir = path.join(
+  __dirname,
+  "public",
+  "pdf-templates",
+  String(amountCents)
+);
+
+const templateFiles = fs
+  .readdirSync(templatesDir)
+  .filter(file => file.toLowerCase().endsWith(".pdf"));
+
+if (templateFiles.length === 0) {
+  throw new Error(`No PDF templates found in ${templatesDir}`);
+}
+
+const randomTemplate =
+  templateFiles[Math.floor(Math.random() * templateFiles.length)];
+
+const templatePath = path.join(templatesDir, randomTemplate);
+
+console.log(
+  `📄 Using PDF template for $${(amountCents / 100).toFixed(2)}:`,
+  randomTemplate
+);
+
+     
+
+      const templateBytes = fs.readFileSync(templatePath);
+      const pdfDoc = await PDFDocument.load(templateBytes);
+
+      const pages = pdfDoc.getPages();
+      const page1 = pages[0];
+      const page2 = pages[1];
+
+      const cm = 28.35;
+      const textColor = rgb(0.35, 0.35, 0.35);
+
+      const page1Height = page1.getHeight();
+      const page2Height = page2.getHeight();
+
+      // TOP LEFT: order number
+page1.drawText(`Check out order #${orderNumber}`, {
+  x: 35,
+  y: 737,
+  size: 12,
+  color: textColor,
+});
+
+// TOP RIGHT: order date
+page1.drawText(formatOrderDate(orderDate), {
+  x: 435,
+  y: 712,
+  size: 10,
+  color: textColor,
+});
+
+// MAIN TITLE (two lines, like the example PDF)
+page1.drawText(`Order #${orderNumber} successfully`, {
+  x: 130,
+  y: 563,
+  size: 20,
+  color: textColor,
+});
+
+page1.drawText(`submitted`, {
+  x: 98,
+  y: 538,
+  size: 20,
+  color: textColor,
+});
+
+// TIMELINE DATES
+page1.drawText(formatShortDate(orderDate), {
+  x: 134,
+  y: 437,
+  size: 9,
+  color: textColor,
+});
+
+page1.drawText(getDeliveryRange(orderDate), {
+  x: 437,
+  y: 437,
+  size: 9,
+  color: textColor,
+});
+
+// ORDER NUMBER — precisely aligned inside sentence
+page1.drawText(`${orderNumber}`, {
+  x: 120,    // more LEFT
+  y: 362,   // more UP
+  size: 10,
+  color: textColor,
+  characterSpacing: -0.4,
+});
+
+
+
+
+
+
+      let billing = null;
+
+if (intent.payment_method) {
+  const paymentMethod = await stripe.paymentMethods.retrieve(
+    intent.payment_method
   );
 
-  const ordersDir = path.join(__dirname, "orders");
-  const outputPath = path.join(ordersDir, `order-${orderNumber}.pdf`);
-
-  // Ensure /orders exists
-  if (!fs.existsSync(ordersDir)) {
-    fs.mkdirSync(ordersDir);
-  }
-
-  // Load template
-  const templateBytes = fs.readFileSync(templatePath);
-  const pdfDoc = await PDFDocument.load(templateBytes);
-  const page = pdfDoc.getPages()[0];
-
-  const textColor = rgb(0.35, 0.35, 0.35);
-
-  // Order number (top right + header)
-  page.drawText(String(orderNumber), { x: 430, y: 760, size: 12, color: textColor });
-  page.drawText(String(orderNumber), { x: 180, y: 735, size: 10, color: textColor });
-
-  // Order date
-  page.drawText(formatOrderDate(orderDate), {
-    x: 80,
-    y: 715,
-    size: 10,
-    color: textColor,
-  });
-
-  // Delivery range
-  page.drawText(deliveryRange, {
-    x: 80,
-    y: 690,
-    size: 10,
-    color: textColor,
-  });
-
-  // Shipping address
-  const ship = intent.shipping;
-  if (ship && ship.address) {
-    const lines = [
-      ship.name,
-      ship.address.line1,
-      `${ship.address.city}, ${ship.address.postal_code}`,
-      ship.address.country,
-    ];
-
-    let y = 520;
-    for (const line of lines) {
-      if (!line) continue;
-      page.drawText(line, { x: 80, y, size: 10, color: textColor });
-      y -= 14;
-    }
-  }
-
-  const pdfBytes = await pdfDoc.save();
-  fs.writeFileSync(outputPath, pdfBytes);
-
-  console.log(`📄 PDF created: orders/order-${orderNumber}.pdf`);
+  billing = paymentMethod.billing_details;
 }
 
 
-    res.json({ received: true });
+if (!billing || !billing.address) {
+  console.log("❌ NO BILLING ADDRESS FOUND");
+} else {
+  console.log("✅ BILLING ADDRESS FOUND:", billing);
+}
+
+if (billing && billing.address) {
+  const addressLines = [
+    billing.name,
+    billing.address.line1,
+    billing.address.line2,
+    `${billing.address.city}, ${billing.address.postal_code}`,
+    billing.address.country,
+  ].filter(Boolean);
+
+  const pageWidth = page2.getWidth();
+  const pageHeight = page2.getHeight();
+
+  let y = 660;
+const x = 117;
+
+
+  for (const line of addressLines) {
+    page2.drawText(line, {
+  x,
+  y,
+  size: 10,
+  color: textColor,
+  characterSpacing: -0.2,
+});
+    y -= 12;
   }
-);
+} else {
+  page2.drawText("NO BILLING ADDRESS FOUND", {
+    x: 100,
+    y: page2.getHeight() / 2,
+    size: 18,
+    color: rgb(0.35, 0.35, 0.35),
+  });
+}
+
+
+      const pdfBytes = await pdfDoc.save();
+      const fileName = `order-${orderNumber}.pdf`;
+
+try {
+  console.log("🚀 Attempting R2 upload:", fileName);
+
+  await r2.send(
+    new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME,
+      Key: fileName,
+      Body: pdfBytes,
+      ContentType: "application/pdf",
+    })
+  );
+
+  console.log("✅ PDF UPLOADED TO R2:", fileName);
+} catch (r2Error) {
+  console.error("❌ R2 UPLOAD FAILED:", r2Error);
+  // DO NOT throw
+  // Webhook must still return 200 to Stripe
+}
+
+console.log("✅ PDF UPLOADED TO R2:", fileName);
+
+
+          }
+
+    res.json({ received: true });
+  } catch (err) {
+    console.error("❌ Webhook processing error:", err);
+    res.status(500).send("Webhook handler error");
+  }
+});
+
 
 
 /* ========================================
    START SERVER
 ======================================== */
 const PORT = process.env.PORT || 10000;
+app.get("/admin/orders", (req, res) => {
+  const password = req.query.password;
+
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).send("Unauthorized");
+  }
+
+  const ordersDir = path.join(__dirname, "orders");
+
+  if (!fs.existsSync(ordersDir)) {
+    return res.send("<h1>No orders yet</h1>");
+  }
+
+  const files = fs
+    .readdirSync(ordersDir)
+    .filter(file => file.endsWith(".pdf"));
+
+  let html = `
+    <h1>Order PDFs</h1>
+    <ul>
+  `;
+
+  for (const file of files) {
+    html += `
+      <li>
+        ${file}
+        <a href="/admin/orders/download/${file}?password=${password}">
+          [Download]
+        </a>
+      </li>
+    `;
+  }
+
+  html += "</ul>";
+
+  res.send(html);
+});
+
+app.get("/admin/orders/download/:filename", (req, res) => {
+  const password = req.query.password;
+
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).send("Unauthorized");
+  }
+
+  const filePath = path.join(__dirname, "orders", req.params.filename);
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).send("File not found");
+  }
+
+  res.download(filePath);
+});
+
+
 app.listen(PORT, () =>
   console.log(`Server running on port ${PORT}`)
 );
