@@ -623,7 +623,7 @@ console.log(
 
       // TOP LEFT: order number
 page1.drawText(`Check out order #${orderNumber}`, {
-  x: 35,
+  x: 40,
   y: 737,
   size: 12,
   color: textColor,
