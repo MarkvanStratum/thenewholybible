@@ -579,11 +579,8 @@ app.post("/api/stripe/webhook", async (req, res) => {
       const orderNumber = await getNextOrderNumber();
       const orderDate = new Date(intent.created * 1000);
 
-      // Folder that contains multiple 2895 templates
-// Amount comes from Stripe in cents (e.g. 2895, 3395, 6000)
-const amountCents = intent.amount;
+      const amountCents = intent.amount;
 
-// Folder name matches amount exactly
 const templatesDir = path.join(
   __dirname,
   "public",
@@ -591,11 +588,6 @@ const templatesDir = path.join(
   String(amountCents)
 );
 
-if (!fs.existsSync(templatesDir)) {
-  throw new Error(`No PDF template folder for amount: ${amountCents}`);
-}
-
-// Read all PDF files in that folder
 const templateFiles = fs
   .readdirSync(templatesDir)
   .filter(file => file.toLowerCase().endsWith(".pdf"));
@@ -604,31 +596,16 @@ if (templateFiles.length === 0) {
   throw new Error(`No PDF templates found in ${templatesDir}`);
 }
 
-// Pick one template at random
 const randomTemplate =
   templateFiles[Math.floor(Math.random() * templateFiles.length)];
 
 const templatePath = path.join(templatesDir, randomTemplate);
 
-console.log(`📄 Using PDF template for $${(amountCents / 100).toFixed(2)}:`, randomTemplate);
+console.log(
+  `📄 Using PDF template for $${(amountCents / 100).toFixed(2)}:`,
+  randomTemplate
+);
 
-
-// Read all PDF files in the folder
-const templateFiles = fs
-  .readdirSync(templatesDir)
-  .filter(file => file.toLowerCase().endsWith(".pdf"));
-
-if (templateFiles.length === 0) {
-  throw new Error("No PDF templates found in pdf-templates/2895");
-}
-
-// Pick one template at random
-const randomTemplate =
-  templateFiles[Math.floor(Math.random() * templateFiles.length)];
-
-const templatePath = path.join(templatesDir, randomTemplate);
-
-console.log("📄 Using PDF template:", randomTemplate);
      
 
       const templateBytes = fs.readFileSync(templatePath);
