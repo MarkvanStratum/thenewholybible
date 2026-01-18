@@ -82,7 +82,6 @@
     .w-title{ font-weight:800; font-size:16px; margin:2px 0 10px }
     .order-row{ display:flex; justify-content:space-between; font-size:14px; padding:6px 0; border-top:1px dashed #e6eaf1 }
     .order-row:first-of-type{ border-top:none }
-    .green{ color:var(--green) }
 
     .delivery{
       display:flex; align-items:center; gap:12px; border:1px dashed #d9e2ef; background:#f7fbff;
@@ -134,10 +133,8 @@
   </div>
 
   <div class="grid">
-    <!-- LEFT -->
     <div class="card">
 
-      <!-- STEP 1 -->
       <section id="step1" class="step" aria-hidden="false">
 
         <div id="hero" style="display:none; margin-bottom:8px; display:flex; align-items:center; gap:10px">
@@ -150,37 +147,37 @@
         <div class="form-grid">
           <div>
             <div class="label">Prénom</div>
-            <input id="firstName" class="input" placeholder="Jean" autocomplete="given-name">
+            <input id="firstName" class="input">
           </div>
           <div>
             <div class="label">Nom</div>
-            <input id="lastName" class="input" placeholder="Dupont" autocomplete="family-name">
+            <input id="lastName" class="input">
           </div>
         </div>
 
         <div class="form-grid">
           <div style="grid-column:1 / -1">
             <div class="label">Adresse</div>
-            <input id="billingStreet" class="input" autocomplete="address-line1" placeholder="Adresse">
+            <input id="billingStreet" class="input">
           </div>
           <div>
             <div class="label">Code postal</div>
-            <input id="billingPostcode" class="input" autocomplete="postal-code" placeholder="Code postal">
+            <input id="billingPostcode" class="input">
           </div>
           <div>
             <div class="label">Ville</div>
-            <input id="billingCity" class="input" autocomplete="address-level2" placeholder="Ville">
+            <input id="billingCity" class="input">
           </div>
         </div>
 
         <div class="form-grid">
           <div>
             <div class="label">E-mail</div>
-            <input id="emailInput" class="input" placeholder="vous@exemple.fr" type="email" autocomplete="email" required>
+            <input id="emailInput" class="input">
           </div>
           <div>
             <div class="label">Pays</div>
-            <input id="billingCountry" class="input" placeholder="Pays" value="France">
+            <input id="billingCountry" class="input" value="France">
           </div>
         </div>
 
@@ -190,8 +187,8 @@
             <select id="phonePrefix" class="select"></select>
           </div>
           <div>
-            <div class="label">Numéro de téléphone</div>
-            <input id="phoneNumber" class="input" inputmode="tel" placeholder="Votre numéro" autocomplete="tel-national">
+            <div class="label">Téléphone</div>
+            <input id="phoneNumber" class="input">
           </div>
         </div>
 
@@ -208,7 +205,6 @@
 
       </section>
 
-      <!-- STEP 2 -->
       <section id="step2" class="step" aria-hidden="true">
 
         <div class="h2">2. Paiement</div>
@@ -247,17 +243,7 @@
 
     </div>
 
-    <!-- RIGHT COLUMN -->
     <aside>
-
-      <div class="widget">
-        <div class="w-title" style="text-align:center">Ce que disent nos client·e·s</div>
-        <div style="text-align:center; font-weight:700; margin-bottom:4px">Fenella Lara</div>
-        <div style="text-align:center; color:#f6b80c; letter-spacing:1px">★★★★★</div>
-        <p class="tiny" style="text-align:center; margin-top:8px">
-          J’ai reçu mon produit hier. Service client rapide et excellent !
-        </p>
-      </div>
 
       <div class="widget">
         <div class="delivery">
@@ -303,8 +289,7 @@
   </div>
 </div>
 
-<!-- LOADING OVERLAY -->
-<div id="loading-overlay" class="loading-overlay" aria-hidden="true" style="display:none">
+<div id="loading-overlay" class="loading-overlay" aria-hidden="true">
   <div class="loading-box">
     <div class="loading-title">Votre paiement est en cours de traitement…</div>
     <div class="progress-wrap"><div class="progress-bar"></div></div>
@@ -312,249 +297,48 @@
   </div>
 </div>
 
-<!-- Stripe.js -->
 <script src="https://js.stripe.com/v3"></script>
-
-<!-- PART 2 WILL BEGIN HERE -->
-<script>
-/* ======================================================
-   ATLAS2 Tracking Logic — EXACTLY like Czech checkout
-   ====================================================== */
-
-/* Save original query string */
-sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
-
-/* Save affiliate SUB IDs */
-(function(){
-  const qs = new URLSearchParams(location.search);
-  const keys = ["sub_id", "subid", "aff_sub", "aff_sub4", "click_id", "cid", "tid"];
-  for (const k of keys){
-    const v = qs.get(k);
-    if (v){
-      localStorage.setItem("aff_sub_id", v);
-      document.cookie = "aff_sub_id=" + v + "; path=/";
-    }
-  }
-})();
-
-/* Save GoAffPro ref */
-(function(){
-  const qs = new URLSearchParams(location.search);
-  const ref = qs.get("ref")
-             || localStorage.getItem("gaf_ref")
-             || (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
-  if (ref){
-    localStorage.setItem("gaf_ref", ref);
-    document.cookie = "gaf_ref=" + ref + "; path=/";
-  }
-})();
-</script>
 
 <script>
 window.addEventListener('DOMContentLoaded', () => {
 
-/* ======================================================
-   PHONE PREFIX SYSTEM (same as ATLAS2 CZ)
-   ====================================================== */
+  /* =======================
+     PREFILL FROM URL PARAMS
+     ======================= */
+  const qs = new URLSearchParams(location.search);
 
-const phonePrefix = document.getElementById("phonePrefix");
-const phoneNumber = document.getElementById("phoneNumber");
-const billingCountry = document.getElementById("billingCountry");
+  const fieldMap = {
+    sub3: 'firstName',
+    sub4: 'lastName',
+    sub5: 'billingStreet',
+    sub6: 'billingPostcode',
+    sub7: 'billingCity',
+    sub8: 'billingCountry',
+    sub9: 'emailInput',
+    sub10:'phoneNumber'
+  };
 
-/* Country → Name */
-const COUNTRY_CHOICES = {
-  CH:'Suisse', DE:'Allemagne', AT:'Autriche', FR:'France', IT:'Italie',
-  GB:'Royaume-Uni', US:'États-Unis', CA:'Canada', AU:'Australie',
-  NZ:'Nouvelle-Zélande', ES:'Espagne', NL:'Pays-Bas', BE:'Belgique',
-  SE:'Suède', FI:'Finlande', DK:'Danemark', NO:'Norvège', PL:'Pologne',
-  CZ:'Tchéquie', HU:'Hongrie', RO:'Roumanie'
-};
-
-/* Country → Calling code */
-const CALLING_CODES = {
-  CH:'+41', DE:'+49', AT:'+43', FR:'+33', IT:'+39',
-  GB:'+44', US:'+1', CA:'+1', AU:'+61',
-  NZ:'+64', ES:'+34', NL:'+31', BE:'+32',
-  SE:'+46', FI:'+358', DK:'+45', NO:'+47',
-  PL:'+48', CZ:'+420', HU:'+36', RO:'+40'
-};
-
-/* Build dropdown options */
-function populatePrefixOptions(){
-  phonePrefix.innerHTML = "";
-  Object.entries(CALLING_CODES).forEach(([code, prefix]) => {
-    const label = `${prefix} — ${COUNTRY_CHOICES[code]}`;
-    phonePrefix.add(new Option(label, prefix));
-  });
-}
-
-/* Convert text to ISO country code */
-function countryToISO(text){
-  if (!text) return null;
-  const t = text.trim().toLowerCase();
-
-  if (t === 'schweiz' || t === 'switzerland' || t === 'suisse' || t === 'svizzera') return 'CH';
-
-  if (t === 'france' || t === 'fr' || t === 'république française' || t === 'republique francaise') return 'FR';
-
-  return null;
-}
-
-/* Sync prefix when country changes */
-function syncPrefixFromCountry(){
-  const iso = countryToISO(billingCountry.value);
-  if (iso && CALLING_CODES[iso]) phonePrefix.value = CALLING_CODES[iso];
-}
-
-/* Initialize */
-populatePrefixOptions();
-syncPrefixFromCountry();
-
-billingCountry.addEventListener("change", syncPrefixFromCountry);
-billingCountry.addEventListener("blur", syncPrefixFromCountry);
-
-
-  const step1 = document.getElementById('step1');
-  const step2 = document.getElementById('step2');
-  const nextBtn = document.getElementById('nextBtn');
-  const backBtn = document.getElementById('backBtn');
-  const errBox = document.getElementById('err');
-
-  const nameInput = document.getElementById('nameInput');
-  const firstName = document.getElementById('firstName');
-  const lastName  = document.getElementById('lastName');
-
-  function show(o){ o.setAttribute('aria-hidden','false'); }
-  function hide(o){ o.setAttribute('aria-hidden','true'); }
-
-  nextBtn.addEventListener('click', ()=>{
-    nameInput.value = `${firstName.value} ${lastName.value}`.trim();
-    hide(step1); show(step2);
+  Object.entries(fieldMap).forEach(([param, id]) => {
+    const el = document.getElementById(id);
+    const val = qs.get(param);
+    if (el && val) el.value = val;
   });
 
-  backBtn.addEventListener('click', ()=>{
-    hide(step2); show(step1);
-  });
+  const title = qs.get('sub1');
+  const image = qs.get('sub2');
 
-  /* ======================================================
-     STRIPE SETUP — EXACT SAME KEY AS ATLAS2 Czech
-     ====================================================== */
-  const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
-  const elements = stripe.elements();
-
-  const cardNumber = elements.create('cardNumber');
-  const cardExpiry = elements.create('cardExpiry');
-  const cardCvc    = elements.create('cardCvc');
-
-  cardNumber.mount('#card-number');
-  cardExpiry.mount('#card-expiry');
-  cardCvc.mount('#card-cvc');
-
-  const payBtn = document.getElementById('payNow');
-
-  /* ======================================================
-     PAYMENT LOGIC — EXACT ATLAS2 FLOW
-     Using /api/stripe/one-time-46-95
-     ====================================================== */
-  payBtn.addEventListener('click', async () => {
-
-    payBtn.disabled = true;
-    payBtn.style.pointerEvents = "none";
-    payBtn.style.opacity = "0.6";
-
-    errBox.setAttribute('aria-hidden','true');
-
-    const overlay = document.getElementById('loading-overlay');
-    overlay.style.display = "flex";
-    overlay.setAttribute('aria-hidden','false');
-
-    const name  = document.getElementById('nameInput').value;
-    const email = document.getElementById('emailInput').value;
-    const phone = document.getElementById('phoneNumber').value;
-
-    const address = {
-      line1: document.getElementById('billingStreet').value,
-      city: document.getElementById('billingCity').value,
-      postal_code: document.getElementById('billingPostcode').value,
-      country: "FR"
-    };
-
-    try {
-
-      /* 1 — Create Payment Method */
-      const pmRes = await stripe.createPaymentMethod({
-        type: "card",
-        card: cardNumber,
-        billing_details: { name, email, phone, address }
-      });
-
-      if (pmRes.error) throw new Error(pmRes.error.message);
-
-      /* 2 — Call Swiss endpoint (33.95) */
-      const resp = await fetch("/api/stripe/one-time-46-95", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({
-          paymentMethodId: pmRes.paymentMethod.id,
-          name, email, phone, address
-        })
-      });
-
-      const data = await resp.json();
-      if (!data.clientSecret)
-        throw new Error(data.error || "Le paiement n’a pas pu être démarré.");
-
-      /* 3 — Confirm card payment */
-      const conf = await stripe.confirmCardPayment(data.clientSecret, {
-        payment_method: pmRes.paymentMethod.id
-      });
-
-      if (conf.error) throw new Error(conf.error.message);
-      if (!conf.paymentIntent || conf.paymentIntent.status !== "succeeded")
-        throw new Error("Le paiement n’a pas été finalisé.");
-
-      /* ======================================================
-         SUCCESS → REDIRECT WITH TRACKING (ATLAS2 LOGIC)
-         ====================================================== */
-
-      const orig = sessionStorage.getItem("orig_qs") || "";
-      const qs = new URLSearchParams(orig);
-
-      /* Add Stripe paymentIntent.id */
-      qs.set("v", conf.paymentIntent.id);
-
-      /* Restore affiliate sub_id */
-      const sub = localStorage.getItem("aff_sub_id");
-      if (sub) qs.set("sub_id", sub);
-
-      /* Restore GoAffPro ref */
-      const ref = localStorage.getItem("gaf_ref");
-      if (ref) qs.set("ref", ref);
-
-      /* Swiss thank-you URL (as you told me to keep unchanged) */
-      window.location.href =
-        "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7"
-        + "?" + qs.toString();
-
-    } catch(err){
-
-      errBox.textContent = err.message;
-      errBox.setAttribute('aria-hidden',"false");
-
-      payBtn.disabled = false;
-      payBtn.style.pointerEvents = "auto";
-      payBtn.style.opacity = "1";
-
-      overlay.style.display = "none";
-      overlay.setAttribute('aria-hidden','true');
+  if (title || image) {
+    document.getElementById('hero').style.display = 'flex';
+    if (title) document.getElementById('heroTitle').textContent = title;
+    if (image) {
+      document.getElementById('heroImg').src = image;
+      document.getElementById('sidebarImg').src = image;
     }
-
-  });
+  }
 
 });
 </script>
 
-<!-- GoAffPro loader -->
 <script type="text/javascript" src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 
 </body>
