@@ -735,7 +735,11 @@ const x = 117;
 
 
       const pdfBytes = await pdfDoc.save();
-      const fileName = `order-${orderNumber}.pdf`;
+      const now = new Date();
+const iso = now.toISOString().replace(/[:.]/g, "-");
+
+const fileName = `${iso}_order-${orderNumber}.pdf`;
+
 
 try {
   console.log("🚀 Attempting R2 upload:", fileName);
