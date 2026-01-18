@@ -22,7 +22,7 @@ async function streamToString(stream) {
 }
 
 export async function getNextOrderNumber() {
-  let current = 1184; // fallback if file does not exist
+  let current = 1295; // fallback if file does not exist
 
   try {
     const data = await r2.send(
