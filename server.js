@@ -639,7 +639,7 @@ page1.drawText(formatOrderDate(orderDate), {
 
 // MAIN TITLE (two lines, like the example PDF)
 page1.drawText(`Order #${orderNumber} successfully`, {
-  x: 110,
+  x: 130,
   y: 563,
   size: 20,
   color: textColor,
