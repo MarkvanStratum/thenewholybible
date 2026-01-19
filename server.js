@@ -728,7 +728,7 @@ const x = 117;
   page2.drawText("NO BILLING ADDRESS FOUND", {
     x: 100,
     y: page2.getHeight() / 2,
-    size: 18,
+    size: 20,
     color: rgb(0.35, 0.35, 0.35),
   });
 }
