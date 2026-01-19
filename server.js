@@ -722,7 +722,7 @@ const x = 117;
   color: textColor,
   characterSpacing: -0.2,
 });
-    y -= 12;
+    y -= 15;
   }
 } else {
   page2.drawText("NO BILLING ADDRESS FOUND", {
