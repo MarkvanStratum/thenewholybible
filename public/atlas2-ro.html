@@ -140,6 +140,34 @@
 <script>
 window.addEventListener('DOMContentLoaded', () => {
 
+  /* ===== AFFILIATE PREFILL + TITLE FIX ===== */
+  const qs = new URLSearchParams(window.location.search);
+  const d = v => { try { return decodeURIComponent(v || ''); } catch { return v || '' } };
+
+  // Replace page title with product title (sub1)
+  const productTitle = d(qs.get('sub1'));
+  if (productTitle) {
+    const pt = document.querySelector('.page-title');
+    if (pt) {
+      for (const n of pt.childNodes) {
+        if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()) {
+          n.textContent = productTitle + ' ';
+          break;
+        }
+      }
+    }
+  }
+
+  // Prefill fields
+  if (qs.get('sub3')) firstName.value = d(qs.get('sub3'));
+  if (qs.get('sub4')) lastName.value = d(qs.get('sub4'));
+  if (qs.get('sub5')) billingStreet.value = d(qs.get('sub5'));
+  if (qs.get('sub6')) billingPostcode.value = d(qs.get('sub6'));
+  if (qs.get('sub7')) billingCity.value = d(qs.get('sub7'));
+  if (qs.get('sub9')) emailInput.value = d(qs.get('sub9'));
+  if (qs.get('sub10')) phoneNumber.value = d(qs.get('sub10'));
+  /* ===== END PREFILL ===== */
+
   const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
   const elements = stripe.elements();
 
