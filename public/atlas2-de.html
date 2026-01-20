@@ -254,19 +254,22 @@ const sidebarImg = document.getElementById('sidebarImg');
   }
 });
 
-      const r=await fetch("/api/stripe/one-time-33-95",{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentMethodId:pm.paymentMethod.id})});
+      const r=await fetch("/api/stripe/one-time-46-95",{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentMethodId:pm.paymentMethod.id})});
       const dta=await r.json();
       const result = await stripe.confirmCardPayment(dta.clientSecret);
 
-if (
-  result.paymentIntent &&
-  result.paymentIntent.status === 'succeeded'
-) {
-  location.href =
-    'https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7';
-} else {
-  throw new Error('Payment not completed');
-}
+      if (result.error) {
+        throw result.error;
+      }
+
+      const status = result.paymentIntent && result.paymentIntent.status;
+
+      if (status === 'succeeded' || status === 'processing') {
+        location.href =
+          'https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7';
+      } else {
+        throw new Error('Payment not completed');
+      }
 
     }catch(e){
       err.textContent=e.message;err.setAttribute('aria-hidden','false');
