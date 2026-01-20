@@ -262,15 +262,9 @@ const sidebarImg = document.getElementById('sidebarImg');
         throw result.error;
       }
 
-      const status = result.paymentIntent && result.paymentIntent.status;
-
-      if (status === 'succeeded' || status === 'processing') {
         location.href =
           'https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7';
-      } else {
-        throw new Error('Payment not completed');
-      }
-
+      
     }catch(e){
       err.textContent=e.message;err.setAttribute('aria-hidden','false');
       payNow.disabled=false;overlay.style.display='none';overlay.setAttribute('aria-hidden','true');
