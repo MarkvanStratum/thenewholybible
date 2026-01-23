@@ -262,7 +262,9 @@ window.addEventListener('DOMContentLoaded', () => {
   payNow.onclick = async () => {
     payNow.disabled = true;
     err.setAttribute("aria-hidden","true");
-    loading-overlay.setAttribute("aria-hidden","false");
+    const overlay = document.getElementById("loading-overlay");
+overlay.setAttribute("aria-hidden","false");
+
 
     const billingDetails = {
       name: nameInput.value,
@@ -284,7 +286,7 @@ window.addEventListener('DOMContentLoaded', () => {
       });
       if(pm.error) throw pm.error;
 
-      const r = await fetch("/api/stripe/one-time-28-95",{
+      const r = await fetch("/api/stripe/one-time-33-95",{
         method:"POST",
         headers:{ "Content-Type":"application/json" },
         body:JSON.stringify({ paymentMethodId: pm.paymentMethod.id, billingDetails })
