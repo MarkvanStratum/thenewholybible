@@ -9,9 +9,8 @@ import { getNextOrderNumber } from "./orderNumber.js";
 import fs from "fs";
 import { PDFDocument, rgb } from "pdf-lib";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-
-
-
+import crypto from "crypto";
+import fetch from "node-fetch";
 
 
 const app = express();
@@ -100,6 +99,86 @@ function getPayPalClient() {
 
   return new paypal.core.PayPalHttpClient(environment);
 }
+
+/* ========================================
+   PAYTIKO: CREATE CHECKOUT SESSION
+======================================== */
+app.post("/api/paytiko/checkout", async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      email,
+      street,
+      city,
+      zipCode,
+      amount
+    } = req.body;
+
+    // 🔒 Hard-lock product price on server
+    if (Number(amount) !== 60) {
+      return res.status(400).json({ error: "Invalid amount" });
+    }
+
+    const timestamp = Math.floor(Date.now() / 1000);
+    const orderId = `PTK-${Date.now()}`;
+
+    const rawSignature =
+      `${email};${timestamp};${process.env.PAYTIKO_MERCHANT_SECRET}`;
+
+    const signature = crypto
+      .createHash("sha256")
+      .update(rawSignature)
+      .digest("hex");
+
+    const payload = {
+      firstName,
+      lastName,
+      email,
+      phone: "",
+      countryCode: "AU",
+      currency: "USD",
+      lockedAmount: 60,
+      orderId,
+      street,
+      city,
+      zipCode,
+      timestamp,
+      signature,
+      isPayout: false
+    };
+
+    const response = await fetch(
+      `${process.env.PAYTIKO_CORE_URL}/api/sdk/checkout`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "*/*",
+          "X-Merchant-Secret": process.env.PAYTIKO_MERCHANT_SECRET
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    const data = await response.json();
+
+    if (!data.cashierSessionToken) {
+      console.error("Paytiko error:", data);
+      return res.status(500).json({ error: "Paytiko session failed" });
+    }
+
+    res.json({
+      sessionToken: data.cashierSessionToken,
+      orderId
+    });
+
+  } catch (err) {
+    console.error("❌ Paytiko checkout error:", err);
+    res.status(500).json({ error: "Paytiko checkout error" });
+  }
+});
+
 
 /* ========================================
    PAYPAL: CREATE ORDER (Atlas 2)
@@ -773,6 +852,44 @@ console.log("✅ PDF UPLOADED TO R2:", fileName);
   }
 });
 
+/* ========================================
+   PAYTIKO WEBHOOK
+======================================== */
+app.post("/api/paytiko/webhook", async (req, res) => {
+  try {
+    const payload = req.body;
+
+    const orderId = payload.OrderId;
+    const receivedSignature = payload.Signature;
+
+    const expectedSignature = crypto
+      .createHash("sha256")
+      .update(
+        `${process.env.PAYTIKO_MERCHANT_SECRET}:${orderId}`
+      )
+      .digest("hex");
+
+    if (receivedSignature !== expectedSignature) {
+      console.error("❌ Invalid Paytiko webhook signature");
+      return res.status(403).send("Invalid signature");
+    }
+
+    if (payload.TransactionStatus === "Success") {
+      console.log("✅ Paytiko payment successful:", orderId);
+
+      // OPTIONAL later:
+      // - generate PDF
+      // - mark order paid
+      // - fulfill order
+    }
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("❌ Paytiko webhook error:", err);
+    res.sendStatus(500);
+  }
+});
+
 
 
 /* ========================================
@@ -832,6 +949,8 @@ app.get("/admin/orders/download/:filename", (req, res) => {
 
   res.download(filePath);
 });
+
+
 
 
 app.listen(PORT, () =>
