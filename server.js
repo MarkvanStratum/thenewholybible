@@ -10,7 +10,6 @@ import fs from "fs";
 import { PDFDocument, rgb } from "pdf-lib";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import crypto from "crypto";
-import fetch from "node-fetch";
 
 
 const app = express();
