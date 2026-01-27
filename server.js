@@ -137,7 +137,7 @@ app.post("/api/paytiko/checkout", async (req, res) => {
       .digest("hex");
 
     const payload = {
-  MerchantId: "thenewholybible.com",
+  MerchantId: 22811,
 
   firstName,
   lastName,
