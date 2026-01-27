@@ -111,7 +111,7 @@
   </div>
 </div>
 
-<script src="https://core.paytiko.com/cdn/js/sdk/paytiko-sdk.1.0.min.js"></script>
+<script src="https://uat-core.paytiko.com/cdn/js/sdk/paytiko-sdk.1.0.min.js"></script>
 
 <script>
 const step1 = document.getElementById("step1");
@@ -153,7 +153,7 @@ payNow.onclick = async () => {
       orderId: data.orderId,
       sessionToken: data.sessionToken,
       iframeContainerSelector: "#cashier-iframe-container",
-      displayMode: PAYTIKO_CASHIER_DISPLAY_MODE.IFRAME,
+      displayMode: "IFRAME",
       locale: "en-US"
     });
 
