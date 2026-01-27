@@ -129,7 +129,8 @@ app.post("/api/paytiko/checkout", async (req, res) => {
     const orderId = `PTK-${Date.now()}`;
 
     const rawSignature =
-      `${email};${timestamp};${process.env.PAYTIKO_MERCHANT_SECRET}`;
+  email + ";" + timestamp + ";" + process.env.PAYTIKO_MERCHANT_SECRET;
+
 
     const signature = crypto
       .createHash("sha256")
@@ -137,7 +138,7 @@ app.post("/api/paytiko/checkout", async (req, res) => {
       .digest("hex");
 
     const payload = {
-  MerchantId: 21189,
+  MerchantId: Number(process.env.PAYTIKO_MERCHANT_ID),
 
   firstName,
   lastName,
@@ -154,6 +155,16 @@ app.post("/api/paytiko/checkout", async (req, res) => {
   signature,
   isPayout: false
 };
+
+
+console.log("PAYTIKO CONFIG", {
+  merchantId: process.env.PAYTIKO_MERCHANT_ID,
+  secret: process.env.PAYTIKO_MERCHANT_SECRET,
+  core: process.env.PAYTIKO_CORE_URL
+});
+
+console.log("PAYTIKO PAYLOAD", payload);
+
 
 
     const response = await fetch(
