@@ -150,13 +150,14 @@ payNow.onclick = async () => {
     if (!data.sessionToken) throw new Error("Failed to create payment session");
 
     PaytikoSdk.cashier.invoke({
-      environment: "UAT",
-      orderId: data.orderId,
-      sessionToken: data.sessionToken,
-      iframeContainerSelector: "#cashier-iframe-container",
-      displayMode: "IFRAME",
-      locale: "en-US"
-    });
+  environment: "uat",
+  orderId: data.orderId,
+  sessionToken: data.sessionToken,
+  iframeContainerSelector: "#cashier-iframe-container",
+  displayMode: "iframe",
+  locale: "en"
+});
+
 
   } catch (e) {
     err.textContent = e.message;
