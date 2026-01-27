@@ -82,6 +82,21 @@
     .step{display:none}
     .step[aria-hidden="false"]{display:block}
 
+    /* ✅ ADDED (matches ZA behavior): product hero, hidden unless sub params exist */
+    .hero{
+      display:none;
+      margin-bottom:12px;
+      padding:10px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      gap:10px;
+      align-items:center;
+    }
+    .hero img{
+      width:44px;height:44px;border-radius:10px;
+      border:1px solid var(--line);object-fit:cover
+    }
+
     .loading-overlay{
       position:fixed;inset:0;
       background:rgba(246,249,252,.92);
@@ -135,6 +150,16 @@
     <div class="card">
 
       <section id="step1" class="step" aria-hidden="false">
+
+        <!-- ✅ ADDED HERO (hidden unless sub params exist) -->
+        <div id="hero" class="hero">
+          <img id="heroImg" alt="">
+          <div>
+            <div id="heroTitle" style="font-weight:900;font-size:14px"></div>
+            <div class="sub">Produkt z vašeho odkazu</div>
+          </div>
+        </div>
+
         <div class="h2">1. Informace</div>
 
         <div class="form-grid">
@@ -185,7 +210,7 @@
       </section>
     </div>
 
-    <!-- RIGHT SIDEBAR (ADDED) -->
+    <!-- RIGHT SIDEBAR (ORIGINAL CONTENT KEPT) -->
     <aside>
 
       <div class="widget">
@@ -197,6 +222,8 @@
 
       <div class="widget">
         <div class="delivery">
+          <!-- ✅ ADDED (non-breaking): show affiliate image if provided -->
+          <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none">
           <div>
             <div style="font-weight:800">Rychlé doručení</div>
             <div class="sub">3–5 pracovních dnů</div>
@@ -237,6 +264,60 @@
 <script>
 window.addEventListener('DOMContentLoaded', () => {
 
+  /* ===== ✅ ADDED: affiliate params support (title/image/prefill) ===== */
+  const qs = new URLSearchParams(window.location.search);
+  const d = v => { try { return decodeURIComponent(v||''); } catch { return v||'' } };
+
+  // Replace main title + delivery title
+  try{
+    const sop1 = qs.get('sub1');
+    if (sop1){
+      const title = d(sop1);
+
+      const pt = document.querySelector('.page-title');
+      if (pt){
+        for (const n of pt.childNodes){
+          if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()){
+            n.textContent = title + ' ';
+            break;
+          }
+        }
+      }
+
+      const delTitle = document.querySelector('.delivery div div');
+      if (delTitle) delTitle.textContent = title;
+    }
+  }catch(e){}
+
+  // Image + hero
+  const hero = document.getElementById('hero');
+  const heroImg = document.getElementById('heroImg');
+  const heroTitle = document.getElementById('heroTitle');
+  const sidebarImg = document.getElementById('sidebarImg');
+
+  if (qs.get('sub1')) {
+    heroTitle.textContent = d(qs.get('sub1'));
+    hero.style.display = 'flex';
+  }
+
+  if (qs.get('sub2')) {
+    heroImg.src = d(qs.get('sub2'));
+    sidebarImg.src = d(qs.get('sub2'));
+    sidebarImg.style.display = 'block';
+    hero.style.display = 'flex';
+  }
+
+  // Prefill inputs
+  if (qs.get('sub3')) firstName.value = d(qs.get('sub3'));
+  if (qs.get('sub4')) lastName.value = d(qs.get('sub4'));
+  if (qs.get('sub5')) billingStreet.value = d(qs.get('sub5'));
+  if (qs.get('sub6')) billingPostcode.value = d(qs.get('sub6'));
+  if (qs.get('sub7')) billingCity.value = d(qs.get('sub7'));
+  // sub8 country is fixed/disabled on this page (CZ)
+  if (qs.get('sub9')) emailInput.value = d(qs.get('sub9'));
+  if (qs.get('sub10')) phoneNumber.value = d(qs.get('sub10'));
+  /* ===== END ADDITION ===== */
+
   const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
   const elements = stripe.elements();
 
@@ -263,8 +344,7 @@ window.addEventListener('DOMContentLoaded', () => {
     payNow.disabled = true;
     err.setAttribute("aria-hidden","true");
     const overlay = document.getElementById("loading-overlay");
-overlay.setAttribute("aria-hidden","false");
-
+    overlay.setAttribute("aria-hidden","false");
 
     const billingDetails = {
       name: nameInput.value,
@@ -302,7 +382,7 @@ overlay.setAttribute("aria-hidden","false");
       err.textContent=e.message;
       err.setAttribute("aria-hidden","false");
       payNow.disabled=false;
-      loading-overlay.setAttribute("aria-hidden","true");
+      overlay.setAttribute("aria-hidden","true");
     }
   };
 });
