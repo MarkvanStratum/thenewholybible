@@ -10,6 +10,8 @@ import fs from "fs";
 import { PDFDocument, rgb } from "pdf-lib";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import crypto from "crypto";
+import fetch from "node-fetch";
+
 
 
 const app = express();
@@ -102,6 +104,10 @@ function getPayPalClient() {
 /* ========================================
    PAYTIKO: CREATE CHECKOUT SESSION
 ======================================== */
+
+console.log("PAYTIKO_CORE_URL =", process.env.PAYTIKO_CORE_URL);
+
+
 app.post("/api/paytiko/checkout", async (req, res) => {
   try {
     const {
