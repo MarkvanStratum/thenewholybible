@@ -137,21 +137,24 @@ app.post("/api/paytiko/checkout", async (req, res) => {
       .digest("hex");
 
     const payload = {
-      firstName,
-      lastName,
-      email,
-      phone: "",
-      countryCode: "AU",
-      currency: "USD",
-      lockedAmount: 60,
-      orderId,
-      street,
-      city,
-      zipCode,
-      timestamp,
-      signature,
-      isPayout: false
-    };
+  MerchantId: "thenewholybible.com",
+
+  firstName,
+  lastName,
+  email,
+  phone: "",
+  countryCode: "AU",
+  currency: "USD",
+  lockedAmount: 60,
+  orderId,
+  street,
+  city,
+  zipCode,
+  timestamp,
+  signature,
+  isPayout: false
+};
+
 
     const response = await fetch(
       `${process.env.PAYTIKO_CORE_URL}/api/sdk/checkout`,
