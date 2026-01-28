@@ -164,13 +164,14 @@ nextBtn.onclick = async () => {
     }
 
     PaytikoSdk.cashier.invoke({
-  environment: "uat",
+  environment: "UAT",
   orderId: data.orderId,
   sessionToken: data.sessionToken,
   iframeContainerSelector: "#cashier-iframe-container",
   displayMode: "embedded",
   locale: "en"
 });
+
 
 
     document.getElementById("loadingOverlay")
