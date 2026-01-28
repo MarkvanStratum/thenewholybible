@@ -164,13 +164,14 @@ nextBtn.onclick = async () => {
     }
 
     PaytikoSdk.cashier.invoke({
-      environment: "uat",
-      orderId: data.orderId,
-      sessionToken: data.sessionToken,
-      iframeContainerSelector: "#cashier-iframe-container",
-      displayMode: "iframe",
-      locale: "en"
-    });
+  environment: "uat",
+  orderId: data.orderId,
+  sessionToken: data.sessionToken,
+  iframeContainerSelector: "#cashier-iframe-container",
+  displayMode: "embedded",
+  locale: "en"
+});
+
 
     document.getElementById("loadingOverlay")
       .setAttribute("aria-hidden","true");
