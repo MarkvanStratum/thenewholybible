@@ -115,23 +115,33 @@
 
 
 <script>
+<script>
+
 const step1 = document.getElementById("step1");
 const step2 = document.getElementById("step2");
 
-nextBtn.onclick = () => {
+const nextBtn = document.getElementById("nextBtn");
+const backBtn = document.getElementById("backBtn");
+const payNow = document.getElementById("payNow");
+const err = document.getElementById("err");
+
+const firstName = document.getElementById("firstName");
+const lastName = document.getElementById("lastName");
+const emailInput = document.getElementById("emailInput");
+const billingStreet = document.getElementById("billingStreet");
+const billingCity = document.getElementById("billingCity");
+const billingPostcode = document.getElementById("billingPostcode");
+
+nextBtn.onclick = async () => {
+
   step1.setAttribute("aria-hidden","true");
   step2.setAttribute("aria-hidden","false");
-};
 
-backBtn.onclick = () => {
-  step2.setAttribute("aria-hidden","true");
-  step1.setAttribute("aria-hidden","false");
-};
-
-payNow.onclick = async () => {
-  document.getElementById("loadingOverlay").setAttribute("aria-hidden","false");
+  document.getElementById("loadingOverlay")
+    .setAttribute("aria-hidden","false");
 
   try {
+
     const res = await fetch("/api/paytiko/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -147,25 +157,45 @@ payNow.onclick = async () => {
     });
 
     const data = await res.json();
-    if (!data.sessionToken) throw new Error("Failed to create payment session");
+
+    if (!data.sessionToken) {
+      throw new Error("Failed to create payment session");
+    }
 
     PaytikoSdk.cashier.invoke({
-  environment: "uat",
-  orderId: data.orderId,
-  sessionToken: data.sessionToken,
-  iframeContainerSelector: "#cashier-iframe-container",
-  displayMode: "iframe",
-  locale: "en"
-});
+      environment: "uat",
+      orderId: data.orderId,
+      sessionToken: data.sessionToken,
+      iframeContainerSelector: "#cashier-iframe-container",
+      displayMode: "iframe",
+      locale: "en"
+    });
 
+    document.getElementById("loadingOverlay")
+      .setAttribute("aria-hidden","true");
 
   } catch (e) {
+
     err.textContent = e.message;
     err.setAttribute("aria-hidden","false");
-    document.getElementById("loadingOverlay").setAttribute("aria-hidden","true");
+
+    document.getElementById("loadingOverlay")
+      .setAttribute("aria-hidden","true");
   }
+
 };
+
+backBtn.onclick = () => {
+  step2.setAttribute("aria-hidden","true");
+  step1.setAttribute("aria-hidden","false");
+};
+
+payNow.onclick = () => {
+  alert("Enter card details inside the form above");
+};
+
 </script>
+
 
 </body>
 </html>
