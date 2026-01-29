@@ -50,6 +50,19 @@
       text-align: center;
       width: 320px;
     }
+
+#cashier-iframe-container {
+  width: 100%;
+  min-height: 650px;
+}
+
+#cashier-iframe-container iframe {
+  width: 100% !important;
+  min-height: 650px !important;
+  border: none;
+}
+
+
   </style>
 </head>
 
@@ -86,9 +99,8 @@
         <p style="font-size:13px;color:#5b6b82;">Card information is encrypted and securely processed.</p>
 
         <div 
-  id="cashier-iframe-container"
-  style="min-height:420px;width:100%;"
-></div>
+  <div id="cashier-iframe-container"></div>
+
 
 
         <div id="err" class="err" aria-hidden="true"></div>
