@@ -173,14 +173,19 @@ if (!window.PaytikoSdk || !PaytikoSdk.cashier) {
   throw new Error("Paytiko SDK not loaded correctly");
 }
 
-    PaytikoSdk.cashier.invoke({
+   
+PaytikoSdk.cashier.invoke({
   environment: "UAT",
   merchantId: "21189",
   orderId: data.orderId,
   sessionToken: data.sessionToken,
+
   iframeContainerSelector: "#cashier-iframe-container",
-  displayMode: "IFRAME"
+
+  displayMode: "EMBEDDED",
+  cashierDisplay: "IFRAME"
 });
+
 
 
 
