@@ -286,6 +286,20 @@ const step2 = document.getElementById("step2");
 const err = document.getElementById("err");
 /* ===== END FIX ===== */
 
+/* ===== ALWAYS-ON STEP NAVIGATION ===== */
+nextBtn.onclick = () => {
+  nameInput.value = `${firstName.value} ${lastName.value}`.trim();
+  step1.setAttribute('aria-hidden','true');
+  step2.setAttribute('aria-hidden','false');
+};
+
+backBtn.onclick = () => {
+  step2.setAttribute('aria-hidden','true');
+  step1.setAttribute('aria-hidden','false');
+};
+/* ===== END STEP NAV ===== */
+
+
   /* ===== ✅ ADDED: affiliate params support (title/image/prefill) ===== */
   const qs = new URLSearchParams(window.location.search);
   const d = v => { try { return decodeURIComponent(v||''); } catch { return v||'' } };
@@ -351,17 +365,7 @@ const err = document.getElementById("err");
   cardExpiry.mount('#card-expiry');
   cardCvc.mount('#card-cvc');
 
-  nextBtn.onclick = () => {
-    nameInput.value = `${firstName.value} ${lastName.value}`.trim();
-    step1.setAttribute('aria-hidden','true');
-    step2.setAttribute('aria-hidden','false');
-  };
-
-  backBtn.onclick = () => {
-    step2.setAttribute('aria-hidden','true');
-    step1.setAttribute('aria-hidden','false');
-  };
-
+ 
   payNow.onclick = async () => {
     payNow.disabled = true;
     err.setAttribute("aria-hidden","true");
