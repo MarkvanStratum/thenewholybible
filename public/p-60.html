@@ -85,7 +85,11 @@
         <div class="h2">2. Payment</div>
         <p style="font-size:13px;color:#5b6b82;">Card information is encrypted and securely processed.</p>
 
-        <div id="cashier-iframe-container" style="min-height:420px;"></div>
+        <div 
+  id="cashier-iframe-container"
+  style="min-height:420px;width:100%;"
+></div>
+
 
         <div id="err" class="err" aria-hidden="true"></div>
 
@@ -165,13 +169,19 @@ nextBtn.onclick = async () => {
       throw new Error("Failed to create payment session");
     }
 
+if (!window.PaytikoSdk || !PaytikoSdk.cashier) {
+  throw new Error("Paytiko SDK not loaded correctly");
+}
+
     PaytikoSdk.cashier.invoke({
   environment: "UAT",
+  merchantId: "21189",
   orderId: data.orderId,
   sessionToken: data.sessionToken,
   iframeContainerSelector: "#cashier-iframe-container",
-  displayMode: "embedded"
+  displayMode: "EMBEDDED"
 });
+
 
 
 
