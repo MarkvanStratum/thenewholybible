@@ -235,7 +235,7 @@
         </div>
 
         <div style="margin-top:14px;font-weight:800">ملخص الطلب</div>
-        <div class="order-row"><span>الإجمالي</span><span>2 ر.س</span></div>
+        <div class="order-row"><span>الإجمالي</span><span>37 ر.س</span></div>
       </div>
 
       <div class="widget">
@@ -354,7 +354,7 @@ window.addEventListener('DOMContentLoaded', () => {
       });
       if (pm.error) throw pm.error;
 
-      const r = await fetch("/api/stripe/one-time-33-95",{
+      const r = await fetch("/api/stripe/one-time-46-95",{
         method:"POST",
         headers:{ "Content-Type":"application/json" },
         body:JSON.stringify({
@@ -373,7 +373,7 @@ window.addEventListener('DOMContentLoaded', () => {
         throw new Error('Payment not completed');
 
       window.location.href =
-        "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
+        "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7";
 
     } catch(e){
       err.textContent = e.message;
