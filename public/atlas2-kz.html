@@ -199,6 +199,13 @@ window.addEventListener('DOMContentLoaded',()=>{
 const qs=new URLSearchParams(location.search);
 const d=v=>{try{return decodeURIComponent(v||'')}catch{return v||''}};
 
+// DEFINE ELEMENTS (MISSING)
+const hero = document.getElementById('hero');
+const heroImg = document.getElementById('heroImg');
+const heroTitle = document.getElementById('heroTitle');
+const sidebarImg = document.getElementById('sidebarImg');
+
+
 // HERO
 if(qs.get('sub1')){
 heroTitle.textContent=d(qs.get('sub1'));
