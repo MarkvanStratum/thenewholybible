@@ -248,8 +248,17 @@ step2.setAttribute('aria-hidden','true');
 step1.setAttribute('aria-hidden','false');
 };
 
-payNow.onclick=async()=>{
-const billingDetails={
+payNow.onclick = async () => {
+
+  // SHOW LOADING OVERLAY
+  payNow.disabled = true;
+  err.setAttribute("aria-hidden","true");
+
+  const overlay = document.getElementById("loading-overlay");
+  overlay.setAttribute("aria-hidden","false");
+
+  const billingDetails = {
+
 name:nameInput.value,
 email:emailInput.value,
 phone:phonePrefix.value+phoneNumber.value,
@@ -279,9 +288,15 @@ payment_method:pm.paymentMethod.id
 });
 
 if(result.paymentIntent && result.paymentIntent.status==="succeeded"){
-window.location.href="https://cudsr.bemobtrcks.com/go/6b6e67d8-fe22-4816-8318-ef7cf7685f83";
+  window.location.href="https://cudsr.bemobtrcks.com/go/6b6e67d8-fe22-4816-8318-ef7cf7685f83";
+  return;
 }
+
+// IF PAYMENT FAILS
+overlay.setAttribute("aria-hidden","true");
+payNow.disabled = false;
 };
+
 
 });
 </script>
