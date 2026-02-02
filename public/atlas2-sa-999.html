@@ -23,7 +23,7 @@
     html,body{height:100%}
     body{
       margin:0;background:var(--bg);color:var(--text);
-      font-family:Tajawal,Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
     }
 
     .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
@@ -143,6 +143,36 @@
 
 <body>
 
+<script>
+  sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
+</script>
+
+<!-- GoAffPro tracking -->
+<script>
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const keys = ["sub_id","subid","aff_sub","aff_sub4","click_id","cid","tid"];
+  for (const k of keys){
+    const v = qs.get(k);
+    if (v){
+      localStorage.setItem("aff_sub_id", v);
+      document.cookie = "aff_sub_id=" + v + "; path=/";
+    }
+  }
+})();
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const ref =
+    qs.get("ref") ||
+    localStorage.getItem("gaf_ref") ||
+    (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
+  if (ref){
+    localStorage.setItem("gaf_ref", ref);
+    document.cookie = "gaf_ref=" + ref + "; path=/";
+  }
+})();
+</script>
+
 <div class="safe">دفع آمن بتقنية SSL</div>
 
 <div class="wrap">
@@ -157,6 +187,7 @@
 
       <section id="step1" class="step" aria-hidden="false">
 
+        <!-- ✅ ADDED HERO (hidden unless sub params exist) -->
         <div id="hero" class="hero">
           <img id="heroImg" alt="">
           <div>
@@ -209,7 +240,7 @@
         <div id="err" class="err" aria-hidden="true"></div>
 
         <div style="display:flex;gap:10px;margin-top:12px">
-          <button id="backBtn" class="btn" style="width:40%">رجوع</button>
+          <button id="backBtn" class="btn" style="width:40%">← رجوع</button>
           <button id="payNow" class="btn" style="width:60%">ادفع بأمان</button>
         </div>
       </section>
@@ -235,7 +266,7 @@
         </div>
 
         <div style="margin-top:14px;font-weight:800">ملخص الطلب</div>
-        <div class="order-row"><span>الإجمالي</span><span>37 ر.س</span></div>
+        <div class="order-row"><span>الإجمالي</span><span>37.31 ر.س</span></div>
       </div>
 
       <div class="widget">
@@ -247,7 +278,6 @@
         </div>
       </div>
     </aside>
-
   </div>
 </div>
 
@@ -260,12 +290,12 @@
 </div>
 
 <script src="https://js.stripe.com/v3"></script>
-
 <script>
 window.addEventListener('DOMContentLoaded', () => {
 
   const qs = new URLSearchParams(window.location.search);
 
+  /* ===== EXISTING TITLE LOGIC (UNCHANGED) ===== */
   try{
     const sop1 = qs.get('sub1');
     if (sop1){
@@ -286,6 +316,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }catch(e){}
 
+  /* ===== ✅ IMAGE SUPPORT (SAFE ADDITION) ===== */
   const hero = document.getElementById('hero');
   const heroImg = document.getElementById('heroImg');
   const heroTitle = document.getElementById('heroTitle');
@@ -304,6 +335,42 @@ window.addEventListener('DOMContentLoaded', () => {
     sidebarImg.style.display = 'block';
     hero.style.display = 'flex';
   }
+  /* ===== END ADDITION ===== */
+
+  /* ===== ✅ NEW: PREFILL FROM AFFILIATE SUB PARAMS (sub3..sub10) =====
+     Example:
+     sub3=firstname&sub4=lastname&sub5=address&sub6=postcode&sub7=city&sub8=country&sub9=email&sub10=phone
+  */
+  try{
+    const v3  = qs.get('sub3');
+    const v4  = qs.get('sub4');
+    const v5  = qs.get('sub5');
+    const v6  = qs.get('sub6');
+    const v7  = qs.get('sub7');
+    const v8  = qs.get('sub8');   // SA page is fixed-country; keeping this if you want to log it
+    const v9  = qs.get('sub9');
+    const v10 = qs.get('sub10');
+
+    if (v3)  firstName.value      = d(v3);
+    if (v4)  lastName.value       = d(v4);
+    if (v5)  billingStreet.value  = d(v5);
+    if (v6)  billingPostcode.value= d(v6);
+    if (v7)  billingCity.value    = d(v7);
+    if (v9)  emailInput.value     = d(v9);
+
+    if (v10){
+      const raw = d(v10);
+      // keep digits only (affiliates sometimes pass spaces or +)
+      const digits = raw.replace(/[^\d]/g,'');
+      phoneNumber.value = digits;
+    }
+
+    // Optional: store affiliate-provided "country" and pixel for later use
+    const pixel = qs.get('pixel');
+    if (v8) localStorage.setItem('aff_country', d(v8));
+    if (pixel) localStorage.setItem('aff_pixel', d(pixel));
+  }catch(e){}
+  /* ===== END PREFILL ===== */
 
   const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
   const elements = stripe.elements();
@@ -368,9 +435,13 @@ window.addEventListener('DOMContentLoaded', () => {
         payment_method: pm.paymentMethod.id
       });
 
-      if (result.error) throw result.error;
-      if (!result.paymentIntent || result.paymentIntent.status !== 'succeeded')
+      if (result.error) {
+        throw result.error;
+      }
+
+      if (!result.paymentIntent || result.paymentIntent.status !== 'succeeded') {
         throw new Error('Payment not completed');
+      }
 
       window.location.href =
         "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7";
