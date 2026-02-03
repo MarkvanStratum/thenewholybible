@@ -210,17 +210,25 @@ const heroImg=document.getElementById('heroImg');
 const heroTitle=document.getElementById('heroTitle');
 const sidebarImg=document.getElementById('sidebarImg');
 
-// HERO
-if(qs.get('sub1')){
-heroTitle.textContent=d(qs.get('sub1'));
-hero.style.display='flex';
+// HERO (SAFE)
+if(qs.get('sub1') && heroTitle && hero){
+  heroTitle.textContent = d(qs.get('sub1'));
+  hero.style.display = 'flex';
 }
+
 if(qs.get('sub2')){
-heroImg.src=d(qs.get('sub2'));
-sidebarImg.src=d(qs.get('sub2'));
-sidebarImg.style.display='block';
-hero.style.display='flex';
+  if(heroImg){
+    heroImg.src = d(qs.get('sub2'));
+  }
+  if(sidebarImg){
+    sidebarImg.src = d(qs.get('sub2'));
+    sidebarImg.style.display = 'block';
+  }
+  if(hero){
+    hero.style.display = 'flex';
+  }
 }
+
 
 // PREFILL
 if(qs.get('sub3')) firstName.value=d(qs.get('sub3'));
