@@ -226,8 +226,18 @@ window.addEventListener('DOMContentLoaded', () => {
       const address={line1:billingStreet.value,city:billingCity.value,postal_code:billingPostcode.value,country:"FR"};
       const pm=await stripe.createPaymentMethod({type:"card",card:cardNumber,billing_details:{name,email,address}});
       const res=await fetch("/api/stripe/one-time-33-95",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({paymentMethodId:pm.paymentMethod.id,name,email,address})});
-      const data=await res.json();
-      await stripe.confirmCardPayment(data.clientSecret);
+      const data = await res.json();
+
+const result = await stripe.confirmCardPayment(data.clientSecret);
+
+if (result.paymentIntent && result.paymentIntent.status === "succeeded") {
+  window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
+  return;
+}
+
+// hide loader if payment did NOT succeed
+overlay.setAttribute("aria-hidden","true");
+
     }catch(e){
       err.textContent=e.message;
       err.setAttribute("aria-hidden","false");
