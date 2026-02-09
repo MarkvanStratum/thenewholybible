@@ -56,6 +56,9 @@
       background:#16a34a;color:#fff;font-weight:900;cursor:pointer
     }
 
+    .logos{display:flex;gap:10px;margin-top:12px}
+    .logos img{height:20px}
+
     .err{
       display:none;background:#fff1f1;border:1px solid #f5bcbc;
       padding:10px;border-radius:10px;margin-top:10px;color:#9a1a1a
@@ -140,6 +143,36 @@
 
 <body>
 
+<script>
+  sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
+</script>
+
+<!-- GoAffPro tracking -->
+<script>
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const keys = ["sub_id","subid","aff_sub","aff_sub4","click_id","cid","tid"];
+  for (const k of keys){
+    const v = qs.get(k);
+    if (v){
+      localStorage.setItem("aff_sub_id", v);
+      document.cookie = "aff_sub_id=" + v + "; path=/";
+    }
+  }
+})();
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const ref =
+    qs.get("ref") ||
+    localStorage.getItem("gaf_ref") ||
+    (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
+  if (ref){
+    localStorage.setItem("gaf_ref", ref);
+    document.cookie = "gaf_ref=" + ref + "; path=/";
+  }
+})();
+</script>
+
 <div class="safe">Sigurno SSL plaćanje</div>
 
 <div class="wrap">
@@ -154,6 +187,7 @@
 
       <section id="step1" class="step" aria-hidden="false">
 
+        <!-- ✅ HERO (hidden unless sub params exist) -->
         <div id="hero" class="hero">
           <img id="heroImg" alt="">
           <div>
@@ -261,6 +295,61 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const qs = new URLSearchParams(window.location.search);
 
+  /* ===== PREFILL (name/email/address/phone) ===== */
+  const d = v => { try { return decodeURIComponent(v||''); } catch { return v||'' } };
+
+  try{
+    if (qs.get('sub3')) firstName.value = d(qs.get('sub3'));
+    if (qs.get('sub4')) lastName.value = d(qs.get('sub4'));
+    if (qs.get('sub5')) billingStreet.value = d(qs.get('sub5'));
+    if (qs.get('sub6')) billingPostcode.value = d(qs.get('sub6'));
+    if (qs.get('sub7')) billingCity.value = d(qs.get('sub7'));
+    if (qs.get('sub9')) emailInput.value = d(qs.get('sub9'));
+    if (qs.get('sub10')) phoneNumber.value = d(qs.get('sub10'));
+  }catch(e){}
+  /* ===== END PREFILL ===== */
+
+  /* ===== EXISTING TITLE LOGIC (SAME AS ZA) ===== */
+  try{
+    const sop1 = qs.get('sub1');
+    if (sop1){
+      const title = decodeURIComponent(sop1);
+
+      const pt = document.querySelector('.page-title');
+      if (pt){
+        for (const n of pt.childNodes){
+          if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()){
+            n.textContent = title + ' ';
+            break;
+          }
+        }
+      }
+
+      const dEl = document.querySelector('.delivery div div');
+      if (dEl) dEl.textContent = title;
+    }
+  }catch(e){}
+  /* ===== END TITLE LOGIC ===== */
+
+  /* ===== IMAGE SUPPORT (SAME AS ZA) ===== */
+  const hero = document.getElementById('hero');
+  const heroImg = document.getElementById('heroImg');
+  const heroTitle = document.getElementById('heroTitle');
+  const sidebarImg = document.getElementById('sidebarImg');
+
+  if (qs.get('sub1')) {
+    heroTitle.textContent = d(qs.get('sub1'));
+    hero.style.display = 'flex';
+  }
+
+  if (qs.get('sub2')) {
+    heroImg.src = d(qs.get('sub2'));
+    sidebarImg.src = d(qs.get('sub2'));
+    sidebarImg.style.display = 'block';
+    hero.style.display = 'flex';
+  }
+  /* ===== END IMAGE SUPPORT ===== */
+
   const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
   const elements = stripe.elements();
 
@@ -319,14 +408,18 @@ window.addEventListener('DOMContentLoaded', () => {
         })
       });
 
-      const d = await r.json();
-      const result = await stripe.confirmCardPayment(d.clientSecret,{
+      const dd = await r.json();
+      const result = await stripe.confirmCardPayment(dd.clientSecret, {
         payment_method: pm.paymentMethod.id
       });
 
-      if (result.error) throw result.error;
-      if (!result.paymentIntent || result.paymentIntent.status !== 'succeeded')
+      if (result.error) {
+        throw result.error;
+      }
+
+      if (!result.paymentIntent || result.paymentIntent.status !== 'succeeded') {
         throw new Error('Plaćanje nije dovršeno');
+      }
 
       window.location.href =
         "https://cudsr.bemobtrcks.com/go/6b6e67d8-fe22-4816-8318-ef7cf7685f83";
