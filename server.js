@@ -557,6 +557,47 @@ app.post("/api/stripe/charge-cart-total", async (req, res) => {
   }
 });
 
+//new stripe account
+
+app.post("/api/stripe/new/one-time-28-95", async (req, res) => {
+  try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
+
+    const { paymentMethodId, billingDetails } = req.body;
+
+    if (!paymentMethodId) {
+      return res.status(400).json({ error: "Missing paymentMethodId" });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: 2895, // $28.95
+      currency: "usd",
+      payment_method: paymentMethodId,
+      confirmation_method: "manual",
+      confirm: false,
+      receipt_email: billingDetails?.email,
+      shipping: billingDetails?.address
+        ? {
+            name: billingDetails.name,
+            address: billingDetails.address
+          }
+        : undefined
+    });
+
+    return res.json({
+      clientSecret: paymentIntent.client_secret
+    });
+
+  } catch (err) {
+    console.error("Stripe NEW 28.95 error:", err);
+    return res.status(500).json({
+      error: err.message || "Payment failed"
+    });
+  }
+});
+
+
+
 /* ========================================
    AIRWALLEX
 ======================================== */
