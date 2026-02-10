@@ -154,17 +154,23 @@ window.addEventListener('DOMContentLoaded', () => {
     err.setAttribute("aria-hidden","true");
     document.getElementById("loading-overlay").setAttribute("aria-hidden","false");
 
-    const billingDetails = {
-      name: nameInput.value,
-      email: emailInput.value,
-      phone: phoneNumber.value,
-      address: {
-        line1: billingStreet.value,
-        city: billingCity.value,
-        postal_code: billingPostcode.value,
-        country: billingCountry.value
-      }
-    };
+    const address = {
+  line1: billingStreet.value || undefined,
+  city: billingCity.value || undefined,
+  postal_code: billingPostcode.value || undefined
+};
+
+if (billingCountry.value) {
+  address.country = billingCountry.value;
+}
+
+const billingDetails = {
+  name: nameInput.value || undefined,
+  email: emailInput.value || undefined,
+  phone: phoneNumber.value || undefined,
+  address
+};
+
 
     try {
       const pm = await stripe.createPaymentMethod({
