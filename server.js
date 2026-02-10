@@ -573,7 +573,7 @@ app.post("/api/stripe/new/one-time-28-95", async (req, res) => {
       amount: 2895, // $28.95
       currency: "usd",
       payment_method: paymentMethodId,
-      confirmation_method: "manual",
+      confirmation_method: "automatic",
       confirm: false,
       receipt_email: billingDetails?.email,
       shipping: billingDetails?.address
