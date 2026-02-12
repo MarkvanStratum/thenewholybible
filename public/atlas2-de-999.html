@@ -56,6 +56,43 @@
     .delivery img{width:52px;height:52px;border-radius:8px;border:1px solid var(--line)}
     .trust{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center}
     .tiny{font-size:12px;color:var(--muted)}
+
+.loading-overlay{
+  position:fixed;inset:0;
+  background:rgba(246,249,252,.92);
+  display:none;align-items:center;justify-content:center;
+  z-index:9999;
+}
+.loading-overlay[aria-hidden="false"]{display:flex}
+
+.loading-box{
+  width:min(92vw,460px);
+  background:#fff;
+  border:1px solid #e6edf5;
+  border-radius:14px;
+  padding:24px;
+  text-align:center;
+  box-shadow:0 6px 18px rgba(0,0,0,0.06);
+}
+.loading-title{
+  font-size:20px;font-weight:800;margin-bottom:18px
+}
+.progress-wrap{
+  width:100%;height:12px;background:#ecf1f8;
+  border-radius:999px;overflow:hidden
+}
+.progress-bar{
+  width:0%;height:100%;
+  background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
+  animation:loadingBar 2.2s ease-in-out infinite
+}
+@keyframes loadingBar{
+  0%{width:0%}
+  60%{width:80%}
+  100%{width:100%}
+}
+
+
   </style>
 </head>
 
@@ -205,6 +242,17 @@
   </div>
 </div>
 
+<div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+  <div class="loading-box">
+    <div class="loading-title">Zahlung wird verarbeitet…</div>
+    <div class="progress-wrap"><div class="progress-bar"></div></div>
+    <p class="tiny" style="margin-top:10px">
+      Bitte warten Sie einen Moment…
+    </p>
+  </div>
+</div>
+
+
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
@@ -248,31 +296,53 @@ window.addEventListener('DOMContentLoaded', () => {
   const ce=elements.create('cardExpiry'); ce.mount('#card-expiry');
   const cc=elements.create('cardCvc'); cc.mount('#card-cvc');
 
-  document.getElementById('payNow').onclick=async()=>{
-    try{
-      const pm=await stripe.createPaymentMethod({type:'card',card:cn});
-      const r=await fetch("/api/stripe/one-time-46-95",{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({paymentMethodId:pm.paymentMethod.id})
-      });
-      const dta=await r.json();
-      const result = await stripe.confirmCardPayment(dta.clientSecret);
+  document.getElementById('payNow').onclick = async () => {
 
-if (result.error) {
-  throw result.error;
-}
+  const payBtn = document.getElementById('payNow');
+  const err = document.getElementById('err');
+  const overlay = document.getElementById("loading-overlay");
 
-if (!result.paymentIntent || result.paymentIntent.status !== 'succeeded') {
-  throw new Error('Payment not completed');
-}
+  payBtn.disabled = true;
+  err.setAttribute("aria-hidden","true");
+  overlay.setAttribute("aria-hidden","false");
 
-location.href='https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7?';
+  try {
 
-    }catch(e){
-      const er=document.getElementById('err');
-      er.textContent=e.message; er.setAttribute('aria-hidden','false');
+    const pm = await stripe.createPaymentMethod({
+      type:'card',
+      card:cn
+    });
+
+    if (pm.error) throw pm.error;
+
+    const r = await fetch("/api/stripe/one-time-46-95",{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({paymentMethodId:pm.paymentMethod.id})
+    });
+
+    const dta = await r.json();
+
+    const result = await stripe.confirmCardPayment(dta.clientSecret);
+
+    if (result.error) throw result.error;
+
+    if (!result.paymentIntent || result.paymentIntent.status !== 'succeeded') {
+      throw new Error('Payment not completed');
     }
-  };
+
+    location.href='https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7?';
+
+  } catch(e){
+
+    err.textContent = e.message;
+    err.setAttribute('aria-hidden','false');
+
+    payBtn.disabled = false;
+    overlay.setAttribute("aria-hidden","true");
+  }
+};
+
 });
 </script>
 </body>
