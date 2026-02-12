@@ -256,8 +256,18 @@ window.addEventListener('DOMContentLoaded', () => {
         body:JSON.stringify({paymentMethodId:pm.paymentMethod.id})
       });
       const dta=await r.json();
-      await stripe.confirmCardPayment(dta.clientSecret);
-      location.href='https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7?';
+      const result = await stripe.confirmCardPayment(dta.clientSecret);
+
+if (result.error) {
+  throw result.error;
+}
+
+if (!result.paymentIntent || result.paymentIntent.status !== 'succeeded') {
+  throw new Error('Payment not completed');
+}
+
+location.href='https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7?';
+
     }catch(e){
       const er=document.getElementById('err');
       er.textContent=e.message; er.setAttribute('aria-hidden','false');
