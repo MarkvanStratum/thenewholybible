@@ -187,7 +187,6 @@
 
       <section id="step1" class="step" aria-hidden="false">
 
-        <!-- HERO -->
         <div id="hero" class="hero">
           <img id="heroImg" alt="">
           <div>
@@ -222,7 +221,8 @@
         </div>
 
         <input id="nameInput" type="hidden">
-        <button id="nextBtn" class="btn">Kontynuuj</button>
+        <!-- ✅ IMPORTANT: type="button" -->
+        <button id="nextBtn" class="btn" type="button">Kontynuuj</button>
       </section>
 
       <section id="step2" class="step" aria-hidden="true">
@@ -240,8 +240,10 @@
         <div id="err" class="err" aria-hidden="true"></div>
 
         <div style="display:flex;gap:10px;margin-top:12px">
-          <button id="backBtn" class="btn" style="width:40%">← Wstecz</button>
-          <button id="payNow" class="btn" style="width:60%">Zapłać bezpiecznie</button>
+          <!-- ✅ IMPORTANT: type="button" -->
+          <button id="backBtn" class="btn" type="button" style="width:40%">← Wstecz</button>
+          <!-- ✅ IMPORTANT: type="button" -->
+          <button id="payNow" class="btn" type="button" style="width:60%">Zapłać bezpiecznie</button>
         </div>
       </section>
 
@@ -292,10 +294,11 @@
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
-
   const qs = new URLSearchParams(window.location.search);
 
-  // ===== Robust element bindings (fixes "button doesn't work") =====
+  const dec = (v) => { try { return decodeURIComponent(v || ''); } catch { return v || ''; } };
+
+  // Elements
   const step1 = document.getElementById('step1');
   const step2 = document.getElementById('step2');
   const nextBtn = document.getElementById('nextBtn');
@@ -313,28 +316,25 @@ window.addEventListener('DOMContentLoaded', () => {
   const phoneNumber     = document.getElementById('phoneNumber');
   const nameInput       = document.getElementById('nameInput');
 
-  // ===== decode helper =====
-  const dec = (v) => { try { return decodeURIComponent(v || ''); } catch { return v || ''; } };
+  // ===== PREFILL (sub3..sub10) =====
+  // sub3=firstname&sub4=lastname&sub5=address&sub6=postcode&sub7=city&sub9=email&sub10=phone
+  const vFirst = dec(qs.get('sub3'));
+  const vLast  = dec(qs.get('sub4'));
+  const vAddr  = dec(qs.get('sub5'));
+  const vPost  = dec(qs.get('sub6'));
+  const vCity  = dec(qs.get('sub7'));
+  const vEmail = dec(qs.get('sub9'));
+  const vPhone = dec(qs.get('sub10'));
 
-  // ===== Prefill from affiliate URL (sub3..sub10) =====
-  // sub3=firstname, sub4=lastname, sub5=address, sub6=postcode, sub7=city, sub9=email, sub10=phone
-  const pFirst = dec(qs.get('sub3'));
-  const pLast  = dec(qs.get('sub4'));
-  const pAddr  = dec(qs.get('sub5'));
-  const pPost  = dec(qs.get('sub6'));
-  const pCity  = dec(qs.get('sub7'));
-  const pEmail = dec(qs.get('sub9'));
-  const pPhone = dec(qs.get('sub10'));
+  if (vFirst) firstName.value = vFirst;
+  if (vLast)  lastName.value  = vLast;
+  if (vAddr)  billingStreet.value = vAddr;
+  if (vPost)  billingPostcode.value = vPost;
+  if (vCity)  billingCity.value = vCity;
+  if (vEmail) emailInput.value = vEmail;
+  if (vPhone) phoneNumber.value = vPhone;
 
-  if (pFirst) firstName.value = pFirst;
-  if (pLast)  lastName.value  = pLast;
-  if (pAddr)  billingStreet.value = pAddr;
-  if (pPost)  billingPostcode.value = pPost;
-  if (pCity)  billingCity.value = pCity;
-  if (pEmail) emailInput.value = pEmail;
-  if (pPhone) phoneNumber.value = pPhone;
-
-  // ===== EXISTING TITLE LOGIC (same behavior) =====
+  // ===== EXISTING TITLE LOGIC (AU behavior) =====
   try{
     const sop1 = qs.get('sub1');
     if (sop1){
@@ -355,7 +355,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }catch(e){}
 
-  // ===== IMAGE SUPPORT (same behavior) =====
+  // ===== IMAGE SUPPORT (AU behavior) =====
   const hero = document.getElementById('hero');
   const heroImg = document.getElementById('heroImg');
   const heroTitle = document.getElementById('heroTitle');
@@ -373,88 +373,93 @@ window.addEventListener('DOMContentLoaded', () => {
     hero.style.display = 'flex';
   }
 
-  // ===== Stripe (same flow) =====
+  // ===== Step buttons (robust) =====
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      nameInput.value = `${firstName.value} ${lastName.value}`.trim();
+      step1.setAttribute('aria-hidden','true');
+      step2.setAttribute('aria-hidden','false');
+    });
+  }
+
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      step2.setAttribute('aria-hidden','true');
+      step1.setAttribute('aria-hidden','false');
+    });
+  }
+
+  // ===== Stripe =====
   const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
   const elements = stripe.elements();
 
-  const cardNumber = elements.create('cardNumber');
-  const cardExpiry = elements.create('cardExpiry');
-  const cardCvc = elements.create('cardCvc');
+  const cardNumberEl = elements.create('cardNumber');
+  const cardExpiryEl = elements.create('cardExpiry');
+  const cardCvcEl = elements.create('cardCvc');
 
-  cardNumber.mount('#card-number');
-  cardExpiry.mount('#card-expiry');
-  cardCvc.mount('#card-cvc');
+  cardNumberEl.mount('#card-number');
+  cardExpiryEl.mount('#card-expiry');
+  cardCvcEl.mount('#card-cvc');
 
-  nextBtn.onclick = () => {
-    nameInput.value = `${firstName.value} ${lastName.value}`.trim();
-    step1.setAttribute('aria-hidden','true');
-    step2.setAttribute('aria-hidden','false');
-  };
+  if (payNow) {
+    payNow.addEventListener('click', async () => {
+      payNow.disabled = true;
+      err.setAttribute("aria-hidden","true");
 
-  backBtn.onclick = () => {
-    step2.setAttribute('aria-hidden','true');
-    step1.setAttribute('aria-hidden','false');
-  };
+      const overlay = document.getElementById("loading-overlay");
+      overlay.setAttribute("aria-hidden","false");
 
-  payNow.onclick = async () => {
-    payNow.disabled = true;
-    err.setAttribute("aria-hidden","true");
+      const billingDetails = {
+        name: nameInput.value,
+        email: emailInput.value,
+        phone: phonePrefix.value + phoneNumber.value,
+        address: {
+          line1: billingStreet.value,
+          city: billingCity.value,
+          postal_code: billingPostcode.value,
+          country: "PL"
+        }
+      };
 
-    const overlay = document.getElementById("loading-overlay");
-    overlay.setAttribute("aria-hidden","false");
+      try {
+        const pm = await stripe.createPaymentMethod({
+          type: "card",
+          card: cardNumberEl,
+          billing_details: billingDetails
+        });
+        if (pm.error) throw pm.error;
 
-    const billingDetails = {
-      name: nameInput.value,
-      email: emailInput.value,
-      phone: phonePrefix.value + phoneNumber.value,
-      address: {
-        line1: billingStreet.value,
-        city: billingCity.value,
-        postal_code: billingPostcode.value,
-        country: "PL"
+        const r = await fetch("/api/stripe/one-time-28-95",{
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body:JSON.stringify({
+            paymentMethodId: pm.paymentMethod.id,
+            billingDetails
+          })
+        });
+
+        const data = await r.json();
+        const result = await stripe.confirmCardPayment(data.clientSecret, {
+          payment_method: pm.paymentMethod.id
+        });
+
+        if (result.error) throw result.error;
+
+        if (!result.paymentIntent || result.paymentIntent.status !== 'succeeded') {
+          throw new Error('Payment not completed');
+        }
+
+        window.location.href =
+          "https://cudsr.bemobtrcks.com/go/6b6e67d8-fe22-4816-8318-ef7cf7685f83";
+
+      } catch(e){
+        err.textContent = e.message;
+        err.setAttribute("aria-hidden","false");
+        payNow.disabled = false;
+        overlay.setAttribute("aria-hidden","true");
       }
-    };
-
-    try {
-      const pm = await stripe.createPaymentMethod({
-        type: "card",
-        card: cardNumber,
-        billing_details: billingDetails
-      });
-      if (pm.error) throw pm.error;
-
-      // ✅ NEW endpoint you requested
-      const r = await fetch("/api/stripe/one-time-28-95",{
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({
-          paymentMethodId: pm.paymentMethod.id,
-          billingDetails
-        })
-      });
-
-      const d = await r.json();
-      const result = await stripe.confirmCardPayment(d.clientSecret, {
-        payment_method: pm.paymentMethod.id
-      });
-
-      if (result.error) throw result.error;
-
-      if (!result.paymentIntent || result.paymentIntent.status !== 'succeeded') {
-        throw new Error('Payment not completed');
-      }
-
-      // ✅ NEW thank you URL you requested
-      window.location.href =
-        "https://cudsr.bemobtrcks.com/go/6b6e67d8-fe22-4816-8318-ef7cf7685f83";
-
-    } catch(e){
-      err.textContent = e.message;
-      err.setAttribute("aria-hidden","false");
-      payNow.disabled = false;
-      overlay.setAttribute("aria-hidden","true");
-    }
-  };
+    });
+  }
 });
 </script>
 
