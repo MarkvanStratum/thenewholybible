@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Secure Checkout</title>
+  <meta name="referrer" content="no-referrer">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,700,900&display=swap">
+  <style>
+    body, html { margin: 0; padding: 0; font-family: Inter, sans-serif; background: #fafafa; color: #0a2540; }
+    .wrap { max-width: 1100px; margin: auto; padding: 18px 14px 60px; }
+    .safe { background: #000; color: #fff; font-size: 12px; padding: 6px 10px; }
+    .page-title { font-size: 28px; font-weight: 900; display: flex; gap: 8px; align-items: center; margin: 10px 0; }
+    .stars { color: #f6b80c; font-size: 15px; }
+    .reviews { color: #5b6b82; font-size: 13px; }
+    .grid { display: grid; grid-template-columns: 1fr 360px; gap: 18px; }
+    @media(max-width:980px){ .grid { grid-template-columns: 1fr; } }
+    .card { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 22px; }
+    .h2 { font-size: 18px; font-weight: 800; margin: 10px 0 14px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media(max-width:620px) { .form-grid { grid-template-columns: 1fr; } }
+    .label { font-weight: 700; font-size: 13px; margin: 4px 0; }
+    .input, .el { width: 100%; border: 1px solid #cfd6e4; border-radius: 10px; padding: 12px; font-size: 15px; }
+    .btn { width: 100%; padding: 12px; font-size: 16px; font-weight: 900; border-radius: 12px; border: none; background: #16a34a; color: white; cursor: pointer; }
+    .btn.muted { background: #f1f4f8; color: #20324d; border: 1px solid #e5e7eb; }
+    .logos { display: flex; gap: 10px; margin-top: 12px; }
+    .logos img { height: 20px; }
+    .err { display: none; background: #fff1f1; color: #9a1a1a; padding: 10px; border-radius: 10px; font-size: 14px; margin-top: 10px; border: 1px solid #f5bcbc; }
+    .err[aria-hidden="false"] { display: block; }
+    .step { display: none; }
+    .step[aria-hidden="false"] { display: block; }
+    .widget { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+    .delivery { display: flex; align-items: center; gap: 12px; background: #f7fbff; border: 1px dashed #d9e2ef; padding: 12px; border-radius: 10px; }
+    .delivery img { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; }
+    .order-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-top: 1px dashed #e6eaf1; }
+    .order-row:first-of-type { border-top: none; }
+    .trust { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; text-align: center; }
+    .trust .box { border: 1px solid #e5e7eb; border-radius: 10px; padding: 8px; }
+    .trust .big { font-weight: 900; font-size: 18px; }
+    .trust .small { font-size: 12px; color: #5b6b82; }
+
+    /* Loading overlay */
+    #loadingOverlay {
+      position: fixed; inset: 0;
+      background: rgba(246,249,252,.92);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    #loadingOverlay[aria-hidden="false"] {
+      display: flex;
+    }
+    .loading-box {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 320px;
+    }
+    .loading-title {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(to right, #3b82f6 0%, #06b6d4 50%, #3b82f6 100%);
+      background-size: 200% auto;
+      animation: loading 1.5s linear infinite;
+    }
+    @keyframes loading {
+      0% { background-position: 0% 0%; }
+      100% { background-position: -200% 0%; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="safe">SSL Secure Checkout</div>
+
+<div class="wrap">
+  <div class="page-title">
+    🔒 Secure Checkout <span class="stars">★★★★★</span><span class="reviews">(2777 reviews)</span>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT -->
+    <div class="card">
+      <section id="step1" class="step" aria-hidden="false">
+        <div class="h2">1. Shipping Info</div>
+        <div class="form-grid">
+          <div><div class="label">First Name</div><input id="firstName" class="input"></div>
+          <div><div class="label">Last Name</div><input id="lastName" class="input"></div>
+        </div>
+        <div class="form-grid">
+          <div style="grid-column:1/-1"><div class="label">Address</div><input id="billingStreet" class="input"></div>
+          <div><div class="label">Postcode</div><input id="billingPostcode" class="input"></div>
+          <div><div class="label">City</div><input id="billingCity" class="input"></div>
+        </div>
+        <div class="form-grid">
+          <div><div class="label">Email</div><input id="emailInput" class="input" type="email"></div>
+          <div><div class="label">Country</div><input id="billingCountry" class="input"></div>
+        </div>
+        <button id="nextBtn" class="btn">Continue</button>
+        <div class="logos">
+          <img src="/visa.png"><img src="/mastercard.png"><img src="/amex.png"><img src="/discover.jpg">
+        </div>
+      </section>
+
+      <section id="step2" class="step" aria-hidden="true">
+        <div class="h2">2. Payment</div>
+        <p style="font-size:13px;color:#5b6b82;">Card information is encrypted and securely processed by Stripe.</p>
+        <div><div class="label">Card Number</div><div id="card-number" class="el"></div></div>
+        <div class="form-grid">
+          <div><div class="label">Expiry</div><div id="card-expiry" class="el"></div></div>
+          <div><div class="label">CVC</div><div id="card-cvc" class="el"></div></div>
+        </div>
+        <div id="err" class="err" aria-hidden="true"></div>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button id="backBtn" class="btn muted" style="width:40%">← Back</button>
+          <button id="payNow" class="btn" style="width:60%">Pay</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- RIGHT -->
+    <aside>
+      <div class="widget">
+        <div class="w-title" style="text-align:center">What customers are saying</div>
+        <div style="text-align:center;font-weight:700;">Fenella Lara</div>
+        <div style="text-align:center;color:#f6b80c;">★★★★★</div>
+        <p style="font-size:12px;text-align:center;color:#5b6b82;">I received my product yesterday. Fast and outstanding customer support! Thank you.</p>
+      </div>
+
+      <div class="widget">
+        <div class="delivery">
+          <img id="sidebarImg">
+          <div><div style="font-weight:800;">Fast delivery to your address</div><div style="font-size:12px;color:#5b6b82;">3–5 business days</div></div>
+          <div style="margin-left:auto;font-weight:800">Free</div>
+        </div>
+        <div class="w-title" style="margin-top:14px">Order Summary</div>
+        <div class="order-row"><span>Total</span><span id="orderTotal">$33.95</span></div>
+      </div>
+
+      <div class="widget">
+        <div class="w-title">TRUSTED SHOP</div>
+        <div class="trust">
+          <div class="box"><div class="big">99%</div><div class="small">Customer Satisfaction</div></div>
+          <div class="box"><div class="big">SSL</div><div class="small">Secure</div></div>
+          <div class="box"><div class="big">$10K</div><div class="small">Buyer Protection</div></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" aria-hidden="true">
+  <div class="loading-box">
+    <div class="loading-title">Processing your payment…</div>
+    <div class="progress-bar"></div>
+  </div>
+</div>
+
+<!-- Stripe JS -->
+<script src="https://js.stripe.com/v3"></script>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const qs = new URLSearchParams(window.location.search);
+  const map = {
+    sub1: { selector: ".page-title", textOnly: true, prepend: "🔒 " },
+    sub2: { selector: "#sidebarImg", attr: "src" },
+    sub3: { selector: "#firstName" },
+    sub4: { selector: "#lastName" },
+    sub5: { selector: "#billingStreet" },
+    sub6: { selector: "#billingPostcode" },
+    sub7: { selector: "#billingCity" },
+    sub8: { selector: "#billingCountry" },
+    sub9: { selector: "#emailInput" }
+  };
+  for (const [k, cfg] of Object.entries(map)) {
+    const v = qs.get(k);
+    if (!v) continue;
+    const el = document.querySelector(cfg.selector);
+    if (!el) continue;
+    if (cfg.textOnly) el.innerHTML = (cfg.prepend || "") + v;
+    else if (cfg.attr) el.setAttribute(cfg.attr, v);
+    else el.value = v;
+  }
+
+  const stripe = Stripe("pk_live_51SxKzcEAzUPDR2OIpDpc6lPbCweDLEimW1e69ZWMFUfHUM5ADNc0BubRUJjcMEV6aDyO4Cvtr2zscg8upTpCK0GR00UEw83sDh");
+  const elements = stripe.elements();
+  const cardNumber = elements.create('cardNumber');
+  const cardExpiry = elements.create('cardExpiry');
+  const cardCvc = elements.create('cardCvc');
+  cardNumber.mount('#card-number');
+  cardExpiry.mount('#card-expiry');
+  cardCvc.mount('#card-cvc');
+
+  nextBtn.onclick = () => {
+    step1.setAttribute('aria-hidden','true');
+    step2.setAttribute('aria-hidden','false');
+  };
+
+  backBtn.onclick = () => {
+    step2.setAttribute('aria-hidden','true');
+    step1.setAttribute('aria-hidden','false');
+  };
+
+  payNow.onclick = async () => {
+    const overlay = document.getElementById("loadingOverlay");
+    overlay.setAttribute("aria-hidden", "false");
+
+    try {
+      const name = firstName.value + " " + lastName.value;
+      const email = emailInput.value;
+      const address = {
+        line1: billingStreet.value,
+        city: billingCity.value,
+        postal_code: billingPostcode.value,
+        country: "AU"
+      };
+
+      const pm = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardNumber,
+        billing_details: { name, email, address }
+      });
+
+      const res = await fetch("/api/stripe/new/one-time-33-95", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentMethodId: pm.paymentMethod.id, name, email, address })
+      });
+
+      const data = await res.json();
+      await stripe.confirmCardPayment(data.clientSecret);
+    } catch (e) {
+      document.getElementById("err").textContent = e.message;
+      document.getElementById("err").setAttribute("aria-hidden", "false");
+      document.getElementById("loadingOverlay").setAttribute("aria-hidden", "true");
+    }
+  };
+});
+</script>
+</body>
+</html>
