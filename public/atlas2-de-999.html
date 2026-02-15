@@ -308,19 +308,42 @@ window.addEventListener('DOMContentLoaded', () => {
 
   try {
 
-    const pm = await stripe.createPaymentMethod({
-      type:'card',
-      card:cn
-    });
+  // ✅ ADD THIS BLOCK RIGHT HERE
+  const billingDetails = {
+    name: firstName.value + " " + lastName.value,
+    email: emailInput.value,
+    phone: phonePrefix.value + phoneNumber.value,
+    address: {
+      line1: billingStreet.value,
+      city: billingCity.value,
+      postal_code: billingPostcode.value,
+      country: "DE"
+    }
+  };
 
-    if (pm.error) throw pm.error;
+  // ✅ MODIFY THIS
+  const pm = await stripe.createPaymentMethod({
+    type:'card',
+    card:cn,
+    billing_details: billingDetails
+  });
 
-    const r = await fetch("/api/stripe/one-time-46-95",{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({paymentMethodId:pm.paymentMethod.id})
-    });
+  if (pm.error) throw pm.error;
 
+  // ✅ MODIFY THIS
+  const r = await fetch("/api/stripe/one-time-46-95",{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      paymentMethodId: pm.paymentMethod.id,
+      name: billingDetails.name,
+      email: billingDetails.email,
+      phone: billingDetails.phone,
+      address: billingDetails.address
+    })
+  });
+
+      
     const dta = await r.json();
 
     const result = await stripe.confirmCardPayment(dta.clientSecret);
