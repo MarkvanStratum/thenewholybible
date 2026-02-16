@@ -1017,14 +1017,15 @@ console.log("✅ PDF UPLOADED TO R2:", fileName);
 });
 
 /* ========================================
-   NEW STRIPE WEBHOOK (Different Templates)
+   /* ========================================
+   NEW STRIPE WEBHOOK (COMPLETE VERSION)
 ======================================== */
 app.post("/api/stripe/webhook-new", async (req, res) => {
   const sig = req.headers["stripe-signature"];
   let event;
 
   try {
-    // Note: We use the second account's secret key here
+    // Uses the SECOND account secret key
     const stripeNew = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
     event = stripeNew.webhooks.constructEvent(
       req.rawBody,
@@ -1043,33 +1044,18 @@ app.post("/api/stripe/webhook-new", async (req, res) => {
       const orderDate = new Date(intent.created * 1000);
       const amountCents = intent.amount;
 
-      // --- THE KEY CHANGE: POINTING TO DIFFERENT FOLDER ---
-      const templatesDir = path.join(
-        __dirname,
-        "public",
-        "pdf-templates-new", 
-        String(amountCents)
-      );
+      // Pointing to the "new" templates folder seen in your screenshot
+      const templatesDir = path.join(__dirname, "public", "pdf-templates-new", String(amountCents));
 
       if (!fs.existsSync(templatesDir)) {
-          throw new Error(`Directory not found: ${templatesDir}`);
+          console.error(`❌ Directory not found: ${templatesDir}`);
+          return res.json({ received: true });
       }
 
       const templateFiles = fs.readdirSync(templatesDir).filter(f => f.toLowerCase().endsWith(".pdf"));
       const randomTemplate = templateFiles[Math.floor(Math.random() * templateFiles.length)];
       const templatePath = path.join(templatesDir, randomTemplate);
 
-      // (The rest of your existing PDF generation logic follows here...)
-let billing = null;
-      try {
-        if (intent.payment_method) {
-          const stripeNew = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
-          const paymentMethod = await stripeNew.paymentMethods.retrieve(intent.payment_method);
-          billing = paymentMethod.billing_details;
-        }
-      } catch (e) {
-        console.log("⚠️ Could not fetch billing details, skipping address drawing.");
-      }
       const templateBytes = fs.readFileSync(templatePath);
       const pdfDoc = await PDFDocument.load(templateBytes);
       const pages = pdfDoc.getPages();
@@ -1077,10 +1063,29 @@ let billing = null;
       const page2 = pages[1];
       const textColor = rgb(0.35, 0.35, 0.35);
 
+      // --- PAGE 1 DRAWING ---
       page1.drawText(`Check out order #${orderNumber}`, { x: 35, y: 737, size: 12, color: textColor });
       page1.drawText(formatOrderDate(orderDate), { x: 435, y: 712, size: 10, color: textColor });
+      page1.drawText(`Order #${orderNumber} successfully`, { x: 130, y: 563, size: 20, color: textColor });
+      page1.drawText(`submitted`, { x: 98, y: 538, size: 20, color: textColor });
+      page1.drawText(formatShortDate(orderDate), { x: 134, y: 437, size: 9, color: textColor });
+      page1.drawText(getDeliveryRange(orderDate), { x: 437, y: 437, size: 9, color: textColor });
+      page1.drawText(`${orderNumber}`, { x: 124, y: 362, size: 10, color: textColor, characterSpacing: -0.4 });
 
-if (billing && billing.address) {
+      // --- BILLING FETCH ---
+      let billing = null;
+      try {
+        if (intent.payment_method) {
+          const stripeNew = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
+          const paymentMethod = await stripeNew.paymentMethods.retrieve(intent.payment_method);
+          billing = paymentMethod.billing_details;
+        }
+      } catch (e) {
+        console.log("⚠️ Could not fetch billing details");
+      }
+
+      // --- PAGE 2 DRAWING ---
+      if (billing && billing.address) {
         const addressLines = [
           billing.name,
           billing.address.line1,
@@ -1095,9 +1100,8 @@ if (billing && billing.address) {
           y -= 15;
         }
       }
-      
-      // ... Add all your other drawText and R2 upload lines from the original webhook here ...
 
+      // --- SAVE AND UPLOAD TO R2 ---
       const pdfBytes = await pdfDoc.save();
       const fileName = `${9999999999999 - Date.now()}_order-${orderNumber}.pdf`;
 
@@ -1108,12 +1112,12 @@ if (billing && billing.address) {
           ContentType: "application/pdf",
       }));
 
-      console.log(`✅ PDF created from NEW folder for order ${orderNumber}`);
+      console.log(`✅ SUCCESS: PDF created for new account order ${orderNumber}`);
     }
     res.json({ received: true });
   } catch (err) {
-    console.error("❌ New Webhook error details:", err.message, err.stack);
-    res.status(500).send("Webhook handler error");
+    console.error("❌ New Webhook error:", err.message);
+    res.status(500).send("Internal Server Error");
   }
 });
 
