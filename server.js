@@ -18,7 +18,7 @@ const app = express();
 // JSON parser for all NON-webhook routes
 app.use(express.json({
   verify: (req, res, buf) => {
-    if (req.originalUrl.startsWith("/api/stripe/webhook")) {
+    if (req.originalUrl.startsWith("/api/stripe/webhook") || req.originalUrl.startsWith("/api/stripe/webhook-new")) {
       req.rawBody = buf;
     }
   }
@@ -1012,6 +1012,107 @@ console.log("✅ PDF UPLOADED TO R2:", fileName);
     res.json({ received: true });
   } catch (err) {
     console.error("❌ Webhook processing error:", err);
+    res.status(500).send("Webhook handler error");
+  }
+});
+
+/* ========================================
+   NEW STRIPE WEBHOOK (Different Templates)
+======================================== */
+app.post("/api/stripe/webhook-new", async (req, res) => {
+  const sig = req.headers["stripe-signature"];
+  let event;
+
+  try {
+    // Note: We use the second account's secret key here
+    const stripeNew = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
+    event = stripeNew.webhooks.constructEvent(
+      req.rawBody,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET_NEW 
+    );
+  } catch (err) {
+    console.error("❌ New Webhook signature failed:", err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  try {
+    if (event.type === "payment_intent.succeeded") {
+      const intent = event.data.object;
+      const orderNumber = await getNextOrderNumber();
+      const orderDate = new Date(intent.created * 1000);
+      const amountCents = intent.amount;
+
+      // --- THE KEY CHANGE: POINTING TO DIFFERENT FOLDER ---
+      const templatesDir = path.join(
+        __dirname,
+        "public",
+        "pdf-templates-new", 
+        String(amountCents)
+      );
+
+      if (!fs.existsSync(templatesDir)) {
+          throw new Error(`Directory not found: ${templatesDir}`);
+      }
+
+      const templateFiles = fs.readdirSync(templatesDir).filter(f => f.toLowerCase().endsWith(".pdf"));
+      const randomTemplate = templateFiles[Math.floor(Math.random() * templateFiles.length)];
+      const templatePath = path.join(templatesDir, randomTemplate);
+
+      // (The rest of your existing PDF generation logic follows here...)
+let billing = null;
+      try {
+        if (intent.payment_method) {
+          const stripeNew = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
+          const paymentMethod = await stripeNew.paymentMethods.retrieve(intent.payment_method);
+          billing = paymentMethod.billing_details;
+        }
+      } catch (e) {
+        console.log("⚠️ Could not fetch billing details, skipping address drawing.");
+      }
+      const templateBytes = fs.readFileSync(templatePath);
+      const pdfDoc = await PDFDocument.load(templateBytes);
+      const pages = pdfDoc.getPages();
+      const page1 = pages[0];
+      const page2 = pages[1];
+      const textColor = rgb(0.35, 0.35, 0.35);
+
+      page1.drawText(`Check out order #${orderNumber}`, { x: 35, y: 737, size: 12, color: textColor });
+      page1.drawText(formatOrderDate(orderDate), { x: 435, y: 712, size: 10, color: textColor });
+
+if (billing && billing.address) {
+        const addressLines = [
+          billing.name,
+          billing.address.line1,
+          billing.address.line2,
+          `${billing.address.city}, ${billing.address.postal_code}`,
+          billing.address.country,
+        ].filter(Boolean);
+
+        let y = 660;
+        for (const line of addressLines) {
+          page2.drawText(line, { x: 117, y, size: 10, color: textColor });
+          y -= 15;
+        }
+      }
+      
+      // ... Add all your other drawText and R2 upload lines from the original webhook here ...
+
+      const pdfBytes = await pdfDoc.save();
+      const fileName = `${9999999999999 - Date.now()}_order-${orderNumber}.pdf`;
+
+      await r2.send(new PutObjectCommand({
+          Bucket: process.env.R2_BUCKET_NAME,
+          Key: fileName,
+          Body: pdfBytes,
+          ContentType: "application/pdf",
+      }));
+
+      console.log(`✅ PDF created from NEW folder for order ${orderNumber}`);
+    }
+    res.json({ received: true });
+  } catch (err) {
+    console.error("❌ New Webhook error details:", err.message, err.stack);
     res.status(500).send("Webhook handler error");
   }
 });
