@@ -8,6 +8,7 @@ import paypal from "@paypal/paypal-server-sdk";
 import { getNextOrderNumber } from "./orderNumber.js";
 import fs from "fs";
 import { PDFDocument, rgb } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import crypto from "crypto";
 import fetch from "node-fetch";
@@ -853,6 +854,12 @@ console.log(
 
       const templateBytes = fs.readFileSync(templatePath);
       const pdfDoc = await PDFDocument.load(templateBytes);
+      pdfDoc.registerFontkit(fontkit);
+      
+      // Load a font that supports Korean/Chinese (Google Noto Sans)
+      const fontUrl = 'https://pdf-lib.js.org/assets/ubuntu/Ubuntu-R.ttf';
+      const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
+      const customFont = await pdfDoc.embedFont(fontBytes);
 
       const pages = pdfDoc.getPages();
       const page1 = pages[0];
@@ -870,6 +877,7 @@ page1.drawText(`Check out order #${orderNumber}`, {
   y: 737,
   size: 12,
   color: textColor,
+  font: customFont,
 });
 
 // TOP RIGHT: order date
@@ -1057,14 +1065,21 @@ app.post("/api/stripe/webhook-new", async (req, res) => {
       const templatePath = path.join(templatesDir, randomTemplate);
 
       const templateBytes = fs.readFileSync(templatePath);
-      const pdfDoc = await PDFDocument.load(templateBytes);
-      const pages = pdfDoc.getPages();
+const pdfDoc = await PDFDocument.load(templateBytes);
+pdfDoc.registerFontkit(fontkit); // <--- ADD THIS
+
+// Load the font again for this section
+const fontUrl = 'https://pdf-lib.js.org/assets/ubuntu/Ubuntu-R.ttf';
+const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
+const customFont = await pdfDoc.embedFont(fontBytes); // <--- ADD THIS
+
+const pages = pdfDoc.getPages();
       const page1 = pages[0];
       const page2 = pages[1];
       const textColor = rgb(0.35, 0.35, 0.35);
 
       // --- PAGE 1 DRAWING ---
-      page1.drawText(`Check out order #${orderNumber}`, { x: 35, y: 737, size: 12, color: textColor });
+      page1.drawText(`Check out order #${orderNumber}`, { x: 35, y: 737, size: 12, color: textColor, font: customFont });
       page1.drawText(formatOrderDate(orderDate), { x: 435, y: 712, size: 10, color: textColor });
       page1.drawText(`Order #${orderNumber} successfully`, { x: 130, y: 563, size: 20, color: textColor });
       page1.drawText(`submitted`, { x: 98, y: 538, size: 20, color: textColor });
@@ -1096,9 +1111,9 @@ app.post("/api/stripe/webhook-new", async (req, res) => {
 
         let y = 660;
         for (const line of addressLines) {
-          page2.drawText(line, { x: 117, y, size: 10, color: textColor });
-          y -= 15;
-        }
+  page2.drawText(line, { x: 117, y, size: 10, color: textColor, font: customFont }); // <--- ADDED HERE
+  y -= 15;
+}
       }
 
       // --- SAVE AND UPLOAD TO R2 ---
