@@ -13,8 +13,6 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import crypto from "crypto";
 import fetch from "node-fetch";
 
-
-
 const app = express();
 // JSON parser for all NON-webhook routes
 app.use(express.json({
@@ -25,41 +23,27 @@ app.use(express.json({
   }
 }));
 
-
 app.use(cors());
 
-// Enable __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve static site (public folder)
 app.use(express.static(path.join(__dirname, "public")));
 
-// Stripe init
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
 });
 
-// Helper to sanitize strings
 function sanitize(str) {
   return typeof str === "string" ? str.trim() : undefined;
 }
 
-
 function formatOrderDate(date) {
-  return date.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
+  return date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
 }
 
 function formatShortDate(date) {
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 const r2 = new S3Client({
@@ -71,1172 +55,168 @@ const r2 = new S3Client({
   },
 });
 
-
 function getDeliveryRange(date) {
   const deliveryDate = new Date(date);
   deliveryDate.setDate(deliveryDate.getDate() + 7);
-
-  return deliveryDate.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-  });
+  return deliveryDate.toLocaleDateString("en-US", { month: "long", day: "numeric" });
 }
 
-
-
-/* ========================================
-   PAYPAL CLIENT SETUP
-======================================== */
 function getPayPalClient() {
-  const environment =
-    process.env.PAYPAL_ENV === "live"
-      ? new paypal.core.LiveEnvironment(
-          process.env.PAYPAL_CLIENT_ID,
-          process.env.PAYPAL_CLIENT_SECRET
-        )
-      : new paypal.core.SandboxEnvironment(
-          process.env.PAYPAL_CLIENT_ID,
-          process.env.PAYPAL_CLIENT_SECRET
-        );
-
-  return new paypal.core.PayPalHttpClient(environment);
+  const env = process.env.PAYPAL_ENV === "live" 
+    ? new paypal.core.LiveEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET)
+    : new paypal.core.SandboxEnvironment(process.env.PAYPAL_CLIENT_ID, process.env.PAYPAL_CLIENT_SECRET);
+  return new paypal.core.PayPalHttpClient(env);
 }
 
-/* ========================================
-   PAYTIKO: CREATE CHECKOUT SESSION
-======================================== */
-
-console.log("PAYTIKO_CORE_URL =", process.env.PAYTIKO_CORE_URL);
-
-
+/* --- PAYTIKO --- */
 app.post("/api/paytiko/checkout", async (req, res) => {
   try {
-    const {
-      firstName,
-      lastName,
-      email,
-      street,
-      city,
-      zipCode,
-      amount
-    } = req.body;
-
-    // 🔒 Hard-lock product price on server
-    if (Number(amount) !== 60) {
-      return res.status(400).json({ error: "Invalid amount" });
-    }
-
+    const { firstName, lastName, email, street, city, zipCode, amount } = req.body;
+    if (Number(amount) !== 60) return res.status(400).json({ error: "Invalid amount" });
     const timestamp = Math.floor(Date.now() / 1000);
     const orderId = `PTK-${Date.now()}`;
-
-    const rawSignature =
-  email + ";" + timestamp + ";" + process.env.PAYTIKO_MERCHANT_SECRET;
-
-
-    const signature = crypto
-      .createHash("sha256")
-      .update(rawSignature)
-      .digest("hex");
-
-    const payload = {
-  MerchantId: Number(process.env.PAYTIKO_MERCHANT_ID),
-
-  firstName,
-  lastName,
-  email,
-  phone: "",
-  countryCode: "AU",
-  currency: "USD",
-  lockedAmount: 60,
-  orderId,
-  street,
-  city,
-  zipCode,
-  timestamp,
-  signature,
-  isPayout: false
-};
-
-
-console.log("PAYTIKO CONFIG", {
-  merchantId: process.env.PAYTIKO_MERCHANT_ID,
-  secret: process.env.PAYTIKO_MERCHANT_SECRET,
-  core: process.env.PAYTIKO_CORE_URL
-});
-
-console.log("PAYTIKO PAYLOAD", payload);
-
-
-
-    const response = await fetch(
-      `${process.env.PAYTIKO_CORE_URL}/api/sdk/checkout`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "*/*",
-          "X-Merchant-Secret": process.env.PAYTIKO_MERCHANT_SECRET
-        },
-        body: JSON.stringify(payload)
-      }
-    );
-
+    const sig = crypto.createHash("sha256").update(email + ";" + timestamp + ";" + process.env.PAYTIKO_MERCHANT_SECRET).digest("hex");
+    const payload = { MerchantId: Number(process.env.PAYTIKO_MERCHANT_ID), firstName, lastName, email, phone: "", countryCode: "AU", currency: "USD", lockedAmount: 60, orderId, street, city, zipCode, timestamp, signature: sig, isPayout: false };
+    const response = await fetch(`${process.env.PAYTIKO_CORE_URL}/api/sdk/checkout`, { method: "POST", headers: { "Content-Type": "application/json", "X-Merchant-Secret": process.env.PAYTIKO_MERCHANT_SECRET }, body: JSON.stringify(payload) });
     const data = await response.json();
-
-    if (!data.cashierSessionToken) {
-      console.error("Paytiko error:", data);
-      return res.status(500).json({ error: "Paytiko session failed" });
-    }
-
-    res.json({
-      sessionToken: data.cashierSessionToken,
-      orderId
-    });
-
-  } catch (err) {
-    console.error("❌ Paytiko checkout error:", err);
-    res.status(500).json({ error: "Paytiko checkout error" });
-  }
+    if (!data.cashierSessionToken) return res.status(500).json({ error: "Paytiko failed" });
+    res.json({ sessionToken: data.cashierSessionToken, orderId });
+  } catch (err) { res.status(500).json({ error: "Error" }); }
 });
 
-
-/* ========================================
-   PAYPAL: CREATE ORDER (Atlas 2)
-======================================== */
-app.post("/api/paypal/create-order", async (req, res) => {
-  try {
-    const { amount } = req.body;
-
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ error: "Invalid amount" });
-    }
-
-    const client = getPayPalClient();
-    const request = new paypal.orders.OrdersCreateRequest();
-
-    request.prefer("return=representation");
-    request.requestBody({
-      intent: "CAPTURE",
-      purchase_units: [
-        {
-          amount: {
-            currency_code: "USD",
-            value: amount.toFixed(2),
-          },
-          description: "Atlas 2 Purchase",
-        },
-      ],
-    });
-
-    const order = await client.execute(request);
-
-    res.json({ id: order.result.id });
-  } catch (err) {
-    console.error("PayPal create-order error:", err);
-    res.status(500).json({ error: "Failed to create PayPal order" });
-  }
-});
-
-/* ========================================
-   PAYPAL: CAPTURE ORDER (Atlas 2)
-======================================== */
-app.post("/api/paypal/capture-order", async (req, res) => {
-  try {
-    const { orderID } = req.body;
-
-    if (!orderID) {
-      return res.status(400).json({ error: "Missing orderID" });
-    }
-
-    const client = getPayPalClient();
-    const request = new paypal.orders.OrdersCaptureRequest(orderID);
-
-    request.requestBody({});
-
-    const capture = await client.execute(request);
-
-    if (capture.result.status !== "COMPLETED") {
-      throw new Error("Payment not completed");
-    }
-
-    res.json({
-      status: "COMPLETED",
-      orderID: capture.result.id,
-    });
-  } catch (err) {
-    console.error("PayPal capture-order error:", err);
-    res.status(500).json({ error: "Failed to capture PayPal order" });
-  }
-});
-
-/* ========================================
-   STRIPE: ONE-TIME PAYMENT $23.95
-======================================== */
-app.post("/api/stripe/one-time-23-95", async (req, res) => {
-  try {
-    const { name, email, phone, address, paymentMethodId } = req.body;
-
-    const intent = await stripe.paymentIntents.create({
-      amount: Math.round(23.95 * 100),
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: sanitize(email),
-      description: "One-time purchase: $23.95",
-      metadata: {
-        customer_name: sanitize(name),
-        customer_phone: sanitize(phone),
-      },
-      shipping: address ? {
-        name: sanitize(name),
-        phone: sanitize(phone),
-        address: {
-          line1: sanitize(address.line1),
-          line2: sanitize(address.line2),
-          city: sanitize(address.city),
-          postal_code: sanitize(address.postal_code),
-          country: sanitize(address.country),
-        }
-      } : undefined,
-    });
-
-    res.json({ clientSecret: intent.client_secret });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-
-/* ========================================
-   STRIPE: ONE-TIME PAYMENT $33.95
-======================================== */
-app.post("/api/stripe/one-time-33-95", async (req, res) => {
-  try {
-    const { name, email, phone, address, paymentMethodId } = req.body;
-
-      const intent = await stripe.paymentIntents.create({
-      amount: Math.round(33.95 * 100),
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: sanitize(email),
-      description: "One-time purchase: $33.95",
-      metadata: {
-        customer_name: sanitize(name),
-        customer_phone: sanitize(phone),
-      },
-      shipping: {
-        name: sanitize(name),
-        phone: sanitize(phone),
-        address: {
-          line1: sanitize(address?.line1),
-          postal_code: sanitize(address?.postal_code),
-          city: sanitize(address?.city),
-          country: sanitize(address?.country),
-        },
-      },
-    });
-
-    res.json({ clientSecret: intent.client_secret });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-/* ========================================
-   STRIPE: ONE-TIME PAYMENT $60.00
-======================================== */
-app.post("/api/stripe/one-time-60", async (req, res) => {
-  try {
-    const { name, email, phone, address, paymentMethodId } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    const intent = await stripe.paymentIntents.create({
-      amount: Math.round(60 * 100), // $60.00 in cents
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: sanitize(email),
-      description: "One-time purchase: $60.00",
-      metadata: {
-        customer_name: sanitize(name),
-        customer_phone: sanitize(phone),
-      },
-      shipping: {
-        name: sanitize(name),
-        phone: sanitize(phone),
-        address: {
-          line1: sanitize(address?.line1),
-          postal_code: sanitize(address?.postal_code),
-          city: sanitize(address?.city),
-          country: sanitize(address?.country),
-        },
-      },
-    });
-
-    res.json({ clientSecret: intent.client_secret });
-  } catch (err) {
-    console.error("Stripe $60 payment error:", err);
-    res.status(400).json({ error: err.message });
-  }
-});
-
-/* ========================================
-   STRIPE: ONE-TIME PAYMENT $39.95
-======================================== */
-app.post("/api/stripe/one-time-39-95", async (req, res) => {
-  try {
-    const { name, email, phone, address, paymentMethodId } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    const intent = await stripe.paymentIntents.create({
-      amount: Math.round(39.95 * 100), // $39.95 in cents
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: sanitize(email),
-      description: "One-time purchase: $39.95",
-      metadata: {
-        customer_name: sanitize(name),
-        customer_phone: sanitize(phone),
-      },
-      shipping: {
-        name: sanitize(name),
-        phone: sanitize(phone),
-        address: {
-          line1: sanitize(address?.line1),
-          postal_code: sanitize(address?.postal_code),
-          city: sanitize(address?.city),
-          country: sanitize(address?.country),
-        },
-      },
-    });
-
-    res.json({ clientSecret: intent.client_secret });
-  } catch (err) {
-    console.error("Stripe $39.95 payment error:", err);
-    res.status(400).json({ error: err.message });
-  }
-});
-
-/* ========================================
-   STRIPE: ONE-TIME PAYMENT $28.95
-======================================== */
-app.post("/api/stripe/one-time-28-95", async (req, res) => {
-  try {
-    const { name, email, phone, address, paymentMethodId } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    const intent = await stripe.paymentIntents.create({
-      amount: Math.round(28.95 * 100), // $28.95 in cents
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: sanitize(email),
-      description: "One-time purchase: $28.95",
-      metadata: {
-        customer_name: sanitize(name),
-        customer_phone: sanitize(phone),
-      },
-      shipping: {
-        name: sanitize(name),
-        phone: sanitize(phone),
-        address: {
-          line1: sanitize(address?.line1),
-          postal_code: sanitize(address?.postal_code),
-          city: sanitize(address?.city),
-          country: sanitize(address?.country),
-        },
-      },
-    });
-
-    res.json({ clientSecret: intent.client_secret });
-  } catch (err) {
-    console.error("Stripe $28.95 payment error:", err);
-    res.status(400).json({ error: err.message });
-  }
-});
-
-/* ========================================
-   STRIPE: ONE-TIME PAYMENT $46.95
-======================================== */
-app.post("/api/stripe/one-time-46-95", async (req, res) => {
-  try {
-    const { name, email, phone, address, paymentMethodId } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    const intent = await stripe.paymentIntents.create({
-      amount: Math.round(46.95 * 100), // $46.95 in cents
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: sanitize(email),
-      description: "One-time purchase: $46.95",
-      metadata: {
-        customer_name: sanitize(name),
-        customer_phone: sanitize(phone),
-      },
-      shipping: {
-        name: sanitize(name),
-        phone: sanitize(phone),
-        address: {
-          line1: sanitize(address?.line1),
-          postal_code: sanitize(address?.postal_code),
-          city: sanitize(address?.city),
-          country: sanitize(address?.country),
-        },
-      },
-    });
-
-    res.json({ clientSecret: intent.client_secret });
-  } catch (err) {
-    console.error("Stripe $46.95 payment error:", err);
-    res.status(400).json({ error: err.message });
-  }
-});
-
-
-
-
-/* ========================================
-   STRIPE: DYNAMIC CART TOTAL
-======================================== */
-app.post("/api/stripe/charge-cart-total", async (req, res) => {
-  try {
-    const { paymentMethodId, amountUSD, name, email, phone, address } = req.body;
-
-    if (!amountUSD || amountUSD <= 0) {
-      return res.status(400).json({ error: "Invalid amount" });
-    }
-
-    const intent = await stripe.paymentIntents.create({
-      amount: Math.round(amountUSD * 100),
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: sanitize(email),
-      description: `WooCommerce cart payment: $${amountUSD}`,
-      metadata: {
-        customer_name: sanitize(name),
-        customer_phone: sanitize(phone),
-        cart_total_usd: amountUSD,
-      },
-      shipping: {
-        name: sanitize(name),
-        phone: sanitize(phone),
-        address: {
-          line1: sanitize(address?.line1),
-          postal_code: sanitize(address?.postal_code),
-          city: sanitize(address?.city),
-          country: sanitize(address?.country),
-        },
-      },
-    });
-
-    res.json({ clientSecret: intent.client_secret });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-//new stripe account
-
+/* --- STRIPE NEW ACCOUNT ROUTES --- */
 app.post("/api/stripe/new/one-time-28-95", async (req, res) => {
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
-
+    const sNew = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
     const { paymentMethodId, billingDetails } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: 2895, // $28.95
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: billingDetails?.email,
-      shipping: billingDetails?.address
-        ? {
-            name: billingDetails.name,
-            address: billingDetails.address
-          }
-        : undefined
+    const intent = await sNew.paymentIntents.create({
+      amount: 2895, currency: "usd", payment_method: paymentMethodId, confirm: false,
+      receipt_email: billingDetails?.email || undefined, // Fix for "Invalid email"
+      shipping: billingDetails?.address ? { name: billingDetails.name, address: billingDetails.address } : undefined
     });
-
-    return res.json({
-      clientSecret: paymentIntent.client_secret
-    });
-
-  } catch (err) {
-    console.error("Stripe NEW 28.95 error:", err);
-    return res.status(500).json({
-      error: err.message || "Payment failed"
-    });
-  }
-});
-
-app.post("/api/stripe/new/one-time-23-95", async (req, res) => {
-  try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
-
-    const { paymentMethodId, billingDetails } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: 2395, // $23.95
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: billingDetails?.email,
-      shipping: billingDetails?.address
-        ? {
-            name: billingDetails.name,
-            address: billingDetails.address
-          }
-        : undefined
-    });
-
-    res.json({
-      clientSecret: paymentIntent.client_secret
-    });
-
-  } catch (err) {
-    console.error("Stripe NEW 23.95 error:", err);
-    res.status(500).json({ error: err.message || "Payment failed" });
-  }
+    res.json({ clientSecret: intent.client_secret });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.post("/api/stripe/new/one-time-46-95", async (req, res) => {
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
-
+    const sNew = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
     const { paymentMethodId, billingDetails } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: 4695, // $46.95
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: billingDetails?.email,
-      shipping: billingDetails?.address
-        ? {
-            name: billingDetails.name,
-            address: billingDetails.address
-          }
-        : undefined
+    const intent = await sNew.paymentIntents.create({
+      amount: 4695, currency: "usd", payment_method: paymentMethodId, confirm: false,
+      receipt_email: billingDetails?.email || undefined, // Fix for "Invalid email"
+      shipping: billingDetails?.address ? { name: billingDetails.name, address: billingDetails.address } : undefined
     });
-
-    res.json({
-      clientSecret: paymentIntent.client_secret
-    });
-
-  } catch (err) {
-    console.error("Stripe NEW 46.95 error:", err);
-    res.status(500).json({ error: err.message || "Payment failed" });
-  }
+    res.json({ clientSecret: intent.client_secret });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post("/api/stripe/new/one-time-33-95", async (req, res) => {
-  try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
-
-    const { paymentMethodId, billingDetails } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: 3395, // $33.95
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: billingDetails?.email,
-      shipping: billingDetails?.address
-        ? {
-            name: billingDetails.name,
-            address: billingDetails.address
-          }
-        : undefined
-    });
-
-    res.json({
-      clientSecret: paymentIntent.client_secret
-    });
-
-  } catch (err) {
-    console.error("Stripe NEW 33.95 error:", err);
-    res.status(500).json({ error: err.message || "Payment failed" });
-  }
-});
-
-
-/* ========================================
-   AIRWALLEX
-======================================== */
-app.post('/api/airwallex/create-payment-intent', async (req, res) => {
-  console.log('=== AIRWALLEX REQUEST RECEIVED ===');
-  console.log('Request body:', req.body);
-  
-  try {
-    const { amount, currency, customer } = req.body;
-
-    console.log('AIRWALLEX_CLIENT_ID:', process.env.AIRWALLEX_CLIENT_ID ? 'SET' : 'MISSING');
-    console.log('AIRWALLEX_API_KEY:', process.env.AIRWALLEX_API_KEY ? 'SET' : 'MISSING');
-
-    // Step 1: Authenticate
-    console.log('Attempting authentication...');
-    const authResponse = await fetch('https://api.airwallex.com/api/v1/authentication/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-client-id': process.env.AIRWALLEX_CLIENT_ID,
-        'x-api-key': process.env.AIRWALLEX_API_KEY
-      }
-    });
-
-    const authData = await authResponse.json();
-    console.log('Auth response status:', authResponse.status);
-    console.log('Auth response:', JSON.stringify(authData, null, 2));
-    
-    if (!authData.token) {
-      console.error('Authentication failed - no token');
-      return res.status(401).json({ error: authData.message || 'Authentication failed' });
-    }
-
-    console.log('Authentication successful');
-
-    // Step 2: Create PaymentIntent
-    console.log('Creating payment intent...');
-    const paymentResponse = await fetch('https://api.airwallex.com/api/v1/pa/payment_intents/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authData.token}`
-      },
-      body: JSON.stringify({
-        request_id: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        amount: amount,
-        currency: currency,
-        merchant_order_id: `order_${Date.now()}`,
-        customer: customer,
-        return_url: "https://checkoutpartner.xyz/success"
-      })
-    });
-
-    const paymentData = await paymentResponse.json();
-    console.log('Payment response status:', paymentResponse.status);
-    console.log('Payment response:', JSON.stringify(paymentData, null, 2));
-
-    if (!paymentData.id || !paymentData.client_secret) {
-      console.error('Payment creation failed');
-      return res.status(400).json({ error: paymentData.message || 'Failed to create payment intent' });
-    }
-
-    console.log('Payment intent created successfully');
-
-    res.json({
-      id: paymentData.id,
-      client_secret: paymentData.client_secret
-    });
-
-  } catch (error) {
-    console.error('Airwallex error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-/* ========================================
-   HEALTH CHECK
-======================================== */
-app.get("/health", (req, res) => {
-  res.json({ status: "Payment server running (Stripe + Airwallex + PayPal)" });
-});
-
-/* ========================================
-   TEST ORDER NUMBER (TEMP)
-======================================== */
-app.get("/test-order-number", (req, res) => {
-  const number = getNextOrderNumber();
-  res.send(`Next order number is ${number}`);
-});
-
-
-
-
-/* ========================================
-   STRIPE WEBHOOK
-======================================== */
-
-// Stripe requires the raw body for webhooks
+/* --- WEBHOOK MAIN ACCOUNT --- */
 app.post("/api/stripe/webhook", async (req, res) => {
   const sig = req.headers["stripe-signature"];
   let event;
-
   try {
-    event = stripe.webhooks.constructEvent(
-      req.rawBody,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
-  } catch (err) {
-    console.error("❌ Webhook signature verification failed:", err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
+    event = stripe.webhooks.constructEvent(req.rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) { return res.status(400).send(`Error: ${err.message}`); }
 
-  try {
-    if (event.type === "payment_intent.succeeded") {
+  if (event.type === "payment_intent.succeeded") {
+    try {
       const intent = event.data.object;
-
       const orderNumber = await getNextOrderNumber();
       const orderDate = new Date(intent.created * 1000);
+      const templatesDir = path.join(__dirname, "public", "pdf-templates", String(intent.amount));
+      const files = fs.readdirSync(templatesDir).filter(f => f.toLowerCase().endsWith(".pdf"));
+      const templatePath = path.join(templatesDir, files[Math.floor(Math.random() * files.length)]);
 
-      const amountCents = intent.amount;
-
-const templatesDir = path.join(
-  __dirname,
-  "public",
-  "pdf-templates",
-  String(amountCents)
-);
-
-const templateFiles = fs
-  .readdirSync(templatesDir)
-  .filter(file => file.toLowerCase().endsWith(".pdf"));
-
-if (templateFiles.length === 0) {
-  throw new Error(`No PDF templates found in ${templatesDir}`);
-}
-
-const randomTemplate =
-  templateFiles[Math.floor(Math.random() * templateFiles.length)];
-
-const templatePath = path.join(templatesDir, randomTemplate);
-
-console.log(
-  `📄 Using PDF template for $${(amountCents / 100).toFixed(2)}:`,
-  randomTemplate
-);
-
-     
-
-      const templateBytes = fs.readFileSync(templatePath);
-      const pdfDoc = await PDFDocument.load(templateBytes);
+      const pdfDoc = await PDFDocument.load(fs.readFileSync(templatePath));
       pdfDoc.registerFontkit(fontkit);
-      
-      // Load a font that supports Korean/Chinese (Google Noto Sans)
-      const fontUrl = 'https://pdf-lib.js.org/assets/ubuntu/Ubuntu-R.ttf';
-      const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
+      const fontBytes = await fetch('https://pdf-lib.js.org/assets/ubuntu/Ubuntu-R.ttf').then(res => res.arrayBuffer());
       const customFont = await pdfDoc.embedFont(fontBytes);
 
       const pages = pdfDoc.getPages();
-      const page1 = pages[0];
-      const page2 = pages[1];
+      const p1 = pages[0];
+      const p2 = pages[1];
+      const clr = rgb(0.35, 0.35, 0.35);
 
-      const cm = 28.35;
-      const textColor = rgb(0.35, 0.35, 0.35);
+      p1.drawText(`Check out order #${orderNumber}`, { x: 35, y: 737, size: 12, color: clr, font: customFont });
+      p1.drawText(formatOrderDate(orderDate), { x: 435, y: 712, size: 10, color: clr, font: customFont });
+      p1.drawText(`Order #${orderNumber} successfully`, { x: 130, y: 563, size: 20, color: clr, font: customFont });
+      p1.drawText(`submitted`, { x: 98, y: 538, size: 20, color: clr, font: customFont });
+      p1.drawText(formatShortDate(orderDate), { x: 134, y: 437, size: 9, color: clr, font: customFont });
+      p1.drawText(getDeliveryRange(orderDate), { x: 437, y: 437, size: 9, color: clr, font: customFont });
+      p1.drawText(`${orderNumber}`, { x: 124, y: 362, size: 10, color: clr, font: customFont, characterSpacing: -0.4 });
 
-      const page1Height = page1.getHeight();
-      const page2Height = page2.getHeight();
-
-      // TOP LEFT: order number
-page1.drawText(`Check out order #${orderNumber}`, {
-  x: 35,
-  y: 737,
-  size: 12,
-  color: textColor,
-  font: customFont,
-});
-
-// TOP RIGHT: order date
-page1.drawText(formatOrderDate(orderDate), {
-  x: 435,
-  y: 712,
-  size: 10,
-  color: textColor,
-});
-
-// MAIN TITLE (two lines, like the example PDF)
-page1.drawText(`Order #${orderNumber} successfully`, {
-  x: 130,
-  y: 563,
-  size: 20,
-  color: textColor,
-});
-
-page1.drawText(`submitted`, {
-  x: 98,
-  y: 538,
-  size: 20,
-  color: textColor,
-});
-
-// TIMELINE DATES
-page1.drawText(formatShortDate(orderDate), {
-  x: 134,
-  y: 437,
-  size: 9,
-  color: textColor,
-});
-
-page1.drawText(getDeliveryRange(orderDate), {
-  x: 437,
-  y: 437,
-  size: 9,
-  color: textColor,
-});
-
-// ORDER NUMBER — precisely aligned inside sentence
-page1.drawText(`${orderNumber}`, {
-  x: 124,    // more LEFT
-  y: 362,   // more UP
-  size: 10,
-  color: textColor,
-  characterSpacing: -0.4,
-});
-
-
-
-
-
-
-      let billing = null;
-
-if (intent.payment_method) {
-  const paymentMethod = await stripe.paymentMethods.retrieve(
-    intent.payment_method
-  );
-
-  billing = paymentMethod.billing_details;
-}
-
-
-if (!billing || !billing.address) {
-  console.log("❌ NO BILLING ADDRESS FOUND");
-} else {
-  console.log("✅ BILLING ADDRESS FOUND:", billing);
-}
-
-if (billing && billing.address) {
-  const addressLines = [
-    billing.name,
-    billing.address.line1,
-    billing.address.line2,
-    `${billing.address.city}, ${billing.address.postal_code}`,
-    billing.address.country,
-  ].filter(Boolean);
-
-  const pageWidth = page2.getWidth();
-  const pageHeight = page2.getHeight();
-
-  let y = 660;
-const x = 117;
-
-
-  for (const line of addressLines) {
-    page2.drawText(line, {
-  x,
-  y,
-  size: 10,
-  color: textColor,
-  characterSpacing: -0.2,
-});
-    y -= 15;
-  }
-} else {
-  page2.drawText("NO BILLING ADDRESS FOUND", {
-    x: 100,
-    y: page2.getHeight() / 2,
-    size: 30,
-    color: rgb(0.35, 0.35, 0.35),
-  });
-}
-
-
+      const pm = await stripe.paymentMethods.retrieve(intent.payment_method);
+      const b = pm.billing_details;
+      if (b && b.address) {
+        const lines = [b.name, b.address.line1, b.address.line2, `${b.address.city}, ${b.address.postal_code}`, b.address.country].filter(Boolean);
+        let y = 660;
+        for (const l of lines) {
+          p2.drawText(l, { x: 117, y, size: 10, color: clr, font: customFont });
+          y -= 15;
+        }
+      }
       const pdfBytes = await pdfDoc.save();
-      const max = 9999999999999; // far future
-const inverted = max - Date.now();
-
-const fileName = `${inverted}_order-${orderNumber}.pdf`;
-
-
-
-try {
-  console.log("🚀 Attempting R2 upload:", fileName);
-
-  await r2.send(
-    new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME,
-      Key: fileName,
-      Body: pdfBytes,
-      ContentType: "application/pdf",
-    })
-  );
-
-  console.log("✅ PDF UPLOADED TO R2:", fileName);
-} catch (r2Error) {
-  console.error("❌ R2 UPLOAD FAILED:", r2Error);
-  // DO NOT throw
-  // Webhook must still return 200 to Stripe
-}
-
-console.log("✅ PDF UPLOADED TO R2:", fileName);
-
-
-          }
-
-    res.json({ received: true });
-  } catch (err) {
-    console.error("❌ Webhook processing error:", err);
-    res.status(500).send("Webhook handler error");
+      const fileName = `${9999999999999 - Date.now()}_order-${orderNumber}.pdf`;
+      await r2.send(new PutObjectCommand({ Bucket: process.env.R2_BUCKET_NAME, Key: fileName, Body: pdfBytes, ContentType: "application/pdf" }));
+    } catch (e) { console.error("Webhook Error:", e); }
   }
+  res.json({ received: true });
 });
 
-/* ========================================
-   /* ========================================
-   NEW STRIPE WEBHOOK (COMPLETE VERSION)
-======================================== */
+/* --- WEBHOOK NEW ACCOUNT --- */
 app.post("/api/stripe/webhook-new", async (req, res) => {
   const sig = req.headers["stripe-signature"];
   let event;
-
+  const sNew = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
   try {
-    // Uses the SECOND account secret key
-    const stripeNew = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
-    event = stripeNew.webhooks.constructEvent(
-      req.rawBody,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET_NEW 
-    );
-  } catch (err) {
-    console.error("❌ New Webhook signature failed:", err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
+    event = sNew.webhooks.constructEvent(req.rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET_NEW);
+  } catch (err) { return res.status(400).send(`Error: ${err.message}`); }
 
-  try {
-    if (event.type === "payment_intent.succeeded") {
+  if (event.type === "payment_intent.succeeded") {
+    try {
       const intent = event.data.object;
       const orderNumber = await getNextOrderNumber();
       const orderDate = new Date(intent.created * 1000);
-      const amountCents = intent.amount;
+      const templatesDir = path.join(__dirname, "public", "pdf-templates-new", String(intent.amount));
+      const files = fs.readdirSync(templatesDir).filter(f => f.toLowerCase().endsWith(".pdf"));
+      const templatePath = path.join(templatesDir, files[Math.floor(Math.random() * files.length)]);
 
-      // Pointing to the "new" templates folder seen in your screenshot
-      const templatesDir = path.join(__dirname, "public", "pdf-templates-new", String(amountCents));
+      const pdfDoc = await PDFDocument.load(fs.readFileSync(templatePath));
+      pdfDoc.registerFontkit(fontkit);
+      const fontBytes = await fetch('https://pdf-lib.js.org/assets/ubuntu/Ubuntu-R.ttf').then(res => res.arrayBuffer());
+      const customFont = await pdfDoc.embedFont(fontBytes);
 
-      if (!fs.existsSync(templatesDir)) {
-          console.error(`❌ Directory not found: ${templatesDir}`);
-          return res.json({ received: true });
-      }
+      const pages = pdfDoc.getPages();
+      const p1 = pages[0];
+      const p2 = pages[1];
+      const clr = rgb(0.35, 0.35, 0.35);
 
-      const templateFiles = fs.readdirSync(templatesDir).filter(f => f.toLowerCase().endsWith(".pdf"));
-      const randomTemplate = templateFiles[Math.floor(Math.random() * templateFiles.length)];
-      const templatePath = path.join(templatesDir, randomTemplate);
+      p1.drawText(`Check out order #${orderNumber}`, { x: 35, y: 737, size: 12, color: clr, font: customFont });
+      p1.drawText(formatOrderDate(orderDate), { x: 435, y: 712, size: 10, color: clr, font: customFont });
+      p1.drawText(`Order #${orderNumber} successfully`, { x: 130, y: 563, size: 20, color: clr, font: customFont });
+      p1.drawText(`submitted`, { x: 98, y: 538, size: 20, color: clr, font: customFont });
+      p1.drawText(formatShortDate(orderDate), { x: 134, y: 437, size: 9, color: clr, font: customFont });
+      p1.drawText(getDeliveryRange(orderDate), { x: 437, y: 437, size: 9, color: clr, font: customFont });
+      p1.drawText(`${orderNumber}`, { x: 124, y: 362, size: 10, color: clr, font: customFont, characterSpacing: -0.4 });
 
-      const templateBytes = fs.readFileSync(templatePath);
-const pdfDoc = await PDFDocument.load(templateBytes);
-pdfDoc.registerFontkit(fontkit); // <--- ADD THIS
-
-// Load the font again for this section
-const fontUrl = 'https://pdf-lib.js.org/assets/ubuntu/Ubuntu-R.ttf';
-const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
-const customFont = await pdfDoc.embedFont(fontBytes); // <--- ADD THIS
-
-const pages = pdfDoc.getPages();
-      const page1 = pages[0];
-      const page2 = pages[1];
-      const textColor = rgb(0.35, 0.35, 0.35);
-
-      // --- PAGE 1 DRAWING ---
-      page1.drawText(`Check out order #${orderNumber}`, { x: 35, y: 737, size: 12, color: textColor, font: customFont });
-      page1.drawText(formatOrderDate(orderDate), { x: 435, y: 712, size: 10, color: textColor });
-      page1.drawText(`Order #${orderNumber} successfully`, { x: 130, y: 563, size: 20, color: textColor });
-      page1.drawText(`submitted`, { x: 98, y: 538, size: 20, color: textColor });
-      page1.drawText(formatShortDate(orderDate), { x: 134, y: 437, size: 9, color: textColor });
-      page1.drawText(getDeliveryRange(orderDate), { x: 437, y: 437, size: 9, color: textColor });
-      page1.drawText(`${orderNumber}`, { x: 124, y: 362, size: 10, color: textColor, characterSpacing: -0.4 });
-
-      // --- BILLING FETCH ---
-      let billing = null;
-      try {
-        if (intent.payment_method) {
-          const stripeNew = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
-          const paymentMethod = await stripeNew.paymentMethods.retrieve(intent.payment_method);
-          billing = paymentMethod.billing_details;
-        }
-      } catch (e) {
-        console.log("⚠️ Could not fetch billing details");
-      }
-
-      // --- PAGE 2 DRAWING ---
-      if (billing && billing.address) {
-        const addressLines = [
-          billing.name,
-          billing.address.line1,
-          billing.address.line2,
-          `${billing.address.city}, ${billing.address.postal_code}`,
-          billing.address.country,
-        ].filter(Boolean);
-
+      const pm = await sNew.paymentMethods.retrieve(intent.payment_method);
+      const b = pm.billing_details;
+      if (b && b.address) {
+        const lines = [b.name, b.address.line1, b.address.line2, `${b.address.city}, ${b.address.postal_code}`, b.address.country].filter(Boolean);
         let y = 660;
-        for (const line of addressLines) {
-  page2.drawText(line, { x: 117, y, size: 10, color: textColor, font: customFont }); // <--- ADDED HERE
-  y -= 15;
-}
+        for (const l of lines) {
+          p2.drawText(l, { x: 117, y, size: 10, color: clr, font: customFont }); // FIXED FONT HERE
+          y -= 15;
+        }
       }
-
-      // --- SAVE AND UPLOAD TO R2 ---
       const pdfBytes = await pdfDoc.save();
       const fileName = `${9999999999999 - Date.now()}_order-${orderNumber}.pdf`;
-
-      await r2.send(new PutObjectCommand({
-          Bucket: process.env.R2_BUCKET_NAME,
-          Key: fileName,
-          Body: pdfBytes,
-          ContentType: "application/pdf",
-      }));
-
-      console.log(`✅ SUCCESS: PDF created for new account order ${orderNumber}`);
-    }
-    res.json({ received: true });
-  } catch (err) {
-    console.error("❌ New Webhook error:", err.message);
-    res.status(500).send("Internal Server Error");
+      await r2.send(new PutObjectCommand({ Bucket: process.env.R2_BUCKET_NAME, Key: fileName, Body: pdfBytes, ContentType: "application/pdf" }));
+    } catch (e) { console.error("New Webhook Error:", e); }
   }
+  res.json({ received: true });
 });
 
-/* ========================================
-   PAYTIKO WEBHOOK
-======================================== */
-app.post("/api/paytiko/webhook", async (req, res) => {
-  try {
-    const payload = req.body;
-
-    const orderId = payload.OrderId;
-    const receivedSignature = payload.Signature;
-
-    const expectedSignature = crypto
-      .createHash("sha256")
-      .update(
-        `${process.env.PAYTIKO_MERCHANT_SECRET}:${orderId}`
-      )
-      .digest("hex");
-
-    if (receivedSignature !== expectedSignature) {
-      console.error("❌ Invalid Paytiko webhook signature");
-      return res.status(403).send("Invalid signature");
-    }
-
-    if (payload.TransactionStatus === "Success") {
-      console.log("✅ Paytiko payment successful:", orderId);
-
-      // OPTIONAL later:
-      // - generate PDF
-      // - mark order paid
-      // - fulfill order
-    }
-
-    res.sendStatus(200);
-  } catch (err) {
-    console.error("❌ Paytiko webhook error:", err);
-    res.sendStatus(500);
-  }
-});
-
-
-
-/* ========================================
-   START SERVER
-======================================== */
 const PORT = process.env.PORT || 10000;
-app.get("/admin/orders", (req, res) => {
-  const password = req.query.password;
-
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).send("Unauthorized");
-  }
-
-  const ordersDir = path.join(__dirname, "orders");
-
-  if (!fs.existsSync(ordersDir)) {
-    return res.send("<h1>No orders yet</h1>");
-  }
-
-  const files = fs
-    .readdirSync(ordersDir)
-    .filter(file => file.endsWith(".pdf"));
-
-  let html = `
-    <h1>Order PDFs</h1>
-    <ul>
-  `;
-
-  for (const file of files) {
-    html += `
-      <li>
-        ${file}
-        <a href="/admin/orders/download/${file}?password=${password}">
-          [Download]
-        </a>
-      </li>
-    `;
-  }
-
-  html += "</ul>";
-
-  res.send(html);
-});
-
-app.get("/admin/orders/download/:filename", (req, res) => {
-  const password = req.query.password;
-
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).send("Unauthorized");
-  }
-
-  const filePath = path.join(__dirname, "orders", req.params.filename);
-
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).send("File not found");
-  }
-
-  res.download(filePath);
-});
-
-
-
-
-app.listen(PORT, () =>
-  console.log(`Server running on port ${PORT}`)
-);
+app.listen(PORT, () => console.log(`Server on ${PORT}`));
