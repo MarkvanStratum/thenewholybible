@@ -240,7 +240,7 @@ if(qs.get('sub9')) emailInput.value=d(qs.get('sub9'));
 if(qs.get('sub10')) phoneNumber.value=d(qs.get('sub10')).replace(/[^\d]/g,'');
 
 // STRIPE
-const stripe=Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
+const stripe=Stripe("pk_live_51SxKzcEAzUPDR2OIpDpc6lPbCweDLEimW1e69ZWMFUfHUM5ADNc0BubRUJjcMEV6aDyO4Cvtr2zscg8upTpCK0GR00UEw83sDh");
 const elements=stripe.elements();
 const cardNumber=elements.create('cardNumber');
 const cardExpiry=elements.create('cardExpiry');
@@ -286,15 +286,22 @@ card:cardNumber,
 billing_details:billingDetails
 });
 
-const r=await fetch("/api/stripe/one-time-46-95",{
+const r=await fetch("/api/stripe/new/one-time-46-95",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({paymentMethodId:pm.paymentMethod.id,billingDetails})
 });
 
 const data=await r.json();
+
+console.log("SERVER RESPONSE:", data);
+
+if (!data.clientSecret) {
+  throw new Error(data.error || "No clientSecret returned from server");
+}
+
 const result=await stripe.confirmCardPayment(data.clientSecret,{
-payment_method:pm.paymentMethod.id
+  payment_method:pm.paymentMethod.id
 });
 
 if(result.error) throw result.error;
