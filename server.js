@@ -986,14 +986,17 @@ const x = 117;
   for (const line of addressLines) {
   const fontToUse = isJapanese(line) ? fontJP : fontLatin;
 
-  page2.drawText(line, {
-    x,
-    y,
-    size: 10,
-    color: textColor,
-    characterSpacing: -0.2,
-    font: fontToUse,
-  });
+  const fontToUse = isJapanese(line) ? fontJP : fontLatin;
+
+page2.drawText(line, {
+  x,
+  y,
+  size: 10,
+  color: textColor,
+  characterSpacing: -0.2,
+  font: fontToUse
+});
+
 
   y -= 15;
 }
