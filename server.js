@@ -1000,7 +1000,6 @@ const x = 117;
 
 
   y -= 15;
-}
 
 } else {
   page2.drawText("NO BILLING ADDRESS FOUND", {
@@ -1021,7 +1020,7 @@ const fileName = `${inverted}_order-${orderNumber}.pdf`;
 
 
 try {
-  console.log("🚀 Attempting R2 upload:", fileName);
+  
 
   await r2.send(
     new PutObjectCommand({
@@ -1039,12 +1038,11 @@ try {
   // Webhook must still return 200 to Stripe
 }
 
-console.log("✅ PDF UPLOADED TO R2:", fileName);
 
+          
 
-          }
+    return res.json({ received: true });
 
-    res.json({ received: true });
   } catch (err) {
     console.error("❌ Webhook processing error:", err);
     res.status(500).send("Webhook handler error");
