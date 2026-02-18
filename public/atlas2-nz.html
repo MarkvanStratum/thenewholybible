@@ -396,9 +396,15 @@ window.addEventListener('DOMContentLoaded', () => {
       });
 
       const d = await r.json();
-      const result = await stripe.confirmCardPayment(d.clientSecret, {
+
+if (!d.clientSecret) {
+  throw new Error(d.error || "No clientSecret returned from server");
+}
+
+const result = await stripe.confirmCardPayment(d.clientSecret, {
   payment_method: pm.paymentMethod.id
 });
+
 
 if (result.error) {
   throw result.error;
