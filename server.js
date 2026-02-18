@@ -1041,14 +1041,18 @@ try {
 
           
 
-    return res.json({ received: true });
-
-  } catch (err) {
-    console.error("❌ Webhook processing error:", err);
-    res.status(500).send("Webhook handler error");
+        return res.json({ received: true });
   }
+} catch (err) {
+
+  console.error("❌ Webhook processing error:", err);
+  res.status(500).send("Webhook handler error");
+}
 });
 
+
+
+  
 /* ========================================
    /* ========================================
    NEW STRIPE WEBHOOK (COMPLETE VERSION)
