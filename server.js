@@ -986,7 +986,7 @@ const x = 117;
   for (const line of addressLines) {
   const fontToUse = isJapanese(line) ? fontJP : fontLatin;
 
-  const fontToUse = isJapanese(line) ? fontJP : fontLatin;
+ 
 
 page2.drawText(line, {
   x,
