@@ -866,8 +866,9 @@ const fontLatinBytes = fs.readFileSync(
 );
 
 const fontJPBytes = fs.readFileSync(
-  path.join(__dirname, "fonts", "NotoSansJP-Regular.otf")
+  path.join(__dirname, "fonts", "NotoSansJP-VariableFont_wght.ttf")
 );
+
 
 const fontLatin = await pdfDoc.embedFont(fontLatinBytes);
 const fontJP = await pdfDoc.embedFont(fontJPBytes);
@@ -912,6 +913,7 @@ page1.drawText(`Order #${orderNumber} successfully`, {
   y: 563,
   size: 20,
   color: textColor,
+  font: fontLatin
 });
 
 page1.drawText(`submitted`, {
@@ -919,7 +921,9 @@ page1.drawText(`submitted`, {
   y: 538,
   size: 20,
   color: textColor,
+  font: fontLatin
 });
+
 
 // TIMELINE DATES
 page1.drawText(formatShortDate(orderDate), {
@@ -927,6 +931,7 @@ page1.drawText(formatShortDate(orderDate), {
   y: 437,
   size: 9,
   color: textColor,
+  font: fontLatin
 });
 
 page1.drawText(getDeliveryRange(orderDate), {
@@ -934,15 +939,17 @@ page1.drawText(getDeliveryRange(orderDate), {
   y: 437,
   size: 9,
   color: textColor,
+  font: fontLatin
 });
 
 // ORDER NUMBER — precisely aligned inside sentence
 page1.drawText(`${orderNumber}`, {
-  x: 124,    // more LEFT
-  y: 362,   // more UP
+  x: 124,
+  y: 362,
   size: 10,
   color: textColor,
   characterSpacing: -0.4,
+  font: fontLatin
 });
 
 
@@ -1006,11 +1013,13 @@ page2.drawText(line, {
 
 } else {
   page2.drawText("NO BILLING ADDRESS FOUND", {
-    x: 100,
-    y: page2.getHeight() / 2,
-    size: 30,
-    color: rgb(0.35, 0.35, 0.35),
-  });
+  x: 100,
+  y: page2.getHeight() / 2,
+  size: 30,
+  color: rgb(0.35, 0.35, 0.35),
+  font: fontLatin
+});
+
 }
 
 
@@ -1105,7 +1114,7 @@ const fontLatinBytes = fs.readFileSync(
 );
 
 const fontJPBytes = fs.readFileSync(
-  path.join(__dirname, "fonts", "NotoSansJP-Regular.otf")
+  path.join(__dirname, "fonts", "NotoSansJP-VariableFont_wght.ttf")
 );
 
 const fontLatin = await pdfDoc.embedFont(fontLatinBytes);
