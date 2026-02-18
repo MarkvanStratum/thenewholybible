@@ -62,6 +62,11 @@ function formatShortDate(date) {
   });
 }
 
+function isJapanese(text) {
+  return /[\u3000-\u30FF\u4E00-\u9FFF]/.test(text);
+}
+
+
 const r2 = new S3Client({
   region: "auto",
   endpoint: process.env.R2_ENDPOINT,
@@ -855,12 +860,23 @@ console.log(
       const templateBytes = fs.readFileSync(templatePath);
       const pdfDoc = await PDFDocument.load(templateBytes);
       pdfDoc.registerFontkit(fontkit);
-      
-      // Load a font that supports Korean/Chinese (Google Noto Sans)
-      const fontUrl = 'https://pdf-lib.js.org/assets/ubuntu/Ubuntu-R.ttf';
-      const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
-      const customFont = await pdfDoc.embedFont(fontBytes);
 
+const fontLatinBytes = fs.readFileSync(
+  path.join(__dirname, "fonts", "NotoSans-Regular.ttf")
+);
+
+const fontJPBytes = fs.readFileSync(
+  path.join(__dirname, "fonts", "NotoSansJP-Regular.otf")
+);
+
+const fontLatin = await pdfDoc.embedFont(fontLatinBytes);
+const fontJP = await pdfDoc.embedFont(fontJPBytes);
+
+
+      
+
+      // Load a font that supports Korean/Chinese (Google Noto Sans)
+      
       const pages = pdfDoc.getPages();
       const page1 = pages[0];
       const page2 = pages[1];
@@ -877,7 +893,7 @@ page1.drawText(`Check out order #${orderNumber}`, {
   y: 737,
   size: 12,
   color: textColor,
-  font: customFont,
+  font: fontLatin
 });
 
 // TOP RIGHT: order date
@@ -886,7 +902,9 @@ page1.drawText(formatOrderDate(orderDate), {
   y: 712,
   size: 10,
   color: textColor,
+  font: fontLatin
 });
+
 
 // MAIN TITLE (two lines, like the example PDF)
 page1.drawText(`Order #${orderNumber} successfully`, {
@@ -966,15 +984,24 @@ const x = 117;
 
 
   for (const line of addressLines) {
-    page2.drawText(line, {
-  x,
-  y,
-  size: 10,
-  color: textColor,
-  characterSpacing: -0.2,
-});
-    y -= 15;
-  }
+  const fontToUse = isJapanese(line) ? fontJP : fontLatin;
+
+  page2.drawText(line, {
+    x,
+    y,
+    size: 10,
+    color: textColor,
+    characterSpacing: -0.2,
+    font: fontToUse,
+  });
+
+  y -= 15;
+}
+
+
+  y -= 15;
+}
+
 } else {
   page2.drawText("NO BILLING ADDRESS FOUND", {
     x: 100,
@@ -1068,10 +1095,19 @@ app.post("/api/stripe/webhook-new", async (req, res) => {
 const pdfDoc = await PDFDocument.load(templateBytes);
 pdfDoc.registerFontkit(fontkit); // <--- ADD THIS
 
-// Load the font again for this section
-const fontUrl = 'https://pdf-lib.js.org/assets/ubuntu/Ubuntu-R.ttf';
-const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
-const customFont = await pdfDoc.embedFont(fontBytes); // <--- ADD THIS
+const fontLatinBytes = fs.readFileSync(
+  path.join(__dirname, "fonts", "NotoSans-Regular.ttf")
+);
+
+const fontJPBytes = fs.readFileSync(
+  path.join(__dirname, "fonts", "NotoSansJP-Regular.otf")
+);
+
+const fontLatin = await pdfDoc.embedFont(fontLatinBytes);
+const fontJP = await pdfDoc.embedFont(fontJPBytes);
+
+
+
 
 const pages = pdfDoc.getPages();
       const page1 = pages[0];
@@ -1079,13 +1115,14 @@ const pages = pdfDoc.getPages();
       const textColor = rgb(0.35, 0.35, 0.35);
 
       // --- PAGE 1 DRAWING ---
-      page1.drawText(`Check out order #${orderNumber}`, { x: 35, y: 737, size: 12, color: textColor, font: customFont });
-      page1.drawText(formatOrderDate(orderDate), { x: 435, y: 712, size: 10, color: textColor });
-      page1.drawText(`Order #${orderNumber} successfully`, { x: 130, y: 563, size: 20, color: textColor });
-      page1.drawText(`submitted`, { x: 98, y: 538, size: 20, color: textColor });
-      page1.drawText(formatShortDate(orderDate), { x: 134, y: 437, size: 9, color: textColor });
-      page1.drawText(getDeliveryRange(orderDate), { x: 437, y: 437, size: 9, color: textColor });
-      page1.drawText(`${orderNumber}`, { x: 124, y: 362, size: 10, color: textColor, characterSpacing: -0.4 });
+page1.drawText(`Check out order #${orderNumber}`, { x: 35, y: 737, size: 12, color: textColor, font: fontLatin });
+page1.drawText(formatOrderDate(orderDate), { x: 435, y: 712, size: 10, color: textColor, font: fontLatin });
+page1.drawText(`Order #${orderNumber} successfully`, { x: 130, y: 563, size: 20, color: textColor, font: fontLatin });
+page1.drawText(`submitted`, { x: 98, y: 538, size: 20, color: textColor, font: fontLatin });
+page1.drawText(formatShortDate(orderDate), { x: 134, y: 437, size: 9, color: textColor, font: fontLatin });
+page1.drawText(getDeliveryRange(orderDate), { x: 437, y: 437, size: 9, color: textColor, font: fontLatin });
+page1.drawText(`${orderNumber}`, { x: 124, y: 362, size: 10, color: textColor, characterSpacing: -0.4, font: fontLatin });
+
 
       // --- BILLING FETCH ---
       let billing = null;
@@ -1111,9 +1148,19 @@ const pages = pdfDoc.getPages();
 
         let y = 660;
         for (const line of addressLines) {
-  page2.drawText(line, { x: 117, y, size: 10, color: textColor, font: customFont }); // <--- ADDED HERE
+  const fontToUse = isJapanese(line) ? fontJP : fontLatin;
+
+  page2.drawText(line, {
+    x: 117,
+    y,
+    size: 10,
+    color: textColor,
+    font: fontToUse
+  });
+
   y -= 15;
 }
+
       }
 
       // --- SAVE AND UPLOAD TO R2 ---
