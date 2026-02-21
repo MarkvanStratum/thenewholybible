@@ -1,1303 +1,352 @@
-// server.js
+//--------------------------------------------
+//	SERVER.JS — BIBLICAL AI CHAT EDITION (WITH CHARMR CHAT LOGIC)
+//--------------------------------------------
+
 import express from "express";
-import Stripe from "stripe";
 import cors from "cors";
+import OpenAI from "openai";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import pkg from "pg";
+import Stripe from "stripe";
 import path from "path";
 import { fileURLToPath } from "url";
-import paypal from "@paypal/paypal-server-sdk";
-import { getNextOrderNumber } from "./orderNumber.js";
-import fs from "fs";
-import { PDFDocument, rgb } from "pdf-lib";
-import fontkit from "@pdf-lib/fontkit";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import crypto from "crypto";
-import fetch from "node-fetch";
+import fs from "fs";
+import multer from "multer";
 
+//--------------------------------------------
+//	BASIC SETUP
+//--------------------------------------------
 
-
-const app = express();
-// JSON parser for all NON-webhook routes
-app.use(express.json({
-  verify: (req, res, buf) => {
-    if (req.originalUrl.startsWith("/api/stripe/webhook") || req.originalUrl.startsWith("/api/stripe/webhook-new")) {
-      req.rawBody = buf;
-    }
-  }
-}));
-
-
-app.use(cors());
-
-// Enable __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve static site (public folder)
-app.use(express.static(path.join(__dirname, "public")));
-
-// Stripe init
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
-});
-
-// Helper to sanitize strings
-function sanitize(str) {
-  return typeof str === "string" ? str.trim() : undefined;
-}
-
-
-function formatOrderDate(date) {
-  return date.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function formatShortDate(date) {
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-}
-
-function isJapanese(text) {
-  return /[\u3000-\u30FF\u4E00-\u9FFF]/.test(text);
-}
-
-
-const r2 = new S3Client({
-  region: "auto",
-  endpoint: process.env.R2_ENDPOINT,
-  credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-  },
-});
-
-
-function getDeliveryRange(date) {
-  const deliveryDate = new Date(date);
-  deliveryDate.setDate(deliveryDate.getDate() + 7);
-
-  return deliveryDate.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-  });
-}
-
-
-
-/* ========================================
-   PAYPAL CLIENT SETUP
-======================================== */
-function getPayPalClient() {
-  const environment =
-    process.env.PAYPAL_ENV === "live"
-      ? new paypal.core.LiveEnvironment(
-          process.env.PAYPAL_CLIENT_ID,
-          process.env.PAYPAL_CLIENT_SECRET
-        )
-      : new paypal.core.SandboxEnvironment(
-          process.env.PAYPAL_CLIENT_ID,
-          process.env.PAYPAL_CLIENT_SECRET
-        );
-
-  return new paypal.core.PayPalHttpClient(environment);
-}
-
-/* ========================================
-   PAYTIKO: CREATE CHECKOUT SESSION
-======================================== */
-
-console.log("PAYTIKO_CORE_URL =", process.env.PAYTIKO_CORE_URL);
-
-
-app.post("/api/paytiko/checkout", async (req, res) => {
-  try {
-    const {
-      firstName,
-      lastName,
-      email,
-      street,
-      city,
-      zipCode,
-      amount
-    } = req.body;
-
-    // 🔒 Hard-lock product price on server
-    if (Number(amount) !== 60) {
-      return res.status(400).json({ error: "Invalid amount" });
-    }
-
-    const timestamp = Math.floor(Date.now() / 1000);
-    const orderId = `PTK-${Date.now()}`;
-
-    const rawSignature =
-  email + ";" + timestamp + ";" + process.env.PAYTIKO_MERCHANT_SECRET;
-
-
-    const signature = crypto
-      .createHash("sha256")
-      .update(rawSignature)
-      .digest("hex");
-
-    const payload = {
-  MerchantId: Number(process.env.PAYTIKO_MERCHANT_ID),
-
-  firstName,
-  lastName,
-  email,
-  phone: "",
-  countryCode: "AU",
-  currency: "USD",
-  lockedAmount: 60,
-  orderId,
-  street,
-  city,
-  zipCode,
-  timestamp,
-  signature,
-  isPayout: false
-};
-
-
-console.log("PAYTIKO CONFIG", {
-  merchantId: process.env.PAYTIKO_MERCHANT_ID,
-  secret: process.env.PAYTIKO_MERCHANT_SECRET,
-  core: process.env.PAYTIKO_CORE_URL
-});
-
-console.log("PAYTIKO PAYLOAD", payload);
-
-
-
-    const response = await fetch(
-      `${process.env.PAYTIKO_CORE_URL}/api/sdk/checkout`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "*/*",
-          "X-Merchant-Secret": process.env.PAYTIKO_MERCHANT_SECRET
-        },
-        body: JSON.stringify(payload)
-      }
-    );
-
-    const data = await response.json();
-
-    if (!data.cashierSessionToken) {
-      console.error("Paytiko error:", data);
-      return res.status(500).json({ error: "Paytiko session failed" });
-    }
-
-    res.json({
-      sessionToken: data.cashierSessionToken,
-      orderId
-    });
-
-  } catch (err) {
-    console.error("❌ Paytiko checkout error:", err);
-    res.status(500).json({ error: "Paytiko checkout error" });
-  }
-});
-
-
-/* ========================================
-   PAYPAL: CREATE ORDER (Atlas 2)
-======================================== */
-app.post("/api/paypal/create-order", async (req, res) => {
-  try {
-    const { amount } = req.body;
-
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ error: "Invalid amount" });
-    }
-
-    const client = getPayPalClient();
-    const request = new paypal.orders.OrdersCreateRequest();
-
-    request.prefer("return=representation");
-    request.requestBody({
-      intent: "CAPTURE",
-      purchase_units: [
-        {
-          amount: {
-            currency_code: "USD",
-            value: amount.toFixed(2),
-          },
-          description: "Atlas 2 Purchase",
-        },
-      ],
-    });
-
-    const order = await client.execute(request);
-
-    res.json({ id: order.result.id });
-  } catch (err) {
-    console.error("PayPal create-order error:", err);
-    res.status(500).json({ error: "Failed to create PayPal order" });
-  }
-});
-
-/* ========================================
-   PAYPAL: CAPTURE ORDER (Atlas 2)
-======================================== */
-app.post("/api/paypal/capture-order", async (req, res) => {
-  try {
-    const { orderID } = req.body;
-
-    if (!orderID) {
-      return res.status(400).json({ error: "Missing orderID" });
-    }
-
-    const client = getPayPalClient();
-    const request = new paypal.orders.OrdersCaptureRequest(orderID);
-
-    request.requestBody({});
-
-    const capture = await client.execute(request);
-
-    if (capture.result.status !== "COMPLETED") {
-      throw new Error("Payment not completed");
-    }
-
-    res.json({
-      status: "COMPLETED",
-      orderID: capture.result.id,
-    });
-  } catch (err) {
-    console.error("PayPal capture-order error:", err);
-    res.status(500).json({ error: "Failed to capture PayPal order" });
-  }
-});
-
-/* ========================================
-   STRIPE: ONE-TIME PAYMENT $23.95
-======================================== */
-app.post("/api/stripe/one-time-23-95", async (req, res) => {
-  try {
-    const { name, email, phone, address, paymentMethodId } = req.body;
-
-    const intent = await stripe.paymentIntents.create({
-      amount: Math.round(23.95 * 100),
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: sanitize(email),
-      description: "One-time purchase: $23.95",
-      metadata: {
-        customer_name: sanitize(name),
-        customer_phone: sanitize(phone),
-      },
-      shipping: address ? {
-        name: sanitize(name),
-        phone: sanitize(phone),
-        address: {
-          line1: sanitize(address.line1),
-          line2: sanitize(address.line2),
-          city: sanitize(address.city),
-          postal_code: sanitize(address.postal_code),
-          country: sanitize(address.country),
-        }
-      } : undefined,
-    });
-
-    res.json({ clientSecret: intent.client_secret });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-
-/* ========================================
-   STRIPE: ONE-TIME PAYMENT $33.95
-======================================== */
-app.post("/api/stripe/one-time-33-95", async (req, res) => {
-  try {
-    const { name, email, phone, address, paymentMethodId } = req.body;
-
-      const intent = await stripe.paymentIntents.create({
-      amount: Math.round(33.95 * 100),
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: sanitize(email),
-      description: "One-time purchase: $33.95",
-      metadata: {
-        customer_name: sanitize(name),
-        customer_phone: sanitize(phone),
-      },
-      shipping: {
-        name: sanitize(name),
-        phone: sanitize(phone),
-        address: {
-          line1: sanitize(address?.line1),
-          postal_code: sanitize(address?.postal_code),
-          city: sanitize(address?.city),
-          country: sanitize(address?.country),
-        },
-      },
-    });
-
-    res.json({ clientSecret: intent.client_secret });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-/* ========================================
-   STRIPE: ONE-TIME PAYMENT $60.00
-======================================== */
-app.post("/api/stripe/one-time-60", async (req, res) => {
-  try {
-    const { name, email, phone, address, paymentMethodId } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    const intent = await stripe.paymentIntents.create({
-      amount: Math.round(60 * 100), // $60.00 in cents
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: sanitize(email),
-      description: "One-time purchase: $60.00",
-      metadata: {
-        customer_name: sanitize(name),
-        customer_phone: sanitize(phone),
-      },
-      shipping: {
-        name: sanitize(name),
-        phone: sanitize(phone),
-        address: {
-          line1: sanitize(address?.line1),
-          postal_code: sanitize(address?.postal_code),
-          city: sanitize(address?.city),
-          country: sanitize(address?.country),
-        },
-      },
-    });
-
-    res.json({ clientSecret: intent.client_secret });
-  } catch (err) {
-    console.error("Stripe $60 payment error:", err);
-    res.status(400).json({ error: err.message });
-  }
-});
-
-/* ========================================
-   STRIPE: ONE-TIME PAYMENT $39.95
-======================================== */
-app.post("/api/stripe/one-time-39-95", async (req, res) => {
-  try {
-    const { name, email, phone, address, paymentMethodId } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    const intent = await stripe.paymentIntents.create({
-      amount: Math.round(39.95 * 100), // $39.95 in cents
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: sanitize(email),
-      description: "One-time purchase: $39.95",
-      metadata: {
-        customer_name: sanitize(name),
-        customer_phone: sanitize(phone),
-      },
-      shipping: {
-        name: sanitize(name),
-        phone: sanitize(phone),
-        address: {
-          line1: sanitize(address?.line1),
-          postal_code: sanitize(address?.postal_code),
-          city: sanitize(address?.city),
-          country: sanitize(address?.country),
-        },
-      },
-    });
-
-    res.json({ clientSecret: intent.client_secret });
-  } catch (err) {
-    console.error("Stripe $39.95 payment error:", err);
-    res.status(400).json({ error: err.message });
-  }
-});
-
-/* ========================================
-   STRIPE: ONE-TIME PAYMENT $28.95
-======================================== */
-app.post("/api/stripe/one-time-28-95", async (req, res) => {
-  try {
-    const { name, email, phone, address, paymentMethodId } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    const intent = await stripe.paymentIntents.create({
-      amount: Math.round(28.95 * 100), // $28.95 in cents
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: sanitize(email),
-      description: "One-time purchase: $28.95",
-      metadata: {
-        customer_name: sanitize(name),
-        customer_phone: sanitize(phone),
-      },
-      shipping: {
-        name: sanitize(name),
-        phone: sanitize(phone),
-        address: {
-          line1: sanitize(address?.line1),
-          postal_code: sanitize(address?.postal_code),
-          city: sanitize(address?.city),
-          country: sanitize(address?.country),
-        },
-      },
-    });
-
-    res.json({ clientSecret: intent.client_secret });
-  } catch (err) {
-    console.error("Stripe $28.95 payment error:", err);
-    res.status(400).json({ error: err.message });
-  }
-});
-
-/* ========================================
-   STRIPE: ONE-TIME PAYMENT $46.95
-======================================== */
-app.post("/api/stripe/one-time-46-95", async (req, res) => {
-  try {
-    const { name, email, phone, address, paymentMethodId } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    const intent = await stripe.paymentIntents.create({
-      amount: Math.round(46.95 * 100), // $46.95 in cents
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: sanitize(email),
-      description: "One-time purchase: $46.95",
-      metadata: {
-        customer_name: sanitize(name),
-        customer_phone: sanitize(phone),
-      },
-      shipping: {
-        name: sanitize(name),
-        phone: sanitize(phone),
-        address: {
-          line1: sanitize(address?.line1),
-          postal_code: sanitize(address?.postal_code),
-          city: sanitize(address?.city),
-          country: sanitize(address?.country),
-        },
-      },
-    });
-
-    res.json({ clientSecret: intent.client_secret });
-  } catch (err) {
-    console.error("Stripe $46.95 payment error:", err);
-    res.status(400).json({ error: err.message });
-  }
-});
-
-
-
-
-/* ========================================
-   STRIPE: DYNAMIC CART TOTAL
-======================================== */
-app.post("/api/stripe/charge-cart-total", async (req, res) => {
-  try {
-    const { paymentMethodId, amountUSD, name, email, phone, address } = req.body;
-
-    if (!amountUSD || amountUSD <= 0) {
-      return res.status(400).json({ error: "Invalid amount" });
-    }
-
-    const intent = await stripe.paymentIntents.create({
-      amount: Math.round(amountUSD * 100),
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: sanitize(email),
-      description: `WooCommerce cart payment: $${amountUSD}`,
-      metadata: {
-        customer_name: sanitize(name),
-        customer_phone: sanitize(phone),
-        cart_total_usd: amountUSD,
-      },
-      shipping: {
-        name: sanitize(name),
-        phone: sanitize(phone),
-        address: {
-          line1: sanitize(address?.line1),
-          postal_code: sanitize(address?.postal_code),
-          city: sanitize(address?.city),
-          country: sanitize(address?.country),
-        },
-      },
-    });
-
-    res.json({ clientSecret: intent.client_secret });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-//new stripe account
-
-app.post("/api/stripe/new/one-time-28-95", async (req, res) => {
-  try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
-
-    const { paymentMethodId, billingDetails } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: 2895, // $28.95
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: billingDetails?.email,
-      shipping: billingDetails?.address
-        ? {
-            name: billingDetails.name,
-            address: billingDetails.address
-          }
-        : undefined
-    });
-
-    return res.json({
-      clientSecret: paymentIntent.client_secret
-    });
-
-  } catch (err) {
-    console.error("Stripe NEW 28.95 error:", err);
-    return res.status(500).json({
-      error: err.message || "Payment failed"
-    });
-  }
-});
-
-app.post("/api/stripe/new/one-time-23-95", async (req, res) => {
-  try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
-
-    const { paymentMethodId, billingDetails } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: 2395, // $23.95
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: billingDetails?.email,
-      shipping: billingDetails?.address
-        ? {
-            name: billingDetails.name,
-            address: billingDetails.address
-          }
-        : undefined
-    });
-
-    res.json({
-      clientSecret: paymentIntent.client_secret
-    });
-
-  } catch (err) {
-    console.error("Stripe NEW 23.95 error:", err);
-    res.status(500).json({ error: err.message || "Payment failed" });
-  }
-});
-
-app.post("/api/stripe/new/one-time-46-95", async (req, res) => {
-  try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
-
-    const { paymentMethodId, billingDetails } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: 4695, // $46.95
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: billingDetails?.email,
-      shipping: billingDetails?.address
-        ? {
-            name: billingDetails.name,
-            address: billingDetails.address
-          }
-        : undefined
-    });
-
-    res.json({
-      clientSecret: paymentIntent.client_secret
-    });
-
-  } catch (err) {
-    console.error("Stripe NEW 46.95 error:", err);
-    res.status(500).json({ error: err.message || "Payment failed" });
-  }
-});
-
-app.post("/api/stripe/new/one-time-33-95", async (req, res) => {
-  try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
-
-    const { paymentMethodId, billingDetails } = req.body;
-
-    if (!paymentMethodId) {
-      return res.status(400).json({ error: "Missing paymentMethodId" });
-    }
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: 3395, // $33.95
-      currency: "usd",
-      payment_method: paymentMethodId,
-      confirmation_method: "automatic",
-      confirm: false,
-      receipt_email: billingDetails?.email,
-      shipping: billingDetails?.address
-        ? {
-            name: billingDetails.name,
-            address: billingDetails.address
-          }
-        : undefined
-    });
-
-    res.json({
-      clientSecret: paymentIntent.client_secret
-    });
-
-  } catch (err) {
-    console.error("Stripe NEW 33.95 error:", err);
-    res.status(500).json({ error: err.message || "Payment failed" });
-  }
-});
-
-
-/* ========================================
-   AIRWALLEX
-======================================== */
-app.post('/api/airwallex/create-payment-intent', async (req, res) => {
-  console.log('=== AIRWALLEX REQUEST RECEIVED ===');
-  console.log('Request body:', req.body);
-  
-  try {
-    const { amount, currency, customer } = req.body;
-
-    console.log('AIRWALLEX_CLIENT_ID:', process.env.AIRWALLEX_CLIENT_ID ? 'SET' : 'MISSING');
-    console.log('AIRWALLEX_API_KEY:', process.env.AIRWALLEX_API_KEY ? 'SET' : 'MISSING');
-
-    // Step 1: Authenticate
-    console.log('Attempting authentication...');
-    const authResponse = await fetch('https://api.airwallex.com/api/v1/authentication/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-client-id': process.env.AIRWALLEX_CLIENT_ID,
-        'x-api-key': process.env.AIRWALLEX_API_KEY
-      }
-    });
-
-    const authData = await authResponse.json();
-    console.log('Auth response status:', authResponse.status);
-    console.log('Auth response:', JSON.stringify(authData, null, 2));
-    
-    if (!authData.token) {
-      console.error('Authentication failed - no token');
-      return res.status(401).json({ error: authData.message || 'Authentication failed' });
-    }
-
-    console.log('Authentication successful');
-
-    // Step 2: Create PaymentIntent
-    console.log('Creating payment intent...');
-    const paymentResponse = await fetch('https://api.airwallex.com/api/v1/pa/payment_intents/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authData.token}`
-      },
-      body: JSON.stringify({
-        request_id: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        amount: amount,
-        currency: currency,
-        merchant_order_id: `order_${Date.now()}`,
-        customer: customer,
-        return_url: "https://checkoutpartner.xyz/success"
-      })
-    });
-
-    const paymentData = await paymentResponse.json();
-    console.log('Payment response status:', paymentResponse.status);
-    console.log('Payment response:', JSON.stringify(paymentData, null, 2));
-
-    if (!paymentData.id || !paymentData.client_secret) {
-      console.error('Payment creation failed');
-      return res.status(400).json({ error: paymentData.message || 'Failed to create payment intent' });
-    }
-
-    console.log('Payment intent created successfully');
-
-    res.json({
-      id: paymentData.id,
-      client_secret: paymentData.client_secret
-    });
-
-  } catch (error) {
-    console.error('Airwallex error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-/* ========================================
-   HEALTH CHECK
-======================================== */
-app.get("/health", (req, res) => {
-  res.json({ status: "Payment server running (Stripe + Airwallex + PayPal)" });
-});
-
-/* ========================================
-   TEST ORDER NUMBER (TEMP)
-======================================== */
-app.get("/test-order-number", (req, res) => {
-  const number = getNextOrderNumber();
-  res.send(`Next order number is ${number}`);
-});
-
-
-
-
-/* ========================================
-   STRIPE WEBHOOK
-======================================== */
-
-// Stripe requires the raw body for webhooks
-app.post("/api/stripe/webhook", async (req, res) => {
-  const sig = req.headers["stripe-signature"];
-  let event;
-
-  try {
-    event = stripe.webhooks.constructEvent(
-      req.rawBody,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
-  } catch (err) {
-    console.error("❌ Webhook signature verification failed:", err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  try {
-    if (event.type === "payment_intent.succeeded") {
-      const intent = event.data.object;
-
-      const orderNumber = await getNextOrderNumber();
-      const orderDate = new Date(intent.created * 1000);
-
-      const amountCents = intent.amount;
-
-const templatesDir = path.join(
-  __dirname,
-  "public",
-  "pdf-templates",
-  String(amountCents)
-);
-
-const templateFiles = fs
-  .readdirSync(templatesDir)
-  .filter(file => file.toLowerCase().endsWith(".pdf"));
-
-if (templateFiles.length === 0) {
-  throw new Error(`No PDF templates found in ${templatesDir}`);
-}
-
-const randomTemplate =
-  templateFiles[Math.floor(Math.random() * templateFiles.length)];
-
-const templatePath = path.join(templatesDir, randomTemplate);
-
-console.log(
-  `📄 Using PDF template for $${(amountCents / 100).toFixed(2)}:`,
-  randomTemplate
-);
-
-     
-
-      const templateBytes = fs.readFileSync(templatePath);
-      const pdfDoc = await PDFDocument.load(templateBytes);
-      pdfDoc.registerFontkit(fontkit);
-
-const fontLatinBytes = fs.readFileSync(
-  path.join(__dirname, "fonts", "NotoSans-Regular.ttf")
-);
-
-const fontJPBytes = fs.readFileSync(
-  path.join(__dirname, "fonts", "NotoSansJP-VariableFont_wght.ttf")
-);
-
-
-const fontLatin = await pdfDoc.embedFont(fontLatinBytes);
-const fontJP = await pdfDoc.embedFont(fontJPBytes);
-
-
-      
-
-      // Load a font that supports Korean/Chinese (Google Noto Sans)
-      
-      const pages = pdfDoc.getPages();
-      const page1 = pages[0];
-      const page2 = pages[1];
-
-      const cm = 28.35;
-      const textColor = rgb(0.35, 0.35, 0.35);
-
-      const page1Height = page1.getHeight();
-      const page2Height = page2.getHeight();
-
-      // TOP LEFT: order number
-page1.drawText(`Check out order #${orderNumber}`, {
-  x: 35,
-  y: 737,
-  size: 12,
-  color: textColor,
-  font: fontLatin
-});
-
-// TOP RIGHT: order date
-page1.drawText(formatOrderDate(orderDate), {
-  x: 435,
-  y: 712,
-  size: 10,
-  color: textColor,
-  font: fontLatin
-});
-
-
-// MAIN TITLE (two lines, like the example PDF)
-page1.drawText(`Order #${orderNumber} successfully`, {
-  x: 130,
-  y: 563,
-  size: 20,
-  color: textColor,
-  font: fontLatin
-});
-
-page1.drawText(`submitted`, {
-  x: 98,
-  y: 538,
-  size: 20,
-  color: textColor,
-  font: fontLatin
-});
-
-
-// TIMELINE DATES
-page1.drawText(formatShortDate(orderDate), {
-  x: 134,
-  y: 437,
-  size: 9,
-  color: textColor,
-  font: fontLatin
-});
-
-page1.drawText(getDeliveryRange(orderDate), {
-  x: 437,
-  y: 437,
-  size: 9,
-  color: textColor,
-  font: fontLatin
-});
-
-// ORDER NUMBER — precisely aligned inside sentence
-page1.drawText(`${orderNumber}`, {
-  x: 124,
-  y: 362,
-  size: 10,
-  color: textColor,
-  characterSpacing: -0.4,
-  font: fontLatin
-});
-
-
-
-
-
-
-      let billing = null;
-
-if (intent.payment_method) {
-  const paymentMethod = await stripe.paymentMethods.retrieve(
-    intent.payment_method
-  );
-
-  billing = paymentMethod.billing_details;
-}
-
-
-if (!billing || !billing.address) {
-  console.log("❌ NO BILLING ADDRESS FOUND");
-} else {
-  console.log("✅ BILLING ADDRESS FOUND:", billing);
-}
-
-if (billing && billing.address) {
-  const addressLines = [
-    billing.name,
-    billing.address.line1,
-    billing.address.line2,
-    `${billing.address.city}, ${billing.address.postal_code}`,
-    billing.address.country,
-  ].filter(Boolean);
-
-  const pageWidth = page2.getWidth();
-  const pageHeight = page2.getHeight();
-
-  let y = 660;
-const x = 117;
-
-
-  for (const line of addressLines) {
-  const fontToUse = isJapanese(line) ? fontJP : fontLatin;
-
- 
-
-page2.drawText(line, {
-  x,
-  y,
-  size: 10,
-  color: textColor,
-  characterSpacing: -0.2,
-  font: fontToUse
-});
-
-
-  y -= 15;
-}
-
-
-  y -= 15;
-
-} else {
-  page2.drawText("NO BILLING ADDRESS FOUND", {
-  x: 100,
-  y: page2.getHeight() / 2,
-  size: 30,
-  color: rgb(0.35, 0.35, 0.35),
-  font: fontLatin
-});
-
-}
-
-
-      const pdfBytes = await pdfDoc.save();
-      const max = 9999999999999; // far future
-const inverted = max - Date.now();
-
-const fileName = `${inverted}_order-${orderNumber}.pdf`;
-
-
-
-try {
-  
-
-  await r2.send(
-    new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME,
-      Key: fileName,
-      Body: pdfBytes,
-      ContentType: "application/pdf",
-    })
-  );
-
-  console.log("✅ PDF UPLOADED TO R2:", fileName);
-} catch (r2Error) {
-  console.error("❌ R2 UPLOAD FAILED:", r2Error);
-  // DO NOT throw
-  // Webhook must still return 200 to Stripe
-}
-
-
-          
-
-        return res.json({ received: true });
-  }
-} catch (err) {
-
-  console.error("❌ Webhook processing error:", err);
-  res.status(500).send("Webhook handler error");
-}
-});
-
-
-
-  
-/* ========================================
-   /* ========================================
-   NEW STRIPE WEBHOOK (COMPLETE VERSION)
-======================================== */
-app.post("/api/stripe/webhook-new", async (req, res) => {
-  const sig = req.headers["stripe-signature"];
-  let event;
-
-  try {
-    // Uses the SECOND account secret key
-    const stripeNew = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
-    event = stripeNew.webhooks.constructEvent(
-      req.rawBody,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET_NEW 
-    );
-  } catch (err) {
-    console.error("❌ New Webhook signature failed:", err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  try {
-    if (event.type === "payment_intent.succeeded") {
-      const intent = event.data.object;
-      const orderNumber = await getNextOrderNumber();
-      const orderDate = new Date(intent.created * 1000);
-      const amountCents = intent.amount;
-
-      // Pointing to the "new" templates folder seen in your screenshot
-      const templatesDir = path.join(__dirname, "public", "pdf-templates-new", String(amountCents));
-
-      if (!fs.existsSync(templatesDir)) {
-          console.error(`❌ Directory not found: ${templatesDir}`);
-          return res.json({ received: true });
-      }
-
-      const templateFiles = fs.readdirSync(templatesDir).filter(f => f.toLowerCase().endsWith(".pdf"));
-      const randomTemplate = templateFiles[Math.floor(Math.random() * templateFiles.length)];
-      const templatePath = path.join(templatesDir, randomTemplate);
-
-      const templateBytes = fs.readFileSync(templatePath);
-const pdfDoc = await PDFDocument.load(templateBytes);
-pdfDoc.registerFontkit(fontkit); // <--- ADD THIS
-
-const fontLatinBytes = fs.readFileSync(
-  path.join(__dirname, "fonts", "NotoSans-Regular.ttf")
-);
-
-const fontJPBytes = fs.readFileSync(
-  path.join(__dirname, "fonts", "NotoSansJP-VariableFont_wght.ttf")
-);
-
-const fontLatin = await pdfDoc.embedFont(fontLatinBytes);
-const fontJP = await pdfDoc.embedFont(fontJPBytes);
-
-
-
-
-const pages = pdfDoc.getPages();
-      const page1 = pages[0];
-      const page2 = pages[1];
-      const textColor = rgb(0.35, 0.35, 0.35);
-
-      // --- PAGE 1 DRAWING ---
-page1.drawText(`Check out order #${orderNumber}`, { x: 35, y: 737, size: 12, color: textColor, font: fontLatin });
-page1.drawText(formatOrderDate(orderDate), { x: 435, y: 712, size: 10, color: textColor, font: fontLatin });
-page1.drawText(`Order #${orderNumber} successfully`, { x: 130, y: 563, size: 20, color: textColor, font: fontLatin });
-page1.drawText(`submitted`, { x: 98, y: 538, size: 20, color: textColor, font: fontLatin });
-page1.drawText(formatShortDate(orderDate), { x: 134, y: 437, size: 9, color: textColor, font: fontLatin });
-page1.drawText(getDeliveryRange(orderDate), { x: 437, y: 437, size: 9, color: textColor, font: fontLatin });
-page1.drawText(`${orderNumber}`, { x: 124, y: 362, size: 10, color: textColor, characterSpacing: -0.4, font: fontLatin });
-
-
-      // --- BILLING FETCH ---
-      let billing = null;
-      try {
-        if (intent.payment_method) {
-          const stripeNew = new Stripe(process.env.STRIPE_SECRET_KEY_NEW);
-          const paymentMethod = await stripeNew.paymentMethods.retrieve(intent.payment_method);
-          billing = paymentMethod.billing_details;
-        }
-      } catch (e) {
-        console.log("⚠️ Could not fetch billing details");
-      }
-
-      // --- PAGE 2 DRAWING ---
-      if (billing && billing.address) {
-        const addressLines = [
-          billing.name,
-          billing.address.line1,
-          billing.address.line2,
-          `${billing.address.city}, ${billing.address.postal_code}`,
-          billing.address.country,
-        ].filter(Boolean);
-
-        let y = 660;
-        for (const line of addressLines) {
-  const fontToUse = isJapanese(line) ? fontJP : fontLatin;
-
-  page2.drawText(line, {
-    x: 117,
-    y,
-    size: 10,
-    color: textColor,
-    font: fontToUse
-  });
-
-  y -= 15;
-}
-
-      }
-
-      // --- SAVE AND UPLOAD TO R2 ---
-      const pdfBytes = await pdfDoc.save();
-      const fileName = `${9999999999999 - Date.now()}_order-${orderNumber}.pdf`;
-
-      await r2.send(new PutObjectCommand({
-          Bucket: process.env.R2_BUCKET_NAME,
-          Key: fileName,
-          Body: pdfBytes,
-          ContentType: "application/pdf",
-      }));
-
-      console.log(`✅ SUCCESS: PDF created for new account order ${orderNumber}`);
-    }
-    res.json({ received: true });
-  } catch (err) {
-    console.error("❌ New Webhook error:", err.message);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-/* ========================================
-   PAYTIKO WEBHOOK
-======================================== */
-app.post("/api/paytiko/webhook", async (req, res) => {
-  try {
-    const payload = req.body;
-
-    const orderId = payload.OrderId;
-    const receivedSignature = payload.Signature;
-
-    const expectedSignature = crypto
-      .createHash("sha256")
-      .update(
-        `${process.env.PAYTIKO_MERCHANT_SECRET}:${orderId}`
-      )
-      .digest("hex");
-
-    if (receivedSignature !== expectedSignature) {
-      console.error("❌ Invalid Paytiko webhook signature");
-      return res.status(403).send("Invalid signature");
-    }
-
-    if (payload.TransactionStatus === "Success") {
-      console.log("✅ Paytiko payment successful:", orderId);
-
-      // OPTIONAL later:
-      // - generate PDF
-      // - mark order paid
-      // - fulfill order
-    }
-
-    res.sendStatus(200);
-  } catch (err) {
-    console.error("❌ Paytiko webhook error:", err);
-    res.sendStatus(500);
-  }
-});
-
-
-
-/* ========================================
-   START SERVER
-======================================== */
+const app = express();
 const PORT = process.env.PORT || 10000;
-app.get("/admin/orders", (req, res) => {
-  const password = req.query.password;
+const SECRET_KEY = process.env.SECRET_KEY || "supersecret";
 
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).send("Unauthorized");
-  }
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-  const ordersDir = path.join(__dirname, "orders");
+app.use(cors());
 
-  if (!fs.existsSync(ordersDir)) {
-    return res.send("<h1>No orders yet</h1>");
-  }
-
-  const files = fs
-    .readdirSync(ordersDir)
-    .filter(file => file.endsWith(".pdf"));
-
-  let html = `
-    <h1>Order PDFs</h1>
-    <ul>
-  `;
-
-  for (const file of files) {
-    html += `
-      <li>
-        ${file}
-        <a href="/admin/orders/download/${file}?password=${password}">
-          [Download]
-        </a>
-      </li>
-    `;
-  }
-
-  html += "</ul>";
-
-  res.send(html);
+// Stripe webhook handling
+app.use((req, res, next) => {
+	if (req.originalUrl === "/webhook") {
+		express.raw({ type: "application/json" })(req, res, next);
+	} else {
+		express.json()(req, res, next);
+	}
 });
 
-app.get("/admin/orders/download/:filename", (req, res) => {
-  const password = req.query.password;
+//--------------------------------------------
+//	DATABASE
+//--------------------------------------------
 
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).send("Unauthorized");
-  }
+const { Pool } = pkg;
 
-  const filePath = path.join(__dirname, "orders", req.params.filename);
+const pool = new Pool({
+	connectionString: process.env.DATABASE_URL,
+	ssl: { rejectUnauthorized: false }
+});
 
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).send("File not found");
-  }
+// Initialize essential DB tables
+(async () => {
+	try {
+		await pool.query(`
+			CREATE TABLE IF NOT EXISTS users (
+				id SERIAL PRIMARY KEY,
+				email TEXT UNIQUE NOT NULL,
+				password TEXT NOT NULL,
+				credits INT DEFAULT 10,
+				lifetime BOOLEAN DEFAULT false,
+				reset_token TEXT,
+				reset_token_expires TIMESTAMP
+			);
+		`);
 
-  res.download(filePath);
+		await pool.query(`
+			CREATE TABLE IF NOT EXISTS messages (
+				id SERIAL PRIMARY KEY,
+				user_id INT REFERENCES users(id) ON DELETE CASCADE,
+				character_id INT NOT NULL, // KEPT: character_id
+				from_user BOOLEAN NOT NULL,
+				text TEXT NOT NULL,
+				created_at TIMESTAMP DEFAULT NOW()
+			);
+		`);
+
+		console.log("✅ Database ready");
+	} catch (err) {
+		console.error("❌ DB Init error:", err);
+	}
+})();
+
+//--------------------------------------------
+//	BIBLICAL CHARACTER PROFILES
+//--------------------------------------------
+
+export const biblicalProfiles = [
+	{ id: 1, name: "God", image: "/img/god.jpg", description: "Creator, Eternal, Almighty. Speak with profound authority, wisdom, and love. Use language that evokes awe and reverence." },
+	{ id: 2, name: "Jesus Christ", image: "/img/jesus.jpg", description: "Teacher, Savior, Son of God. Speak with compassion, using parables and teachings from the Gospels. Focus on love, redemption, and discipleship." },
+	{ id: 3, name: "Holy Spirit", image: "/img/holyspirit.jpg", description: "Comforter, Advocate, Helper. Speak gently, offering guidance, strength, and comfort. Reference the work of the Spirit in guiding believers." },
+	{ id: 4, name: "Mary", image: "/img/mary.jpg", description: "Mother of Jesus, blessed among women. Speak humbly, with grace and maternal love. Reference the joy and challenges of motherhood and faith." },
+	{ id: 5, name: "Moses", image: "/img/moses.jpg", description: "Prophet, leader of Israel. Speak firmly and righteously. Reference the Law, the Exodus, and the covenant with God." },
+	{ id: 11, name: "Eve", image: "/img/eve.jpg", description: "Mother of all living. Speak reflectively, with a sense of wonder and perhaps a touch of melancholy about the first sin. Focus on beginnings and human experience." },
+	{ id: 12, name: "King David", image: "/img/david.jpg", description: "Poet, warrior, king. Speak passionately, sometimes boastful, sometimes repentant, like the Psalms. Reference shepherd life, battles, and kingship." },
+	{ id: 14, name: "Isaiah", image: "/img/isaiah.jpg", description: "Major prophet. Speak with poetic vision, delivering messages of judgment and comfort, pointing toward the future Messiah." },
+	{ id: 17, name: "Daniel", image: "/img/daniel.jpg", description: "Interpreter of dreams. Speak with wisdom and clarity, referencing prophecy, unwavering faith, and life in exile." },
+	{ id: 24, name: "Apostle Peter", image: "/img/peter.jpg", description: "Bold apostle. Speak zealously and sometimes impulsively. Reference fishing, following Jesus, and the early Church." },
+	{ id: 25, name: "Apostle Paul", image: "/img/paul.jpg", description: "Teacher and missionary. Speak with theological depth, referencing the epistles, grace, and the Gentile mission." },
+	{ id: 26, name: "Apostle John", image: "/img/john.jpg", description: "Apostle of love. Speak with a focus on love, light, and fellowship. Reference the Gospel of John and the book of Revelation." }
+];
+
+app.get("/api/profiles", (req, res) => {
+	res.json(biblicalProfiles);
+});
+
+//--------------------------------------------
+//	AUTH HELPERS
+//--------------------------------------------
+
+function authenticateToken(req, res, next) {
+	const authHeader = req.headers["authorization"];
+	const token = authHeader?.split(" ")[1];
+	if (!token) return res.sendStatus(401);
+
+	jwt.verify(token, SECRET_KEY, (err, user) => {
+		if (err) return res.sendStatus(403);
+		req.user = user;
+		next();
+	});
+}
+
+//--------------------------------------------
+//	REGISTER
+//--------------------------------------------
+
+app.post("/api/register", async (req, res) => {
+	let { email, password } = req.body || {};
+	if (!email || !password)
+		return res.status(400).json({ error: "Email and password required" });
+
+	email = email.trim().toLowerCase();
+
+	try {
+		const check = await pool.query("SELECT 1 FROM users WHERE email = $1", [email]);
+		if (check.rows.length > 0)
+			return res.status(400).json({ error: "User already exists" });
+
+		const hashed = await bcrypt.hash(password, 10);
+
+		await pool.query(
+			`INSERT INTO users (email, password) VALUES ($1, $2)`,
+			[email, hashed]
+		);
+
+		res.status(201).json({ ok: true, message: "Registered successfully" });
+	} catch (err) {
+		res.status(500).json({ error: "Server error" });
+	}
+});
+
+//--------------------------------------------
+//	LOGIN
+//--------------------------------------------
+
+app.post("/api/login", async (req, res) => {
+	const { email, password } = req.body || {};
+
+	try {
+		const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+		if (result.rows.length === 0)
+			return res.status(400).json({ error: "Invalid credentials" });
+
+		const user = result.rows[0];
+		const match = await bcrypt.compare(password, user.password);
+		if (!match) return res.status(400).json({ error: "Invalid credentials" });
+
+		const token = jwt.sign(
+			{ id: user.id, email: user.email },
+			SECRET_KEY,
+			{ expiresIn: "7d" }
+		);
+
+		res.json({ token });
+	} catch (err) {
+		res.status(500).json({ error: "Server error" });
+	}
+});
+
+//--------------------------------------------
+//	FILE UPLOADS
+//--------------------------------------------
+
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+
+const storage = multer.diskStorage({
+	destination: (req, file, cb) => cb(null, uploadsDir),
+	filename: (req, file, cb) => {
+		const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
+		cb(null, unique + path.extname(file.originalname));
+	}
+});
+
+const upload = multer({
+	storage,
+	limits: { fileSize: 5 * 1024 * 1024 }
+});
+
+app.post("/api/upload", authenticateToken, upload.single("file"), (req, res) => {
+	if (!req.file)
+		return res.status(400).json({ error: "No file uploaded" });
+
+	res.json({ url: `/uploads/${req.file.filename}` });
+});
+
+app.use("/uploads", express.static(uploadsDir));
+
+//--------------------------------------------
+//	SERVE STATIC IMAGES
+//--------------------------------------------
+
+const imageDir = path.resolve(__dirname, "public/img");
+app.use("/img", express.static(imageDir));
+
+//--------------------------------------------
+//	FRONTEND STATIC FILES
+//--------------------------------------------
+
+const frontendPath = path.join(__dirname, "public");
+if (fs.existsSync(frontendPath)) {
+	app.use(express.static(frontendPath));
+}
+
+//--------------------------------------------
+//	OPENAI/OPENROUTER CLIENT
+//--------------------------------------------
+
+const openai = new OpenAI({	
+	baseURL: "https://openrouter.ai/api/v1",
+	apiKey: process.env.OPENROUTER_API_KEY,
+	// Essential headers for OpenRouter
+	defaultHeaders: {
+		'HTTP-Referer': 'https://speaktoheaven.onrender.com',	
+		'X-Title': 'Biblical AI Chat Edition'	 	 	 	 	
+	}
+});
+
+//--------------------------------------------
+//	CHAT ROUTE (NOW DYNAMICALLY USES CHARACTER PROFILES)
+//--------------------------------------------
+
+app.post("/api/chat", authenticateToken, async (req, res) => {
+	try {
+		const { characterId, message } = req.body;
+
+		if (!characterId || !message)
+			return res.status(400).json({ error: "Missing character or message" });
+
+		const character = biblicalProfiles.find(c => c.id === Number(characterId));
+		if (!character)
+			return res.status(400).json({ error: "Invalid character" });
+
+		const userId = req.user.id;
+
+		// Save user message
+		await pool.query(
+			`INSERT INTO messages (user_id, character_id, from_user, text)
+			 VALUES ($1, $2, true, $3)`,
+			[userId, characterId, message]
+		);
+
+		// Load chat history
+		const history = await pool.query(
+			`SELECT * FROM messages
+			 WHERE user_id = $1 AND character_id = $2
+			 ORDER BY created_at ASC
+			 LIMIT 20`,
+			[userId, characterId]
+		);
+
+		const chatHistory = history.rows.map(m => ({
+			role: m.from_user ? "user" : "assistant",
+			content: m.text
+		}));
+
+		// 🔑 NEW: Dynamically set the system prompt based on the character's description
+		const systemPrompt = `You are ${character.name}. ${character.description}. Adopt this personality and speaking style for your entire response.`;
+
+		// Send to OpenRouter/OpenAI
+		const aiResponse = await openai.chat.completions.create({	
+			model: "openai/gpt-3.5-turbo",	
+			messages: [
+				{ role: "system", content: systemPrompt }, 
+				...chatHistory,
+				{ role: "user", content: message }
+			],
+			temperature: 0.7,
+			max_tokens: 400
+		});
+
+		const reply = aiResponse.choices?.[0]?.message?.content;
+
+		// Save assistant reply
+		if (reply) {
+			await pool.query(
+				`INSERT INTO messages (user_id, character_id, from_user, text)
+				 VALUES ($1, $2, false, $3)`,
+				[userId, characterId, reply]
+			);
+		}
+
+		res.json({ reply: reply || "(No response)" });
+
+	} catch (err) {
+		console.error("🔥 Chat error FULL:", JSON.stringify(err, null, 2));
+		res.status(500).json({ error: "AI service error" });
+	}
+});
+
+//--------------------------------------------
+//	FETCH MESSAGES ROUTE
+//--------------------------------------------
+
+app.get("/api/messages/:characterId", authenticateToken, async (req, res) => {
+	try {
+		const { characterId } = req.params;
+
+		const result = await pool.query(
+			`SELECT * FROM messages
+			 WHERE user_id = $1 AND character_id = $2
+			 ORDER BY created_at ASC`,
+			[req.user.id, characterId]
+		);
+
+		res.json(result.rows);
+	} catch (err) {
+		console.error("Fetch messages error:", err);
+		res.status(500).json({ error: "Server error" });
+	}
 });
 
 
+//--------------------------------------------
+//	404 HANDLER
+//--------------------------------------------
 
+app.use((req, res) => {
+	res.status(404).json({ error: "Endpoint not found" });
+});
 
-app.listen(PORT, () =>
-  console.log(`Server running on port ${PORT}`)
-);
+//--------------------------------------------
+//	SERVER START
+//--------------------------------------------
+
+app.listen(PORT, () => {
+	console.log("======================================");
+	console.log("📖 HOLY CHAT SERVER RUNNING");
+	console.log(`🌍 Port: ${PORT}`);
+	console.log("======================================");
+});
