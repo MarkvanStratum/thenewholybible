@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Pago seguro</title>
+  <title>Pago Seguro</title>
+  <meta name="referrer" content="no-referrer">
 
-  <!-- Google Tag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -15,472 +15,241 @@
   </script>
 
   <style>
-    :root{
-      --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb; --card:#ffffff;
-      --green:#18a957; --accent:#0f9d58; --accent2:#2dd4bf; --warn:#d30000;
-      --radius:14px;
-    }
+    :root{ --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb; }
     *{box-sizing:border-box}
-    body{
-      margin:0; background:var(--bg); color:var(--text);
-      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-    }
-
-    .safe{
-      background:#0a0a0a;color:#fff;font-size:12px;padding:6px 10px;
-    }
-
+    html,body{height:100%}
+    body{ margin:0;background:var(--bg);color:var(--text); font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
     .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
-
-    .page-title{
-      font-size:28px;font-weight:900;display:flex;gap:8px;align-items:center;
-      margin:6px 0 14px;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) 360px;
-      gap:18px;
-    }
-    @media(max-width:980px){ .grid{grid-template-columns:1fr;} }
-
-    .card{
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:22px;
-    }
-
+    .safe{background:#0a0a0a;color:#fff;font-size:12px;padding:6px 10px;text-align:center}
+    .grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px}
+    @media(max-width:980px){.grid{grid-template-columns:1fr}}
+    .card{background:#fff;border:1px solid var(--line);padding:22px;border-radius:12px}
+    .page-title{ font-size:28px;font-weight:900;display:flex;gap:8px;margin:6px 0 14px }
+    .stars{color:#f6b80c}
+    .reviews{color:#5b6b82;font-size:13px}
     .h2{font-size:18px;font-weight:800;margin:10px 0 14px}
-    .label{font-weight:700;font-size:13px;margin-bottom:4px;color:#334}
-
-    .form-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-    @media(max-width:620px){ .form-grid{grid-template-columns:1fr;} }
-
-    .input,.select,.el{
-      width:100%;padding:12px;border:1px solid #cfd6e4;
-      border-radius:10px;font-size:15px;background:#fff;
-    }
-
-    .btn{
-      width:100%;padding:14px;border:none;border-radius:12px;
-      font-weight:900;background:#16a34a;color:#fff;font-size:16px;
-      cursor:pointer;
-    }
-    .btn.muted{
-      background:#f1f4f8;color:#20324d;border:1px solid var(--line)
-    }
-
-    .logos{
-      display:flex;gap:10px;margin-top:12px;align-items:center;
-    }
-    .logos img{
-      height:20px;
-      width:auto;
-      display:block;
-    }
-
-    .err{
-      display:none;background:#fff1f1;border:1px solid #f5bcbc;
-      color:#9a1a1a;padding:10px;border-radius:10px;
-      font-size:14px;margin-top:10px
-    }
+    .sub{font-size:13px;color:#5b6b82}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:620px){.form-grid{grid-template-columns:1fr}}
+    .input,.select,.el{ width:100%;border:1px solid #cfd6e4;border-radius:10px; padding:12px;font-size:15px;background:#fff }
+    .btn{ width:100%;padding:12px;border:none;border-radius:12px; background:#16a34a;color:#fff;font-weight:900;cursor:pointer }
+    .err{ display:none;background:#fff1f1;border:1px solid #f5bcbc; padding:10px;border-radius:10px;margin-top:10px;color:#9a1a1a }
     .err[aria-hidden="false"]{display:block}
-
+    .widget{ background:#fff;border:1px solid var(--line); padding:16px;border-radius:12px }
+    .widget + .widget{margin-top:12px}
+    .order-row{ display:flex;justify-content:space-between; padding:6px 0;border-top:1px dashed #e6eaf1 }
+    .delivery{ display:flex;gap:12px;padding:12px; border:1px dashed #d9e2ef;border-radius:10px;background:#f7fbff; align-items:center; }
+    .trust{ display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center }
+    .trust .box{border:1px solid var(--line);padding:8px;border-radius:10px}
     .step{display:none}
     .step[aria-hidden="false"]{display:block}
-
-    /* Loading overlay */
-    .loading-overlay{
-      position:fixed; inset:0; background:rgba(246,249,252,.92);
-      display:none; align-items:center; justify-content:center;
-      z-index:9999;
-    }
+    .hero{ display:none; margin-bottom:12px; padding:10px; border:1px solid var(--line); border-radius:12px; gap:10px; align-items:center; }
+    .hero img{ width:44px;height:44px;border-radius:10px; border:1px solid var(--line);object-fit:cover }
+    .loading-overlay{ position:fixed;inset:0; background:rgba(246,249,252,.92); display:none;align-items:center;justify-content:center; z-index:9999; }
     .loading-overlay[aria-hidden="false"]{display:flex}
-    .loading-box{
-      background:#fff;border:1px solid #e6edf5;
-      padding:20px;border-radius:14px;text-align:center;
-      width:min(92vw,460px);
-      box-shadow:0 6px 18px rgba(0,0,0,.06);
-      color:#2a3b55;
-    }
-
-    /* SIDEBAR */
-    .widget{
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:16px;
-      margin-bottom:12px;
-    }
-
-    .delivery{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      border:1px dashed #d9e2ef;
-      background:#f7fbff;
-      padding:12px;
-      border-radius:10px;
-    }
-    .delivery img{
-      width:52px;height:52px;border-radius:8px;object-fit:cover;
-      border:1px solid #e6eaf1;background:#fff;
-    }
-
-    .w-title{ font-weight:800; font-size:16px; margin:2px 0 10px }
-
-    .order-row{
-      display:flex;justify-content:space-between;
-      font-size:14px;padding:6px 0;
-      border-top:1px dashed #e6eaf1;
-    }
-    .order-row:first-of-type{ border-top:none }
-
-    .tiny{ font-size:12px; color:var(--muted) }
-
-    .trust{
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      gap:12px;text-align:center;
-    }
-    .trust .box{
-      border:1px solid var(--line);
-      border-radius:10px;
-      padding:8px;
-    }
-    .trust .big{
-      font-weight:900;font-size:18px;
-    }
-    .trust .small{
-      font-size:12px;color:#5b6b82;
-    }
   </style>
 </head>
 
-<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
-
-
 <body>
-  <div class="safe">Pago SSL seguro</div>
 
-  <div class="wrap">
-    <div class="page-title">
-      Pago seguro 🔒 <span style="color:#f6b80c;font-size:15px">★★★★★</span>
-      <span style="color:#5b6b82;font-size:13px">(2777 reseñas)</span>
-    </div>
+<div class="safe">Pago seguro SSL</div>
 
-    <div class="grid">
-      <div class="card">
+<div class="wrap">
+  <div class="page-title">
+    Pago Seguro 🔒 <span class="stars">★★★★★</span>
+    <span class="reviews">(2777 valoraciones)</span>
+  </div>
 
-        <!-- STEP 1 -->
-        <section id="step1" class="step" aria-hidden="false">
-          <div class="h2">1. Información</div>
-
-          <div class="form-grid">
-            <div>
-              <div class="label">Nombre</div>
-              <input class="input" id="firstName" placeholder="Ana">
-            </div>
-            <div>
-              <div class="label">Apellidos</div>
-              <input class="input" id="lastName" placeholder="García">
-            </div>
-          </div>
-
-          <div class="form-grid">
-            <div style="grid-column:1 / -1">
-              <div class="label">Dirección</div>
-              <input class="input" id="billingStreet" placeholder="Dirección (España)">
-            </div>
-            <div>
-              <div class="label">Código postal</div>
-              <input class="input" id="billingPostcode">
-            </div>
-            <div>
-              <div class="label">Ciudad</div>
-              <input class="input" id="billingCity">
-            </div>
-          </div>
-
-          <div class="form-grid">
-            <div>
-              <div class="label">Correo electrónico</div>
-              <input class="input" id="emailInput" type="email">
-            </div>
-            <div>
-              <div class="label">País</div>
-              <input class="input" id="billingCountry" value="España" readonly>
-            </div>
-          </div>
-
-          <div class="form-grid">
-            <div>
-              <div class="label">Prefijo internacional</div>
-              <select class="select" id="phonePrefix">
-                <option value="+34">+34 — España</option>
-              </select>
-            </div>
-            <div>
-              <div class="label">Número de teléfono</div>
-              <input class="input" id="phoneNumber">
-            </div>
-          </div>
-
-          <input id="nameInput" style="display:none">
-
-          <button id="nextBtn" class="btn">Continuar</button>
-
-          <div class="logos">
-            <img src="/visa.png">
-            <img src="mastercard.png">
-            <img src="amex.png">
-            <img src="discover.jpg">
-          </div>
-        </section>
-
-        <!-- STEP 2 -->
-        <section id="step2" class="step" aria-hidden="true">
-          <div class="h2">2. Pago</div>
-          <p style="color:#5b6b82;font-size:13px;margin-top:-6px">
-            Tus datos se procesan de forma segura mediante Stripe.
-          </p>
-
+  <div class="grid">
+    <div class="card">
+      <section id="step1" class="step" aria-hidden="false">
+        <div id="hero" class="hero">
+          <img id="heroImg" alt="">
           <div>
-            <div class="label">Número de tarjeta</div>
-            <div id="card-number" class="el"></div>
+            <div id="heroTitle" style="font-weight:900;font-size:14px"></div>
+            <div class="sub">Producto de su enlace</div>
           </div>
+        </div>
 
-          <div class="form-grid">
-            <div>
-              <div class="label">Vencimiento</div>
-              <div id="card-expiry" class="el"></div>
-            </div>
-            <div>
-              <div class="label">CVC</div>
-              <div id="card-cvc" class="el"></div>
-            </div>
-          </div>
+        <div class="h2">1. Información</div>
+        <div class="form-grid">
+          <input id="firstName" class="input" placeholder="Nombre">
+          <input id="lastName" class="input" placeholder="Apellidos">
+        </div>
+        <div class="form-grid">
+          <input id="billingStreet" class="input" placeholder="Dirección" style="grid-column:1/-1">
+          <input id="billingPostcode" class="input" placeholder="Código Postal">
+          <input id="billingCity" class="input" placeholder="Ciudad">
+        </div>
+        <div class="form-grid">
+          <input id="emailInput" class="input" type="email" placeholder="Correo electrónico">
+          <input class="input" value="España" disabled>
+        </div>
+        <div class="form-grid">
+          <select id="phonePrefix" class="select">
+            <option value="+34">+34 — España</option>
+          </select>
+          <input id="phoneNumber" class="input" placeholder="Número de teléfono">
+        </div>
+        <input id="nameInput" type="hidden">
+        <button id="nextBtn" class="btn">Continuar</button>
+      </section>
 
-          <div id="err" class="err" aria-hidden="true"></div>
+      <section id="step2" class="step" aria-hidden="true">
+        <div class="h2">2. Pago</div>
+        <p class="sub">Los detalles de la tarjeta están encriptados y son procesados por Stripe.</p>
+        <div id="card-number" class="el" style="margin-bottom:10px"></div>
+        <div class="form-grid">
+          <div id="card-expiry" class="el"></div>
+          <div id="card-cvc" class="el"></div>
+        </div>
+        <div id="err" class="err" aria-hidden="true"></div>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button id="backBtn" class="btn" style="width:40%; background:#f1f4f8; color:#20324d; border:1px solid var(--line)">← Volver</button>
+          <button id="payNow" class="btn" style="width:60%">Pagar ahora</button>
+        </div>
+      </section>
+    </div>
 
-          <div style="display:flex;gap:10px;margin-top:12px">
-            <button id="backBtn" class="btn muted">← Volver</button>
-            <button id="payNow" class="btn">Pagar de forma segura</button>
-          </div>
-        </section>
-
+    <aside>
+      <div class="widget">
+        <div style="text-align:center;font-weight:800">Lo que dicen nuestros clientes</div>
+        <div style="text-align:center;font-weight:700;">Fenella Lara</div>
+        <div style="text-align:center;color:#f6b80c;">★★★★★</div>
+        <p style="text-align:center; font-size:12px; color:var(--muted)">Recibí mi producto ayer. ¡Servicio rápido y excelente! Muchas gracias.</p>
       </div>
-
-      <!-- FULL SIDEBAR -->
-      <aside>
-
-        <!-- Testimonial -->
-        <div class="widget">
-          <div class="w-title" style="text-align:center">Lo que dicen nuestros clientes</div>
-          <div style="text-align:center; font-weight:700; margin-bottom:4px">Fenella Lara</div>
-          <div style="text-align:center; color:#f6b80c; letter-spacing:1px">★★★★★</div>
-          <p class="tiny" style="text-align:center; margin-top:8px">
-            Recibí mi producto ayer. ¡Servicio rápido y excelente! Muchas gracias.
-          </p>
+      <div class="widget">
+        <div class="delivery">
+          <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none">
+          <div>
+            <div id="deliveryProductTitle" style="font-weight:800">Envío rápido</div>
+            <div class="sub">3–5 días laborables</div>
+          </div>
+          <div style="margin-left:auto;font-weight:800">Gratis</div>
         </div>
-
-        <!-- Delivery + Summary -->
-        <div class="widget">
-          <div class="delivery">
-            <img id="sidebarImg" alt="">
-            <div>
-              <div style="font-weight:800">Entrega rápida a tu dirección</div>
-              <div class="tiny">3–5 días laborables</div>
-            </div>
-            <div style="margin-left:auto; font-weight:800">Gratis</div>
-          </div>
-
-          <div class="w-title" style="margin-top:14px">Resumen del pedido</div>
-
-          <div class="order-row">
-            <span>Total</span>
-            <span id="orderTotal">€9,95</span>
-          </div>
-
-          <div class="tiny" style="margin-top:10px; line-height:1.5">
-            🗃️ Solo quedan 13 en stock<br>
-            👀 <span id="viewingNow">31</span> personas están viendo esto ahora mismo<br>
-            ✅ <span id="recentBuyer">J****s</span> lo compró (hace 10 minutos)<br>
-            💳 <span id="purchasedCount">715</span> personas lo compraron en los últimos 7 días
-          </div>
-        </div>
-
-        <!-- Trusted Store -->
-        <div class="widget">
-          <div class="w-title">TIENDA DE CONFIANZA</div>
-          <div class="trust">
-            <div class="box">
-              <div class="big">99%</div>
-              <div class="small">Clientes satisfechos</div>
-            </div>
-            <div class="box">
-              <div class="big">Seguro</div>
-              <div class="small">SSL Encriptado</div>
-            </div>
-            <div class="box">
-              <div class="big">€100K</div>
-              <div class="small">Protección al comprador</div>
-            </div>
-          </div>
-        </div>
-
-      </aside>
-
-    </div>
+        <div style="margin-top:14px;font-weight:800">Resumen del pedido</div>
+        <div class="order-row"><span>Total</span><span>9,95 €</span></div>
+      </div>
+    </aside>
   </div>
+</div>
 
-  <!-- LOADING -->
-  <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
-    <div class="loading-box">
-      <h3>Procesando tu pago…</h3>
-      <p>Por favor espera…</p>
-    </div>
+<div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+  <div style="background:#fff;padding:24px;border-radius:14px;text-align:center; width:min(92vw,460px);">
+    <div style="font-size:20px;font-weight:800;margin-bottom:18px">Procesando pago…</div>
+    <p class="sub">Por favor, espere un momento…</p>
   </div>
+</div>
 
-  <!-- Stripe.js -->
-  <script src="https://js.stripe.com/v3"></script>
+<script src="https://js.stripe.com/v3"></script>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  // EXACT ENDPOINT FROM YOUR FILE
+  const SUBSCRIBE_URL = "/api/stripe/one-time-46-95"; 
+  const qs = new URLSearchParams(window.location.search);
 
-  <!-- FULL ORIGINAL JS (REQUIRED FOR CONTINUE BUTTON) -->
-  <script>
-  document.addEventListener("DOMContentLoaded", () => {
+  // PREFILL LOGIC
+  try {
+    const s1 = qs.get('sub1'); 
+    if(s1){ 
+      const title = decodeURIComponent(s1);
+      document.getElementById('heroTitle').textContent = title; 
+      document.getElementById('deliveryProductTitle').textContent = title; 
+    }
+    const s2 = qs.get('sub2'); 
+    if(s2){ 
+      const url=decodeURIComponent(s2); 
+      document.getElementById('heroImg').src=url; 
+      document.getElementById('hero').style.display='flex'; 
+      document.getElementById('sidebarImg').src=url; 
+      document.getElementById('sidebarImg').style.display='block'; 
+    }
+    if(qs.get('sub3')) document.getElementById('firstName').value = decodeURIComponent(qs.get('sub3'));
+    if(qs.get('sub4')) document.getElementById('lastName').value = decodeURIComponent(qs.get('sub4'));
+    if(qs.get('sub5')) document.getElementById('billingStreet').value = decodeURIComponent(qs.get('sub5'));
+    if(qs.get('sub6')) document.getElementById('billingPostcode').value = decodeURIComponent(qs.get('sub6'));
+    if(qs.get('sub7')) document.getElementById('billingCity').value = decodeURIComponent(qs.get('sub7'));
+    if(qs.get('sub9')) document.getElementById('emailInput').value = decodeURIComponent(qs.get('sub9'));
+    if(qs.get('sub10')) document.getElementById('phoneNumber').value = decodeURIComponent(qs.get('sub10'));
+  } catch(e){}
 
-    const PUBLISHABLE_KEY =
-      "pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t";
+  // EXACT PUBLISHABLE KEY FROM YOUR FILE
+  const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
+  const elements = stripe.elements();
+  const cardNumber = elements.create('cardNumber');
+  const cardExpiry = elements.create('cardExpiry');
+  const cardCvc = elements.create('cardCvc');
+  cardNumber.mount('#card-number'); cardExpiry.mount('#card-expiry'); cardCvc.mount('#card-cvc');
 
-    const SUBSCRIBE_URL = "/api/stripe/one-time-46-95";
+  const step1 = document.getElementById("step1");
+  const step2 = document.getElementById("step2");
+  const nameInput = document.getElementById("nameInput");
 
-    const step1 = document.getElementById("step1");
-    const step2 = document.getElementById("step2");
-    const nextBtn = document.getElementById("nextBtn");
-    const backBtn = document.getElementById("backBtn");
-    const errBox = document.getElementById("err");
+  document.getElementById("nextBtn").onclick = () => {
+    nameInput.value = (document.getElementById("firstName").value + " " + document.getElementById("lastName").value).trim();
+    step1.setAttribute('aria-hidden','true'); 
+    step2.setAttribute('aria-hidden','false');
+  };
+
+  document.getElementById("backBtn").onclick = () => {
+    step2.setAttribute('aria-hidden','true'); 
+    step1.setAttribute('aria-hidden','false');
+  };
+
+  document.getElementById("payNow").onclick = async () => {
+    document.getElementById("payNow").disabled = true;
     const overlay = document.getElementById("loading-overlay");
-
-    const firstName = document.getElementById("firstName");
-    const lastName = document.getElementById("lastName");
-    const nameInput = document.getElementById("nameInput");
-    const emailInput = document.getElementById("emailInput");
-
-    const phonePrefix = document.getElementById("phonePrefix");
-    const phoneNumber = document.getElementById("phoneNumber");
-
-    const billingStreet = document.getElementById("billingStreet");
-    const billingCity = document.getElementById("billingCity");
-    const billingPostcode = document.getElementById("billingPostcode");
-
-    /* Make Continue work */
-    nextBtn.onclick = () => {
-      nameInput.value = (firstName.value + " " + lastName.value).trim();
-      step1.setAttribute("aria-hidden","true");
-      step2.setAttribute("aria-hidden","false");
+    overlay.setAttribute("aria-hidden","false");
+    
+    const address = {
+      line1: document.getElementById("billingStreet").value.trim(),
+      city: document.getElementById("billingCity").value.trim(),
+      postal_code: document.getElementById("billingPostcode").value.trim(),
+      country: "ES"
     };
 
-    /* Back button */
-    backBtn.onclick = () => {
-      step1.setAttribute("aria-hidden","false");
-      step2.setAttribute("aria-hidden","true");
-    };
-
-    /* Stripe setup */
-    const stripe = Stripe(PUBLISHABLE_KEY);
-    const elements = stripe.elements();
-
-    const cardNumber = elements.create("cardNumber");
-    const cardExpiry = elements.create("cardExpiry");
-    const cardCvc = elements.create("cardCvc");
-
-    cardNumber.mount("#card-number");
-    cardExpiry.mount("#card-expiry");
-    cardCvc.mount("#card-cvc");
-
-    document.getElementById("payNow").onclick = async () => {
-
-      errBox.setAttribute("aria-hidden","true");
-      overlay.setAttribute("aria-hidden","false");
-
-      const address = {
-        line1: billingStreet.value.trim(),
-        city: billingCity.value.trim(),
-        postal_code: billingPostcode.value.trim(),
-        country: "ES"
-      };
-
+    try {
       const pm = await stripe.createPaymentMethod({
         type: "card",
         card: cardNumber,
-        billing_details:{
-          name: nameInput.value,
-          email: emailInput.value.trim(),
-          phone: phonePrefix.value + phoneNumber.value.replace(/\D/g,""),
-          address
+        billing_details: { 
+          name: nameInput.value, 
+          email: document.getElementById("emailInput").value.trim(),
+          phone: document.getElementById("phonePrefix").value + document.getElementById("phoneNumber").value.replace(/\D/g,""),
+          address: address 
         }
       });
+      if (pm.error) throw pm.error;
 
-      if(pm.error){
-        errBox.textContent = pm.error.message;
-        errBox.setAttribute("aria-hidden","false");
-        overlay.setAttribute("aria-hidden","true");
-        return;
-      }
-
-      const response = await fetch(SUBSCRIBE_URL,{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
+      const response = await fetch(SUBSCRIBE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           paymentMethodId: pm.paymentMethod.id,
           name: nameInput.value,
-          email: emailInput.value.trim(),
-          phone: phonePrefix.value + phoneNumber.value.replace(/\D/g,""),
-          address
+          email: document.getElementById("emailInput").value.trim(),
+          phone: document.getElementById("phonePrefix").value + document.getElementById("phoneNumber").value.replace(/\D/g,""),
+          address: address
         })
       });
 
       const data = await response.json();
-
-      if(!data.clientSecret){
-        errBox.textContent = data.error || "Error al iniciar el pago.";
-        errBox.setAttribute("aria-hidden","false");
-        overlay.setAttribute("aria-hidden","true");
-        return;
-      }
+      if(!data.clientSecret) throw new Error(data.error || "Error al iniciar el pago.");
 
       const conf = await stripe.confirmCardPayment(data.clientSecret);
+      if (conf.error) throw conf.error;
 
-      if(conf.error){
-        errBox.textContent = conf.error.message;
-        errBox.setAttribute("aria-hidden","false");
-        overlay.setAttribute("aria-hidden","true");
-        return;
-      }
-
-      if(conf.paymentIntent.status !== "succeeded"){
-        errBox.textContent = "El pago no se completó.";
-        errBox.setAttribute("aria-hidden","false");
-        overlay.setAttribute("aria-hidden","true");
-        return;
-      }
-
-      const TRACKER_URL =
-        "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7";
-
-      const qp = new URLSearchParams();
-      qp.set("v", conf.paymentIntent.id);
-
-      window.location.href = TRACKER_URL + "?" + qp.toString();
-    };
-
-  });
-  </script>
-
+      // SUCCESS REDIRECT
+      window.location.href = "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7" + "?v=" + conf.paymentIntent.id;
+    } catch(e){
+      const errBox = document.getElementById("err");
+      errBox.textContent = e.message;
+      errBox.setAttribute("aria-hidden","false");
+      document.getElementById("payNow").disabled = false;
+      overlay.setAttribute("aria-hidden","true");
+    }
+  };
+});
+</script>
 </body>
 </html>

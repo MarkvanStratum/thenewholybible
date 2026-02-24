@@ -74,7 +74,8 @@
 
     .delivery{
       display:flex;gap:12px;padding:12px;
-      border:1px dashed #d9e2ef;border-radius:10px;background:#f7fbff
+      border:1px dashed #d9e2ef;border-radius:10px;background:#f7fbff;
+      align-items:center;
     }
 
     .trust{
@@ -84,6 +85,20 @@
 
     .step{display:none}
     .step[aria-hidden="false"]{display:block}
+
+    .hero{
+      display:none;
+      margin-bottom:12px;
+      padding:10px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      gap:10px;
+      align-items:center;
+    }
+    .hero img{
+      width:44px;height:44px;border-radius:10px;
+      border:1px solid var(--line);object-fit:cover
+    }
 
     .loading-overlay{
       position:fixed;inset:0;
@@ -135,6 +150,15 @@
   <div class="grid">
     <div class="card">
       <section id="step1" class="step" aria-hidden="false">
+        
+        <div id="hero" class="hero">
+          <img id="heroImg" alt="">
+          <div>
+            <div id="heroTitle" style="font-weight:900;font-size:14px"></div>
+            <div class="sub">Produkt fra dit link</div>
+          </div>
+        </div>
+
         <div class="h2">1. Information</div>
 
         <div class="form-grid">
@@ -195,8 +219,9 @@
 
       <div class="widget">
         <div class="delivery">
+          <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none">
           <div>
-            <div style="font-weight:800">Hurtig levering</div>
+            <div id="deliveryText" style="font-weight:800">Hurtig levering</div>
             <div class="sub">3–5 hverdage</div>
           </div>
           <div style="margin-left:auto;font-weight:800">Gratis</div>
@@ -229,6 +254,69 @@
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
+
+  const qs = new URLSearchParams(window.location.search);
+
+  /* ===== PREFILL & DYNAMIC CONTENT LOGIC (DENMARK) ===== */
+  try {
+    // 1. Title Prefill (sub1)
+    const sub1 = qs.get('sub1');
+    if (sub1) {
+      const title = decodeURIComponent(sub1);
+      
+      // Update Main Page Title
+      const pt = document.querySelector('.page-title');
+      if (pt) {
+        for (const n of pt.childNodes) {
+          if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()) {
+            n.textContent = title + ' ';
+            break;
+          }
+        }
+      }
+      
+      // Update Hero Title (Step 1)
+      const ht = document.getElementById('heroTitle');
+      if (ht) ht.textContent = title;
+      
+      // Update Sidebar delivery text
+      const dt = document.getElementById('deliveryText');
+      if (dt) dt.textContent = title;
+    }
+
+    // 2. Image URL Prefill (sub2)
+    const sub2 = qs.get('sub2');
+    if (sub2) {
+      const imgUrl = decodeURIComponent(sub2);
+      
+      // Update and show Hero image
+      const hImg = document.getElementById('heroImg');
+      const hWrap = document.getElementById('hero');
+      if (hImg && hWrap) {
+        hImg.src = imgUrl;
+        hWrap.style.display = 'flex';
+      }
+      
+      // Update and show Sidebar image
+      const sImg = document.getElementById('sidebarImg');
+      if (sImg) {
+        sImg.src = imgUrl;
+        sImg.style.display = 'block';
+      }
+    }
+
+    // 3. Form Field Prefills
+    if (qs.get('sub3')) document.getElementById('firstName').value = decodeURIComponent(qs.get('sub3'));
+    if (qs.get('sub4')) document.getElementById('lastName').value = decodeURIComponent(qs.get('sub4'));
+    if (qs.get('sub5')) document.getElementById('billingStreet').value = decodeURIComponent(qs.get('sub5'));
+    if (qs.get('sub6')) document.getElementById('billingPostcode').value = decodeURIComponent(qs.get('sub6'));
+    if (qs.get('sub7')) document.getElementById('billingCity').value = decodeURIComponent(qs.get('sub7'));
+    if (qs.get('sub9')) document.getElementById('emailInput').value = decodeURIComponent(qs.get('sub9'));
+    if (qs.get('sub10')) document.getElementById('phoneNumber').value = decodeURIComponent(qs.get('sub10'));
+
+  } catch(e) { console.warn("Prefill failed:", e); }
+  /* ===== END PREFILL LOGIC ===== */
+
   const stripe = Stripe("pk_live_51SxKzcEAzUPDR2OIpDpc6lPbCweDLEimW1e69ZWMFUfHUM5ADNc0BubRUJjcMEV6aDyO4Cvtr2zscg8upTpCK0GR00UEw83sDh");
   const elements = stripe.elements();
 
@@ -279,7 +367,7 @@ window.addEventListener('DOMContentLoaded', () => {
       const r = await fetch("/api/stripe/new/one-time-33-95",{
         method:"POST",
         headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ paymentMethodId: pm.paymentMethod.id, billingDetails })
+        body:JSON.stringify({ paymentMethodId: pm.paymentMethod.id, billingDetails })\
       });
 
       const d = await r.json();
