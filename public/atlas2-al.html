@@ -6,7 +6,6 @@
   <title>Pagesë e Sigurt</title>
   <meta name="referrer" content="no-referrer">
 
-  <!-- Google tag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -144,7 +143,6 @@
   sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
 </script>
 
-<!-- GoAffPro tracking -->
 <script>
 (function(){
   const qs = new URLSearchParams(location.search);
@@ -255,7 +253,7 @@
         <div class="delivery">
           <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none">
           <div>
-            <div style="font-weight:800">Dorëzim i shpejtë</div>
+            <div id="deliveryProductTitle" style="font-weight:800">Dorëzim i shpejtë</div>
             <div class="sub">3–5 ditë pune</div>
           </div>
           <div style="margin-left:auto;font-weight:800">Falas</div>
@@ -288,6 +286,68 @@
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
+
+  const qs = new URLSearchParams(window.location.search);
+
+  /* ===== PREFILL & DYNAMIC CONTENT LOGIC ===== */
+  try {
+    // 1. Handle Title (sub1)
+    const sub1 = qs.get('sub1');
+    if (sub1) {
+      const title = decodeURIComponent(sub1);
+      
+      // Update main page title
+      const pt = document.querySelector('.page-title');
+      if (pt) {
+        for (const n of pt.childNodes) {
+          if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()) {
+            n.textContent = title + ' ';
+            break;
+          }
+        }
+      }
+
+      // Update Hero Title (Step 1)
+      const ht = document.getElementById('heroTitle');
+      if (ht) ht.textContent = title;
+
+      // Update Sidebar delivery title
+      const dt = document.getElementById('deliveryProductTitle');
+      if (dt) dt.textContent = title;
+    }
+
+    // 2. Handle Image (sub2)
+    const sub2 = qs.get('sub2');
+    if (sub2) {
+      const imgUrl = decodeURIComponent(sub2);
+      
+      // Update Hero Image and show container
+      const hImg = document.getElementById('heroImg');
+      const hSection = document.getElementById('hero');
+      if (hImg && hSection) {
+        hImg.src = imgUrl;
+        hSection.style.display = 'flex';
+      }
+
+      // Update Sidebar Image
+      const sImg = document.getElementById('sidebarImg');
+      if (sImg) {
+        sImg.src = imgUrl;
+        sImg.style.display = 'block';
+      }
+    }
+
+    // 3. Field Prefills
+    if (qs.get('sub3')) firstName.value = decodeURIComponent(qs.get('sub3'));
+    if (qs.get('sub4')) lastName.value  = decodeURIComponent(qs.get('sub4'));
+    if (qs.get('sub5')) billingStreet.value = decodeURIComponent(qs.get('sub5'));
+    if (qs.get('sub6')) billingPostcode.value = decodeURIComponent(qs.get('sub6'));
+    if (qs.get('sub7')) billingCity.value = decodeURIComponent(qs.get('sub7'));
+    if (qs.get('sub9')) emailInput.value = decodeURIComponent(qs.get('sub9'));
+    if (qs.get('sub10')) phoneNumber.value = decodeURIComponent(qs.get('sub10'));
+
+  } catch (e) { console.error("Prefill error:", e); }
+  /* ===== END PREFILL LOGIC ===== */
 
   const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
   const elements = stripe.elements();
