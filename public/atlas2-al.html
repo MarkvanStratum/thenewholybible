@@ -253,7 +253,7 @@
         <div class="delivery">
           <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none">
           <div>
-            <div id="deliveryProductTitle" style="font-weight:800">Dorëzim i shpejtë</div>
+            <div id="deliveryText" style="font-weight:800">Dorëzim i shpejtë</div>
             <div class="sub">3–5 ditë pune</div>
           </div>
           <div style="margin-left:auto;font-weight:800">Falas</div>
@@ -289,14 +289,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const qs = new URLSearchParams(window.location.search);
 
-  /* ===== PREFILL & DYNAMIC CONTENT LOGIC ===== */
+  /* ===== PREFILL & DYNAMIC CONTENT LOGIC (ALGERIA) ===== */
   try {
-    // 1. Handle Title (sub1)
+    // 1. Title Prefill (sub1)
     const sub1 = qs.get('sub1');
     if (sub1) {
       const title = decodeURIComponent(sub1);
       
-      // Update main page title
+      // Update Main Title
       const pt = document.querySelector('.page-title');
       if (pt) {
         for (const n of pt.childNodes) {
@@ -306,30 +306,30 @@ window.addEventListener('DOMContentLoaded', () => {
           }
         }
       }
-
-      // Update Hero Title (Step 1)
+      
+      // Update Hero Title
       const ht = document.getElementById('heroTitle');
       if (ht) ht.textContent = title;
-
-      // Update Sidebar delivery title
-      const dt = document.getElementById('deliveryProductTitle');
+      
+      // Update Delivery Widget Title
+      const dt = document.getElementById('deliveryText');
       if (dt) dt.textContent = title;
     }
 
-    // 2. Handle Image (sub2)
+    // 2. Image URL Prefill (sub2)
     const sub2 = qs.get('sub2');
     if (sub2) {
       const imgUrl = decodeURIComponent(sub2);
       
-      // Update Hero Image and show container
+      // Hero image visibility logic
       const hImg = document.getElementById('heroImg');
-      const hSection = document.getElementById('hero');
-      if (hImg && hSection) {
+      const hWrap = document.getElementById('hero');
+      if (hImg && hWrap) {
         hImg.src = imgUrl;
-        hSection.style.display = 'flex';
+        hWrap.style.display = 'flex';
       }
-
-      // Update Sidebar Image
+      
+      // Sidebar image visibility logic
       const sImg = document.getElementById('sidebarImg');
       if (sImg) {
         sImg.src = imgUrl;
@@ -337,16 +337,16 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 3. Field Prefills
-    if (qs.get('sub3')) firstName.value = decodeURIComponent(qs.get('sub3'));
-    if (qs.get('sub4')) lastName.value  = decodeURIComponent(qs.get('sub4'));
-    if (qs.get('sub5')) billingStreet.value = decodeURIComponent(qs.get('sub5'));
-    if (qs.get('sub6')) billingPostcode.value = decodeURIComponent(qs.get('sub6'));
-    if (qs.get('sub7')) billingCity.value = decodeURIComponent(qs.get('sub7'));
-    if (qs.get('sub9')) emailInput.value = decodeURIComponent(qs.get('sub9'));
-    if (qs.get('sub10')) phoneNumber.value = decodeURIComponent(qs.get('sub10'));
+    // 3. Form Prefills (sub3 - sub10)
+    if (qs.get('sub3')) document.getElementById('firstName').value = decodeURIComponent(qs.get('sub3'));
+    if (qs.get('sub4')) document.getElementById('lastName').value = decodeURIComponent(qs.get('sub4'));
+    if (qs.get('sub5')) document.getElementById('billingStreet').value = decodeURIComponent(qs.get('sub5'));
+    if (qs.get('sub6')) document.getElementById('billingPostcode').value = decodeURIComponent(qs.get('sub6'));
+    if (qs.get('sub7')) document.getElementById('billingCity').value = decodeURIComponent(qs.get('sub7'));
+    if (qs.get('sub9')) document.getElementById('emailInput').value = decodeURIComponent(qs.get('sub9'));
+    if (qs.get('sub10')) document.getElementById('phoneNumber').value = decodeURIComponent(qs.get('sub10'));
 
-  } catch (e) { console.error("Prefill error:", e); }
+  } catch(e) { console.warn("Prefill failed:", e); }
   /* ===== END PREFILL LOGIC ===== */
 
   const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
