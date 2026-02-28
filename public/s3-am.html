@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Անվտանգ վճարում</title>
+
+<style>
+:root{--bg:#fafafa;--text:#0a2540;--muted:#5b6b82;--line:#e5e7eb;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Inter,system-ui}
+.wrap{max-width:1100px;margin:auto;padding:20px}
+.grid{display:grid;grid-template-columns:1fr 360px;gap:18px}
+.card{background:#fff;border:1px solid var(--line);padding:22px;border-radius:12px}
+.widget{background:#fff;border:1px solid var(--line);padding:16px;border-radius:12px}
+.input,.select{width:100%;padding:12px;border-radius:10px;border:1px solid #cfd6e4}
+.btn{width:100%;padding:12px;background:#16a34a;color:#fff;border:none;border-radius:12px;font-weight:700}
+.h2{font-weight:800;margin-bottom:10px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.order-row{display:flex;justify-content:space-between;margin-top:10px}
+</style>
+
+</head>
+<body>
+
+<div class="wrap">
+
+<h1>Անվտանգ վճարում 🔒</h1>
+
+<div class="grid">
+
+<!-- LEFT -->
+<div class="card">
+
+<h2 class="h2">1. Տվյալներ</h2>
+
+<div class="form-grid">
+<input id="firstName" class="input" placeholder="Անուն">
+<input id="lastName" class="input" placeholder="Ազգանուն">
+</div>
+
+<div class="form-grid">
+<input id="address" class="input" placeholder="Հասցե" style="grid-column:1/-1">
+<input id="zip" class="input" placeholder="Փոստային կոդ">
+<input id="city" class="input" placeholder="Քաղաք">
+</div>
+
+<div class="form-grid">
+<input id="email" class="input" placeholder="Էլ․ փոստ">
+<input class="input" value="Հայաստան" disabled>
+</div>
+
+<div class="form-grid">
+<select class="select">
+<option>+374 — Հայաստան</option>
+</select>
+<input id="phone" class="input" placeholder="Հեռախոս">
+</div>
+
+<button onclick="nextStep()" class="btn">Շարունակել</button>
+
+<!-- PAYMENT -->
+<div id="payment" style="display:none">
+
+<h2 class="h2">2. Վճարում</h2>
+
+<div id="card-number" class="input"></div>
+<div class="form-grid">
+<div id="card-expiry" class="input"></div>
+<div id="card-cvc" class="input"></div>
+</div>
+
+<button onclick="pay()" class="btn">Վճարել անվտանգ</button>
+
+</div>
+
+</div>
+
+<!-- RIGHT -->
+<div>
+
+<div class="widget">
+<h3>Պատվերի ամփոփում</h3>
+<div class="order-row">
+<span>Ընդհանուր</span>
+<span>880 ֏</span>
+</div>
+</div>
+
+<div class="widget">
+<h3>Ինչու վստահել մեզ</h3>
+<p>🔒 SSL պաշտպանություն</p>
+<p>⭐ 99% դրական կարծիքներ</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script src="https://js.stripe.com/v3"></script>
+
+<script>
+
+// STEP SWITCH
+function nextStep(){
+document.getElementById("payment").style.display="block";
+}
+
+// =======================
+// STRIPE SETUP
+// =======================
+
+// 👉 INSERT YOUR STRIPE PUBLIC KEY HERE
+const stripe = Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
+
+const elements = stripe.elements();
+
+const cardNumber = elements.create('cardNumber');
+const cardExpiry = elements.create('cardExpiry');
+const cardCvc = elements.create('cardCvc');
+
+cardNumber.mount('#card-number');
+cardExpiry.mount('#card-expiry');
+cardCvc.mount('#card-cvc');
+
+
+// =======================
+// PAYMENT FUNCTION
+// =======================
+
+async function pay(){
+
+// 👉 CREATE PAYMENT METHOD
+const pm = await stripe.createPaymentMethod({
+type: "card",
+card: cardNumber,
+billing_details: {
+name: document.getElementById("firstName").value,
+email: document.getElementById("email").value,
+phone: "+374" + document.getElementById("phone").value,
+address: {
+city: document.getElementById("city").value,
+postal_code: document.getElementById("zip").value,
+country: "AM"
+}
+}
+});
+
+// 👉 CALL YOUR BACKEND HERE
+// YOU MUST CREATE THIS ENDPOINT YOURSELF
+
+const r = await fetch("/api/stripe/s3/one-time-29-95",{
+method: "POST",
+headers: {"Content-Type":"application/json"},
+body: JSON.stringify({
+paymentMethodId: pm.paymentMethod.id,
+amount: 200 // cents (if charging €2)
+})
+});
+
+const data = await res.json();
+
+// 👉 CONFIRM PAYMENT
+const result = await stripe.confirmCardPayment(data.clientSecret);
+
+if(result.paymentIntent.status === "succeeded"){
+
+// 👉 CHANGE THIS URL
+window.location.href = "YOUR_SUCCESS_URL";
+
+}else{
+alert("Վճարումը ձախողվեց");
+}
+
+}
+
+</script>
+
+</body>
+</html>

