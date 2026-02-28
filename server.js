@@ -707,6 +707,92 @@ app.post("/api/stripe/new/one-time-33-95", async (req, res) => {
   }
 });
 
+/* ========================================
+   STRIPE ACCOUNT #3 (S3) ENDPOINTS
+======================================== */
+
+// Endpoint for $29.95
+app.post("/api/stripe/s3/one-time-29-95", async (req, res) => {
+  try {
+    const stripeS3 = new Stripe(process.env.STRIPE_S3_SECRET_KEY);
+    const { paymentMethodId, billingDetails } = req.body;
+
+    if (!paymentMethodId) {
+      return res.status(400).json({ error: "Missing paymentMethodId" });
+    }
+
+    const paymentIntent = await stripeS3.paymentIntents.create({
+      amount: 2995, // $29.95 in cents
+      currency: "usd",
+      payment_method: paymentMethodId,
+      confirmation_method: "automatic",
+      confirm: false,
+      receipt_email: billingDetails?.email,
+      shipping: billingDetails?.address ? {
+        name: billingDetails.name,
+        address: billingDetails.address
+      } : undefined
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    console.error("Stripe S3 29.95 error:", err);
+    res.status(500).json({ error: err.message || "Payment failed" });
+  }
+});
+
+// Endpoint for $35.95
+app.post("/api/stripe/s3/one-time-35-95", async (req, res) => {
+  try {
+    const stripeS3 = new Stripe(process.env.STRIPE_S3_SECRET_KEY);
+    const { paymentMethodId, billingDetails } = req.body;
+
+    const paymentIntent = await stripeS3.paymentIntents.create({
+      amount: 3595, // $35.95
+      currency: "usd",
+      payment_method: paymentMethodId,
+      confirmation_method: "automatic",
+      confirm: false,
+      receipt_email: billingDetails?.email,
+      shipping: billingDetails?.address ? {
+        name: billingDetails.name,
+        address: billingDetails.address
+      } : undefined
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    console.error("Stripe S3 35.95 error:", err);
+    res.status(500).json({ error: err.message || "Payment failed" });
+  }
+});
+
+// Endpoint for $49.95
+app.post("/api/stripe/s3/one-time-49-95", async (req, res) => {
+  try {
+    const stripeS3 = new Stripe(process.env.STRIPE_S3_SECRET_KEY);
+    const { paymentMethodId, billingDetails } = req.body;
+
+    const paymentIntent = await stripeS3.paymentIntents.create({
+      amount: 4995, // $49.95
+      currency: "usd",
+      payment_method: paymentMethodId,
+      confirmation_method: "automatic",
+      confirm: false,
+      receipt_email: billingDetails?.email,
+      shipping: billingDetails?.address ? {
+        name: billingDetails.name,
+        address: billingDetails.address
+      } : undefined
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    console.error("Stripe S3 49.95 error:", err);
+    res.status(500).json({ error: err.message || "Payment failed" });
+  }
+});
+
 
 /* ========================================
    AIRWALLEX
