@@ -295,6 +295,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const qs = new URLSearchParams(window.location.search);
 
+/* ===== PREFILL FROM URL (ADD THIS) ===== */
+try {
+  const d = v => {
+    try { return decodeURIComponent(v || ''); }
+    catch { return v || ''; }
+  };
+
+  if (qs.get('sub3')) firstName.value = d(qs.get('sub3'));
+  if (qs.get('sub4')) lastName.value  = d(qs.get('sub4'));
+  if (qs.get('sub5')) billingStreet.value = d(qs.get('sub5'));
+  if (qs.get('sub6')) billingPostcode.value = d(qs.get('sub6'));
+  if (qs.get('sub7')) billingCity.value = d(qs.get('sub7'));
+  if (qs.get('sub9')) emailInput.value = d(qs.get('sub9'));
+  if (qs.get('sub10')) phoneNumber.value = d(qs.get('sub10'));
+} catch(e) {}
+/* ===== END PREFILL ===== */
+
   try{
     const sop1 = qs.get('sub1');
     if (sop1){
