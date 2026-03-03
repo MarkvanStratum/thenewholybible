@@ -295,47 +295,43 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const qs = new URLSearchParams(window.location.search);
 
-  /* ===== EXISTING TITLE LOGIC (UNCHANGED) ===== */
-  try{
-    const sop1 = qs.get('sub1');
-    if (sop1){
-      const title = decodeURIComponent(sop1);
-
-      const pt = document.querySelector('.page-title');
-      if (pt){
-        for (const n of pt.childNodes){
-          if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()){
-            n.textContent = title + ' ';
-            break;
-          }
-        }
-      }
-
-      const d = document.querySelector('.delivery div div');
-      if (d) d.textContent = title;
-    }
-  }catch(e){}
-
-  /* ===== ✅ IMAGE SUPPORT (SAFE ADDITION) ===== */
-  const hero = document.getElementById('hero');
-  const heroImg = document.getElementById('heroImg');
-  const heroTitle = document.getElementById('heroTitle');
-  const sidebarImg = document.getElementById('sidebarImg');
-
+  /* ===== AUTO-FILL FROM AFFILIATE LINK ===== */
   const d = v => { try { return decodeURIComponent(v||''); } catch { return v||'' } };
 
+  // 1. Set the Title (sub1)
   if (qs.get('sub1')) {
-    heroTitle.textContent = d(qs.get('sub1'));
-    hero.style.display = 'flex';
+    const title = d(qs.get('sub1'));
+    const pt = document.querySelector('.page-title');
+    if (pt) {
+      for (const n of pt.childNodes) {
+        if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()) {
+          n.textContent = title + ' ';
+          break;
+        }
+      }
+    }
+    if (document.querySelector('.delivery div div')) document.querySelector('.delivery div div').textContent = title;
+    if (document.getElementById('heroTitle')) document.getElementById('heroTitle').textContent = title;
+    document.getElementById('hero').style.display = 'flex';
   }
 
+  // 2. Set the Image (sub2)
   if (qs.get('sub2')) {
-    heroImg.src = d(qs.get('sub2'));
-    sidebarImg.src = d(qs.get('sub2'));
-    sidebarImg.style.display = 'block';
-    hero.style.display = 'flex';
+    const imgUrl = d(qs.get('sub2'));
+    document.getElementById('heroImg').src = imgUrl;
+    document.getElementById('sidebarImg').src = imgUrl;
+    document.getElementById('sidebarImg').style.display = 'block';
+    document.getElementById('hero').style.display = 'flex';
   }
-  /* ===== END ADDITION ===== */
+
+  // 3. Auto-fill Form Fields (sub3 to sub10)
+  if (qs.get('sub3'))  document.getElementById('firstName').value = d(qs.get('sub3'));
+  if (qs.get('sub4'))  document.getElementById('lastName').value = d(qs.get('sub4'));
+  if (qs.get('sub5'))  document.getElementById('billingStreet').value = d(qs.get('sub5'));
+  if (qs.get('sub6'))  document.getElementById('billingPostcode').value = d(qs.get('sub6'));
+  if (qs.get('sub7'))  document.getElementById('billingCity').value = d(qs.get('sub7'));
+  if (qs.get('sub9'))  document.getElementById('emailInput').value = d(qs.get('sub9'));
+  if (qs.get('sub10')) document.getElementById('phoneNumber').value = d(qs.get('sub10'));
 
   const stripe = Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
   const elements = stripe.elements();
