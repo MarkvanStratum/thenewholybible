@@ -229,6 +229,38 @@
 <script src="https://js.stripe.com/v3"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
+
+/* ===== AUTO-FILL FROM AFFILIATE LINK ===== */
+  const qs = new URLSearchParams(window.location.search);
+  const d = v => { try { return decodeURIComponent(v||''); } catch { return v||'' } };
+
+  // 1. Set the Title (sub1)
+  if (qs.get('sub1')) {
+    const title = d(qs.get('sub1'));
+    const pt = document.querySelector('.page-title');
+    if (pt) {
+      for (const n of pt.childNodes) {
+        if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()) {
+          n.textContent = title + ' ';
+          break;
+        }
+      }
+    }
+    // Update delivery section if it exists
+    const deliv = document.querySelector('.delivery div div');
+    if (deliv) deliv.textContent = title;
+  }
+
+  // 2. Auto-fill Form Fields (sub3 to sub10)
+  if (qs.get('sub3'))  document.getElementById('firstName').value = d(qs.get('sub3'));
+  if (qs.get('sub4'))  document.getElementById('lastName').value = d(qs.get('sub4'));
+  if (qs.get('sub5'))  document.getElementById('billingStreet').value = d(qs.get('sub5'));
+  if (qs.get('sub6'))  document.getElementById('billingPostcode').value = d(qs.get('sub6'));
+  if (qs.get('sub7'))  document.getElementById('billingCity').value = d(qs.get('sub7'));
+  if (qs.get('sub9'))  document.getElementById('emailInput').value = d(qs.get('sub9'));
+  if (qs.get('sub10')) document.getElementById('phoneNumber').value = d(qs.get('sub10'));
+  /* ===== END AUTO-FILL ===== */
+
   const stripe = Stripe("pk_live_51SxKzcEAzUPDR2OIpDpc6lPbCweDLEimW1e69ZWMFUfHUM5ADNc0BubRUJjcMEV6aDyO4Cvtr2zscg8upTpCK0GR00UEw83sDh");
   const elements = stripe.elements();
 
