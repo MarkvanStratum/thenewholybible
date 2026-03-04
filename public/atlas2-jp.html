@@ -401,10 +401,13 @@ try {
       const r = await fetch("/api/stripe/one-time-46-95",{
         method:"POST",
         headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({
-          paymentMethodId: pm.paymentMethod.id,
-          billingDetails
-        })
+        body: JSON.stringify({
+  paymentMethodId: pm.paymentMethod.id,
+  name: billingDetails.name,
+  email: billingDetails.email,
+  phone: billingDetails.phone,
+  address: billingDetails.address
+})
       });
 
       const d = await r.json();
