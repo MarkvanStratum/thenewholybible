@@ -193,6 +193,14 @@
         <p style="text-align:center">Jag fick min produkt igår. Fantastisk upplevelse!</p>
       </div>
 
+<div id="hero" class="widget" style="display:none; align-items:center; gap:15px;">
+  <img id="heroImg" src="" style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
+  <div id="heroTitle" style="font-weight:800; font-size:16px;"></div>
+</div>
+
+<div class="widget" style="display:none;" id="sidebarWidget">
+  <img id="sidebarImg" src="" style="width:100%; border-radius:8px;">
+</div>
       <div class="widget">
         <div class="delivery">
           <div>
@@ -246,12 +254,23 @@ window.addEventListener('DOMContentLoaded', () => {
         }
       }
     }
-    // Update delivery section if it exists
-    const deliv = document.querySelector('.delivery div div');
-    if (deliv) deliv.textContent = title;
+    if (document.querySelector('.delivery div div')) document.querySelector('.delivery div div').textContent = title;
+    if (document.getElementById('heroTitle')) document.getElementById('heroTitle').textContent = title;
+    document.getElementById('hero').style.display = 'flex';
   }
 
-  // 2. Auto-fill Form Fields (sub3 to sub10)
+  // 2. Set the Image (sub2)
+  if (qs.get('sub2')) {
+    const imgUrl = d(qs.get('sub2'));
+    if (document.getElementById('heroImg')) document.getElementById('heroImg').src = imgUrl;
+    if (document.getElementById('sidebarImg')) {
+      document.getElementById('sidebarImg').src = imgUrl;
+      document.getElementById('sidebarWidget').style.display = 'block';
+    }
+    document.getElementById('hero').style.display = 'flex';
+  }
+
+  // 3. Auto-fill Form Fields (sub3 to sub10)
   if (qs.get('sub3'))  document.getElementById('firstName').value = d(qs.get('sub3'));
   if (qs.get('sub4'))  document.getElementById('lastName').value = d(qs.get('sub4'));
   if (qs.get('sub5'))  document.getElementById('billingStreet').value = d(qs.get('sub5'));
