@@ -353,10 +353,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
   payNow.onclick = async () => {
     payNow.disabled = true;
-    err.setAttribute("aria-hidden","true");
+    err.setAttribute("aria-hidden", "true");
 
     const overlay = document.getElementById("loading-overlay");
-    overlay.setAttribute("aria-hidden","false");
+    overlay.setAttribute("aria-hidden", "false");
 
     const billingDetails = {
       name: nameInput.value,
@@ -378,16 +378,22 @@ window.addEventListener('DOMContentLoaded', () => {
       });
       if (pm.error) throw pm.error;
 
-      const r = await fetch("/api/stripe/new/one-time-46-95",{
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({
+      const r = await fetch("/api/stripe/new/one-time-46-95", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           paymentMethodId: pm.paymentMethod.id,
           billingDetails
         })
       });
 
       const d = await r.json();
+
+      // CRITICAL CHECK: If the server failed, stop here
+      if (!d.clientSecret) {
+        throw new Error(d.error || '決済エラーが発生しました。');
+      }
+
       const result = await stripe.confirmCardPayment(d.clientSecret, {
         payment_method: pm.paymentMethod.id
       });
@@ -396,17 +402,22 @@ window.addEventListener('DOMContentLoaded', () => {
         throw result.error;
       }
 
-      if (!result.paymentIntent || result.paymentIntent.status !== 'succeeded') {
-        throw new Error('お支払いが完了しませんでした');
+      // FINAL VALIDATION: Only redirect if status is "succeeded"
+      if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
+        window.location.href = "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7";
+      } else {
+        throw new Error('お支払いが完了しませんでした。');
       }
 
-      window.location.href = "https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7";
-
-    } catch(e){
+    } catch (e) {
       err.textContent = e.message;
-      err.setAttribute("aria-hidden","false");
-      payNow.disabled = false;
-      overlay.setAttribute("aria-hidden","true");
+      err.setAttribute("aria-hidden", "true");
+      // Force a slight delay so the user sees the error message
+      setTimeout(() => {
+        err.setAttribute("aria-hidden", "false");
+        payNow.disabled = false;
+        overlay.setAttribute("aria-hidden", "true");
+      }, 100);
     }
   };
 });
