@@ -244,7 +244,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (qs.get('sub10')) document.getElementById('phoneNumber').value = decodeURIComponent(qs.get('sub10'));
   } catch(e) {}
 
-  const stripe = Stripe("pk_live_51P0O7K2M6fKzLp0Z..."); // Tu clave de Stripe
+  const stripe = Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT"); // Tu clave de Stripe
   const elements = stripe.elements();
 
   const cardNumber = elements.create('cardNumber');
