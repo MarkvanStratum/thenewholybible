@@ -222,7 +222,7 @@
         </div>
 
         <div style="margin-top:14px;font-weight:800">Rendelés összesítése</div>
-        <div class="order-row"><span>Összesen</span><span>Ft 687</span></div>
+        <div class="order-row"><span>Összesen</span><span>Ft 688</span></div>
       </div>
 
       <div class="widget">
@@ -291,7 +291,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (qs.get('sub9')) emailInput.value = d(qs.get('sub9'));
   if (qs.get('sub10')) phoneNumber.value = d(qs.get('sub10'));
 
-  const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
+  const stripe = Stripe("pk_live_51SxKzcEAzUPDR2OIpDpc6lPbCweDLEimW1e69ZWMFUfHUM5ADNc0BubRUJjcMEV6aDyO4Cvtr2zscg8upTpCK0GR00UEw83sDh");
   const elements = stripe.elements();
 
   const cardNumber = elements.create('cardNumber');
@@ -351,9 +351,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
       const d = await r.json();
 
+      // --- CRITICAL FIX START ---
       if (!d.clientSecret) {
         throw new Error(d.error || 'Hiba történt a fizetés előkészítésekor.');
       }
+      // --- CRITICAL FIX END ---
 
       const c = await stripe.confirmCardPayment(d.clientSecret,{
         payment_method: pm.paymentMethod.id
