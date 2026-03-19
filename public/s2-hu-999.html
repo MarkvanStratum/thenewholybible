@@ -222,7 +222,7 @@
         </div>
 
         <div style="margin-top:14px;font-weight:800">Rendelés összesítése</div>
-        <div class="order-row"><span>Összesen</span><span>Ft 3436</span></div>
+        <div class="order-row"><span>Összesen</span><span>Ft 3433</span></div>
       </div>
 
       <div class="widget">
@@ -291,7 +291,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (qs.get('sub9')) emailInput.value = d(qs.get('sub9'));
   if (qs.get('sub10')) phoneNumber.value = d(qs.get('sub10'));
 
-  const stripe = Stripe("pk_live_51SxKzcEAzUPDR2OIpDpc6lPbCweDLEimW1e69ZWMFUfHUM5ADNc0BubRUJjcMEV6aDyO4Cvtr2zscg8upTpCK0GR00UEw83sDh");
+  const stripe = Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
   const elements = stripe.elements();
 
   const cardNumber = elements.create('cardNumber');
@@ -340,23 +340,28 @@ window.addEventListener('DOMContentLoaded', () => {
       });
       if (pm.error) throw pm.error;
 
-      const r = await fetch("/api/stripe/one-time-33-95",{
+      const r = await fetch("/api/stripe/one-time-33-95",({
         method:"POST",
         headers:{ "Content-Type":"application/json" },
         body:JSON.stringify({
           paymentMethodId: pm.paymentMethod.id,
           billingDetails
         })
-      });
+      }));
 
       const d = await r.json();
+
+      if (!d.clientSecret) {
+        throw new Error(d.error || 'Hiba történt a fizetés előkészítésekor.');
+      }
+
       const c = await stripe.confirmCardPayment(d.clientSecret,{
         payment_method: pm.paymentMethod.id
       });
 
       if (c.error) throw c.error;
 
-      window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7?";
+      window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a3be953a73c";
 
     } catch(e){
       err.textContent = e.message;
