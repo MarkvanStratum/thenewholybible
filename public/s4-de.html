@@ -254,7 +254,9 @@ const sidebarImg = document.getElementById('sidebarImg');
   }
 });
 
-      const r=await fetch("/api/stripe/s4/one-time-46-95",{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentMethodId:pm.paymentMethod.id})});
+      const r = await fetch("/api/stripe/s4/one-time-49-95",{
+
+method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentMethodId:pm.paymentMethod.id})});
       const dta=await r.json();
       const result = await stripe.confirmCardPayment(dta.clientSecret);
 
