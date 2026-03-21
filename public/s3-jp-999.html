@@ -329,7 +329,7 @@ window.addEventListener('DOMContentLoaded', () => {
     hero.style.display = 'flex';
   }
 
-  const stripe = Stripe("pk_live_51TA3CuPJ1vAPmCA0QvtIZt3IAGXO0Q6uBFkGeAKyQ6vLBaYK1HBKoE3UGYhbb8EmJI3Rw8UrEtiYDAc4JZXIG94c00VIXXqch6");
+  const stripe = Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
   const elements = stripe.elements();
 
   const cardNumber = elements.create('cardNumber');
@@ -378,7 +378,7 @@ window.addEventListener('DOMContentLoaded', () => {
       });
       if (pm.error) throw pm.error;
 
-      const r = await fetch("/api/stripe/s4/one-time-49-95", {
+      const r = await fetch("/api/stripe/s3/one-time-49-95", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
