@@ -347,7 +347,7 @@ window.addEventListener('DOMContentLoaded', () => {
       });
       if (pm.error) throw pm.error;
 
-      const r = await fetch("/api/stripe/new/one-time-29-95", {
+      const r = await fetch("/api/stripe/s6/one-time-29-95", {
         method:"POST",
         headers:{ "Content-Type":"application/json" },
         body:JSON.stringify({
