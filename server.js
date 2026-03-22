@@ -879,6 +879,92 @@ app.post("/api/stripe/s4/one-time-49-95", async (req, res) => {
   }
 });
 
+/* ========================================
+   STRIPE ACCOUNT #6 (S6) ENDPOINTS
+======================================== */
+
+// Endpoint for $29.95
+app.post("/api/stripe/s6/one-time-29-95", async (req, res) => {
+  try {
+    const stripeS6 = new Stripe(process.env.STRIPE_S6_SECRET_KEY);
+    const { paymentMethodId, billingDetails } = req.body;
+
+    if (!paymentMethodId) {
+      return res.status(400).json({ error: "Missing paymentMethodId" });
+    }
+
+    const paymentIntent = await stripeS6.paymentIntents.create({
+      amount: 2995, // $29.95
+      currency: "usd",
+      payment_method: paymentMethodId,
+      confirmation_method: "automatic",
+      confirm: false,
+      receipt_email: billingDetails?.email,
+      shipping: billingDetails?.address ? {
+        name: billingDetails.name,
+        address: billingDetails.address
+      } : undefined
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    console.error("Stripe S6 29.95 error:", err);
+    res.status(500).json({ error: err.message || "Payment failed" });
+  }
+});
+
+// Endpoint for $35.95
+app.post("/api/stripe/s6/one-time-35-95", async (req, res) => {
+  try {
+    const stripeS6 = new Stripe(process.env.STRIPE_S6_SECRET_KEY);
+    const { paymentMethodId, billingDetails } = req.body;
+
+    const paymentIntent = await stripeS6.paymentIntents.create({
+      amount: 3595, // $35.95
+      currency: "usd",
+      payment_method: paymentMethodId,
+      confirmation_method: "automatic",
+      confirm: false,
+      receipt_email: billingDetails?.email,
+      shipping: billingDetails?.address ? {
+        name: billingDetails.name,
+        address: billingDetails.address
+      } : undefined
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    console.error("Stripe S6 35.95 error:", err);
+    res.status(500).json({ error: err.message || "Payment failed" });
+  }
+});
+
+// Endpoint for $49.95
+app.post("/api/stripe/s6/one-time-49-95", async (req, res) => {
+  try {
+    const stripeS6 = new Stripe(process.env.STRIPE_S6_SECRET_KEY);
+    const { paymentMethodId, billingDetails } = req.body;
+
+    const paymentIntent = await stripeS6.paymentIntents.create({
+      amount: 4995, // $49.95
+      currency: "usd",
+      payment_method: paymentMethodId,
+      confirmation_method: "automatic",
+      confirm: false,
+      receipt_email: billingDetails?.email,
+      shipping: billingDetails?.address ? {
+        name: billingDetails.name,
+        address: billingDetails.address
+      } : undefined
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    console.error("Stripe S6 49.95 error:", err);
+    res.status(500).json({ error: err.message || "Payment failed" });
+  }
+});
+
 
 /* ========================================
    AIRWALLEX
