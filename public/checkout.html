@@ -29,7 +29,6 @@
         <div class="logo">†</div>
         <h2 id="plan-title">Heaven's Voices</h2>
         <p id="plan-desc">Complete your offering to unlock sacred wisdom.</p>
-<input id="customer-email" type="email" placeholder="Enter your email" style="width:100%;padding:14px;margin-bottom:16px;border:1px solid #d8c7a1;border-radius:8px;font-size:16px;box-sizing:border-box;">
         
         <form id="payment-form">
             <div id="payment-element"></div>
@@ -44,7 +43,7 @@
         
         const params = new URLSearchParams(window.location.search);
         const plan = params.get('plan') || 'god';
-        
+        const token = localStorage.getItem("jwt");
 
         // UI Updates based on plan
         const titles = { 'god': 'God Access', 'all': 'Full Access', 'lifetime': 'Lifetime Access' };
@@ -54,27 +53,20 @@
 
         async function initialize() {
             // We fetch the clientSecret from the new endpoint we added to server.js
-            const email = document.getElementById("customer-email").value.trim();
-
-if (!email) {
-    document.getElementById("error-message").innerText = "Please enter your email.";
-    return;
-}
-
-const response = await fetch("/api/create-payment-intent", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ plan, email }),
-});
+            const response = await fetch("/api/create-payment-intent", {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token 
+                },
+                body: JSON.stringify({ plan }),
+            });
             
             const data = await response.json();
-
-if (!response.ok || data.error) {
-    document.getElementById("error-message").innerText = data.error || "Could not load payment form.";
-    return;
-}
+            if (data.error) {
+                document.getElementById('error-message').innerText = data.error;
+                return;
+            }
 
             const { clientSecret } = data;
             elements = stripe.elements({ clientSecret });
