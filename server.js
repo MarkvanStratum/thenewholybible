@@ -229,14 +229,18 @@ app.post("/api/login", async (req, res) => {
 });
 
 // 1. Remove 'authenticateToken' from this route to allow guests
-app.post("/api/create-payment-intent", async (req, res) => {
+app.post("/api/create-payment-intent", authenticateToken, async (req, res) => {
     try {
-        const { plan, email } = req.body;
+        const { plan } = req.body;
+        
+        // This pulls the email from your login session automatically
+        const email = req.user.email;
+        const userId = req.user.id;
 
         const amounts = {
-            god: 2995,
-            all: 3595,
-            lifetime: 4995
+            'god': 2995,
+            'all': 3595,
+            'lifetime': 4995
         };
 
         const amount = amounts[plan];
@@ -248,10 +252,10 @@ app.post("/api/create-payment-intent", async (req, res) => {
         const paymentIntent = await stripe.paymentIntents.create({
             amount,
             currency: "usd",
-            metadata: {
-                plan,
-                email: email || "",
-                userId: ""
+            metadata: { 
+                plan, 
+                email,
+                userId 
             },
         });
 
@@ -566,15 +570,15 @@ app.post("/webhook", express.raw({ type: "application/json" }), async (req, res)
     let expiresAt = null;
     let isLifetime = false;
 
-    if (plan === 'god' || plan === 'all') {
-    const date = new Date();
-    date.setDate(date.getDate() + 30);
-    expiresAt = date;
-    isLifetime = false;
-} else if (plan === 'lifetime') {
-    expiresAt = null;
-    isLifetime = true;
-}
+    if (plan === '2995' || plan === '3595') {
+        const date = new Date();
+        date.setDate(date.getDate() + 30);
+        expiresAt = date;
+        isLifetime = false;
+    } else if (plan === '4995') {
+        expiresAt = null;
+        isLifetime = true;
+    }
 
     try {
         if (userId) {
