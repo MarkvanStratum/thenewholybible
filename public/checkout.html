@@ -3,75 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heaven's Voices — Secure Checkout</title>
+    <title>Secure Access — Speak to Legends</title>
     <script src="https://js.stripe.com/v3/"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --gold-divine: #c5a059;
-            --blue-saint: #2c3e50;
-            --bg-heaven: #fdfcfb;
+            --bg-deep: #1a1a1c;
+            --panel-dark: #242426;
+            --accent-crimson: #a63446;
+            --text-bright: #e0e0e0;
+            --text-dim: #959595;
+            --slate-border: #333335;
+            --white: #ffffff;
         }
-        body { background: var(--bg-heaven); font-family: 'EB Garamond', serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .checkout-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 15px 50px rgba(0,0,0,0.05); width: 100%; max-width: 450px; border: 1px solid rgba(197,160,89,0.2); }
-        .logo { text-align: center; color: var(--gold-divine); font-family: 'Cinzel'; font-size: 30px; margin-bottom: 20px; }
-        h2 { font-family: 'Cinzel'; text-align: center; color: var(--blue-saint); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
-        p { text-align: center; color: #8a8276; font-style: italic; margin-bottom: 30px; }
-        #payment-element { margin-bottom: 24px; }
-        .pay-btn { background: var(--gold-divine); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px; letter-spacing: 1px; }
-        .pay-btn:hover { background: #b38f4d; transform: translateY(-1px); }
-        .pay-btn:disabled { opacity: 0.5; cursor: default; }
-        #error-message { color: #b03a2e; margin-top: 15px; text-align: center; font-size: 14px; }
+
+        * { box-sizing: border-box; transition: all 0.25s ease; }
+
+        body { 
+            background: var(--bg-deep); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            color: var(--text-bright);
+        }
+
+        .checkout-box { 
+            background: var(--panel-dark); 
+            padding: 50px 40px; 
+            border-radius: 20px; 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4); 
+            width: 100%; 
+            max-width: 480px; 
+            border: 1px solid var(--slate-border); 
+            position: relative;
+        }
+
+        /* Branding match from Index */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-box { 
+            width: 55px; 
+            height: 55px; 
+            background: var(--accent-crimson); 
+            display: grid; 
+            place-items: center; 
+            border-radius: 12px;
+            font-family: 'Playfair Display', serif; 
+            color: white; 
+            font-size: 28px;
+            margin: 0 auto 15px;
+            box-shadow: 0 10px 20px rgba(166, 52, 70, 0.3);
+        }
+
+        .logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            letter-spacing: 0.5px;
+            color: var(--white);
+            margin-bottom: 5px;
+        }
+
+        h2 { 
+            text-align: center; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            font-size: 14px; 
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-dim); 
+            margin-bottom: 35px; 
+            font-weight: 600;
+        }
+
+        /* Stripe Element Styling Container */
+        #payment-element { 
+            margin-bottom: 30px;
+            padding: 10px;
+            background: #1c1c1e;
+            border-radius: 12px;
+            border: 1px solid var(--slate-border);
+        }
+
+        .btn {
+            background: var(--accent-crimson);
+            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(166, 52, 70, 0.2);
+        }
+
+        .btn:hover { 
+            filter: brightness(1.2); 
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(166, 52, 70, 0.3);
+        }
+
+        .btn:disabled { 
+            opacity: 0.5; 
+            cursor: not-allowed; 
+            transform: none;
+        }
+
+        #error-message { 
+            color: #ff4d4d; 
+            text-align: center; 
+            margin-top: 20px; 
+            font-size: 14px; 
+            font-weight: 500;
+        }
+
+        .back-link { 
+            display: block; 
+            text-align: center; 
+            margin-top: 30px; 
+            color: var(--text-dim); 
+            text-decoration: none; 
+            font-size: 13px; 
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .back-link:hover { color: var(--white); }
+
+        /* Customizing Stripe appearance via JS later, but this ensures layout matches */
     </style>
 </head>
 <body>
     <div class="checkout-box">
-        <div class="logo">†</div>
-        <h2 id="plan-title">Heaven's Voices</h2>
-        <p id="plan-desc">Complete your offering to unlock sacred wisdom.</p>
+        <div class="logo-container">
+            <div class="logo-box">S</div>
+            <div class="logo-text">Speak to Legends</div>
+        </div>
+        
+        <h2>Secure Archive Access</h2>
         
         <form id="payment-form">
-            <div id="payment-element"></div>
-            <button id="submit" class="pay-btn">Complete Offering</button>
+            <div id="payment-element">
+                </div>
+            <button id="submit" class="btn">Confirm Access</button>
             <div id="error-message"></div>
         </form>
+
+        <a href="/pricing.html" class="back-link">Return to Tiers</a>
     </div>
 
     <script>
-        // Use your Public Key here
-        const stripe = Stripe('pk_live_51TEQzRRwoTkydCMoKlhlp6CF2lQw0YF9QFNoOhLNbsSfbXLq9QDc0lzqRRUaf1fXQjiHrPKey9M76uZBKPjAfHvf00YtU1Gfec');
-        
+        // Restored your specific Stripe Public Key and Logic
+        const stripe = Stripe("pk_live_51TEWVEC1yMQmPc2andSEJX99RgN2Aj1iwr5xvZ23RUX6gXOjxP9xfwF3avtpn4spSkHVjbknOxML3rx9kCswKfCT003lNhtUjj");
         const params = new URLSearchParams(window.location.search);
-        const plan = params.get('plan') || 'god';
+        const plan = params.get('plan');
         const token = localStorage.getItem("jwt");
-
-        // UI Updates based on plan
-        const titles = { 'god': 'God Access', 'all': 'Full Access', 'lifetime': 'Lifetime Access' };
-        document.getElementById('plan-title').innerText = titles[plan] || "Heaven's Voices Offering";
 
         let elements;
 
         async function initialize() {
-            // We fetch the clientSecret from the new endpoint we added to server.js
-            const response = await fetch("/api/create-payment-intent", {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + token 
-                },
-                body: JSON.stringify({ plan }),
-            });
-            
-            const data = await response.json();
-            if (data.error) {
-                document.getElementById('error-message').innerText = data.error;
-                return;
-            }
+            try {
+                const response = await fetch("/api/create-payment-intent", {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + token 
+                    },
+                    body: JSON.stringify({ plan: plan }),
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    document.getElementById('error-message').innerText = data.error;
+                    return;
+                }
 
-            const { clientSecret } = data;
-            elements = stripe.elements({ clientSecret });
-            const paymentElement = elements.create("payment");
-            paymentElement.mount("#payment-element");
+                const { clientSecret } = data;
+                
+                // Styling Stripe Elements to match the dark theme
+                const appearance = {
+                    theme: 'night',
+                    variables: {
+                        colorPrimary: '#a63446',
+                        colorBackground: '#1c1c1e',
+                        colorText: '#e0e0e0',
+                        colorDanger: '#ff4d4d',
+                        fontFamily: 'Plus Jakarta Sans, sans-serif',
+                        spacingUnit: '4px',
+                        borderRadius: '8px',
+                    },
+                };
+
+                elements = stripe.elements({ clientSecret, appearance });
+                const paymentElement = elements.create("payment");
+                paymentElement.mount("#payment-element");
+            } catch (err) {
+                document.getElementById('error-message').innerText = "Failed to initialize payment sanctuary.";
+            }
         }
 
         document.querySelector("#payment-form").addEventListener("submit", async (e) => {
@@ -82,7 +220,7 @@
             const { error } = await stripe.confirmPayment({
                 elements,
                 confirmParams: {
-                    // Redirect back to home with a success flag
+                    // Redirect back to home with a success flag as in original
                     return_url: window.location.origin + "/?payment=success",
                 },
             });
@@ -93,7 +231,16 @@
             }
         });
 
-        initialize();
+        // Validation logic preserved
+        if (!token) {
+            alert("Please sign in to access the archives.");
+            window.location.href = "/";
+        } else if (!plan) {
+            alert("No tier selected.");
+            window.location.href = "/pricing.html";
+        } else {
+            initialize();
+        }
     </script>
 </body>
 </html>
