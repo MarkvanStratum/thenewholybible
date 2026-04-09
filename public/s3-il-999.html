@@ -280,7 +280,7 @@ window.addEventListener('DOMContentLoaded', () => {
   };
 
   // ✅ Using Stripe Public Key from German (DE) file
-  const stripe=Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
+  const stripe=Stripe("pk_live_51T3DMAAC1AZtWXWqdUQpq4e708hWDC8eixOTIwLOlR7IIF60tiyLEum1CxQiwVbPECrKV8VoHwZfFmTDTpRiqsU300dIpubyaT");
   const elements=stripe.elements();
   const cn=elements.create('cardNumber'); cn.mount('#card-number');
   const ce=elements.create('cardExpiry'); ce.mount('#card-expiry');
@@ -318,7 +318,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (pm.error) throw pm.error;
 
       // ✅ Using API Endpoint from German (DE) file
-      const r = await fetch("/api/stripe/one-time-46-95",{
+      const r = await fetch("/api/stripe/s3/one-time-49-95",{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
@@ -340,7 +340,7 @@ window.addEventListener('DOMContentLoaded', () => {
       }
 
       // ✅ Using Redirect URL from German (DE) file
-      location.href='https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7';
+      location.href='https://cudsr.bemobtrcks.com/go/a0224109-84eb-47be-926c-e1a7232611a7?';
 
     } catch(e){
       err.textContent = e.message;

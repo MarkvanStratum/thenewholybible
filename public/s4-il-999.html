@@ -280,7 +280,7 @@ window.addEventListener('DOMContentLoaded', () => {
   };
 
   // ✅ Using Stripe Public Key from German (DE) file
-  const stripe=Stripe("pk_live_51SaxeyEV8OvsGiVpMTahrMGQMjZMXD1neiFffQPrybev0TQNcxvVaixH5TfQKzDBNKxLIqcuAgQ1ynYPWXe792D500VQ7Gcw6t");
+  const stripe=Stripe("pk_live_51TA3CuPJ1vAPmCA0QvtIZt3IAGXO0Q6uBFkGeAKyQ6vLBaYK1HBKoE3UGYhbb8EmJI3Rw8UrEtiYDAc4JZXIG94c00VIXXqch6");
   const elements=stripe.elements();
   const cn=elements.create('cardNumber'); cn.mount('#card-number');
   const ce=elements.create('cardExpiry'); ce.mount('#card-expiry');
@@ -318,7 +318,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (pm.error) throw pm.error;
 
       // ✅ Using API Endpoint from German (DE) file
-      const r = await fetch("/api/stripe/one-time-46-95",{
+      const r = await fetch("/api/stripe/s4/one-time-49-95",{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
