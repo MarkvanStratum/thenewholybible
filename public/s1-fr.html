@@ -172,7 +172,7 @@ Paiement sécurisé 🔒 <span class="stars">★★★★★</span>
 </div>
 
 <div style="margin-top:14px;font-weight:800">Récapitulatif</div>
-<div class="order-row"><span>Total</span><span>9,95 €</span></div>
+<div class="order-row"><span>Total</span><span>2,00 €</span></div>
 </div>
 
 <div class="widget">
@@ -286,7 +286,7 @@ card:cardNumber,
 billing_details:billingDetails
 });
 
-const r = await fetch("/api/stripe/s3/one-time-49-95",{
+const r = await fetch("/api/stripe/s1/one-time-59-95",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({paymentMethodId:pm.paymentMethod.id,billingDetails})
