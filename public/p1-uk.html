@@ -257,12 +257,20 @@ nextBtn.onclick = () => {
   step1.setAttribute("aria-hidden", "true");
   step2.setAttribute("aria-hidden", "false");
 
-  if (!cardFieldsRendered && cardField.isEligible()) {
-    cardField.NumberField().render("#card-number");
-    cardField.ExpiryField().render("#card-expiry");
-    cardField.CVVField().render("#card-cvc");
-    cardFieldsRendered = true;
+  if (!cardFieldsRendered) {
+  console.log("PayPal Card Fields eligible:", cardField.isEligible());
+
+  if (!cardField.isEligible()) {
+    err.textContent = "PayPal card fields are not eligible for this account/client ID. Check that Advanced Credit and Debit Card Payments is enabled for this Live app.";
+    err.setAttribute("aria-hidden", "false");
+    return;
   }
+
+  cardField.NumberField().render("#card-number");
+  cardField.ExpiryField().render("#card-expiry");
+  cardField.CVVField().render("#card-cvc");
+  cardFieldsRendered = true;
+}
 };
 
 backBtn.onclick = () => {
