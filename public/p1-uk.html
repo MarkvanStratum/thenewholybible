@@ -208,6 +208,7 @@ const hero=document.getElementById('hero');
 const heroImg=document.getElementById('heroImg');
 const heroTitle=document.getElementById('heroTitle');
 const sidebarImg=document.getElementById('sidebarImg');
+const loadingOverlay = document.getElementById("loading-overlay");
 
 // HERO (SAFE)
 if(qs.get('sub1') && heroTitle && hero){
@@ -238,14 +239,26 @@ if(qs.get('sub7')) billingCity.value=d(qs.get('sub7'));
 if(qs.get('sub9')) emailInput.value=d(qs.get('sub9'));
 if(qs.get('sub10')) phoneNumber.value=d(qs.get('sub10')).replace(/[^\d]/g,'');
 
-const cardField = paypal.CardFields({
+let cardField;
+
+nextBtn.onclick = () => {
+  nameInput.value = `${firstName.value} ${lastName.value}`.trim();
+  step1.setAttribute("aria-hidden", "true");
+  step2.setAttribute("aria-hidden", "false");
+};
+
+backBtn.onclick = () => {
+  step2.setAttribute("aria-hidden", "true");
+  step1.setAttribute("aria-hidden", "false");
+};
+
+cardField = paypal.CardFields({
   createOrder: async () => {
     const r = await fetch("/api/paypal/one-time-59-95/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        amount: "2.00",
-        currency: "GBP",
+        currency: "USD",
         billingDetails: {
           name: nameInput.value,
           email: emailInput.value,
@@ -261,26 +274,36 @@ const cardField = paypal.CardFields({
     });
 
     const data = await r.json();
+
+    if (!data.id) {
+      throw new Error(data.error || "Could not create PayPal order");
+    }
+
     return data.id;
   },
 
   onApprove: async (data) => {
-    const r = await fetch(`/api/paypal/s1-uk/capture-order/${data.orderID}`, {
-      method: "POST"
+    const r = await fetch("/api/paypal/capture-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderID: data.orderID })
     });
 
     const result = await r.json();
 
     if (result.status === "COMPLETED") {
       window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
-    } else {
-      throw new Error("Payment not completed");
+      return;
     }
+
+    throw new Error(result.error || "Payment not completed");
   },
 
   onError: (error) => {
     err.textContent = error.message || "Payment failed";
     err.setAttribute("aria-hidden", "false");
+    loadingOverlay.setAttribute("aria-hidden", "true");
+    payNow.disabled = false;
   }
 });
 
@@ -290,22 +313,19 @@ if (cardField.isEligible()) {
   cardField.CVVField().render("#card-cvc");
 }
 
-if(result.error) throw result.error;
+payNow.onclick = async () => {
+  payNow.disabled = true;
+  err.setAttribute("aria-hidden", "true");
+  loadingOverlay.setAttribute("aria-hidden", "false");
 
-if(result.paymentIntent && result.paymentIntent.status==="succeeded"){
-window.location.href="https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
-return;
-}
-
-throw new Error("Payment not completed");
-
-}catch(e){
-err.textContent=e.message;
-err.setAttribute("aria-hidden","false");
-overlay.setAttribute("aria-hidden","true");
-payNow.disabled=false;
-}
-
+  try {
+    await cardField.submit();
+  } catch (e) {
+    err.textContent = e.message || "Payment failed";
+    err.setAttribute("aria-hidden", "false");
+    loadingOverlay.setAttribute("aria-hidden", "true");
+    payNow.disabled = false;
+  }
 };
 
 });
