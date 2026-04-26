@@ -87,11 +87,6 @@ function getDeliveryRange(date) {
   });
 }
 
-
-
-/* ========================================
-   PAYPAL CLIENT SETUP
-======================================== */
 function getPayPalClient() {
   const environment =
     process.env.PAYPAL_ENV === "live"
@@ -108,112 +103,30 @@ function getPayPalClient() {
 }
 
 /* ========================================
-   PAYTIKO: CREATE CHECKOUT SESSION
+   PAYPAL CHECKOUT ENDPOINTS
 ======================================== */
 
-console.log("PAYTIKO_CORE_URL =", process.env.PAYTIKO_CORE_URL);
-
-
-app.post("/api/paytiko/checkout", async (req, res) => {
-  try {
-    const {
-      firstName,
-      lastName,
-      email,
-      street,
-      city,
-      zipCode,
-      amount
-    } = req.body;
-
-    // 🔒 Hard-lock product price on server
-    if (Number(amount) !== 60) {
-      return res.status(400).json({ error: "Invalid amount" });
-    }
-
-    const timestamp = Math.floor(Date.now() / 1000);
-    const orderId = `PTK-${Date.now()}`;
-
-    const rawSignature =
-  email + ";" + timestamp + ";" + process.env.PAYTIKO_MERCHANT_SECRET;
-
-
-    const signature = crypto
-      .createHash("sha256")
-      .update(rawSignature)
-      .digest("hex");
-
-    const payload = {
-  MerchantId: Number(process.env.PAYTIKO_MERCHANT_ID),
-
-  firstName,
-  lastName,
-  email,
-  phone: "",
-  countryCode: "AU",
-  currency: "USD",
-  lockedAmount: 60,
-  orderId,
-  street,
-  city,
-  zipCode,
-  timestamp,
-  signature,
-  isPayout: false
+const PAYPAL_PRICES = {
+  "one-time-35-95": "35.95",
+  "one-time-43-95": "43.95",
+  "one-time-59-95": "59.95",
 };
 
-
-console.log("PAYTIKO CONFIG", {
-  merchantId: process.env.PAYTIKO_MERCHANT_ID,
-  secret: process.env.PAYTIKO_MERCHANT_SECRET,
-  core: process.env.PAYTIKO_CORE_URL
+app.get("/api/paypal/client-id", (req, res) => {
+  res.json({
+    clientId: process.env.PAYPAL_CLIENT_ID,
+  });
 });
 
-console.log("PAYTIKO PAYLOAD", payload);
-
-
-
-    const response = await fetch(
-      `${process.env.PAYTIKO_CORE_URL}/api/sdk/checkout`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "*/*",
-          "X-Merchant-Secret": process.env.PAYTIKO_MERCHANT_SECRET
-        },
-        body: JSON.stringify(payload)
-      }
-    );
-
-    const data = await response.json();
-
-    if (!data.cashierSessionToken) {
-      console.error("Paytiko error:", data);
-      return res.status(500).json({ error: "Paytiko session failed" });
-    }
-
-    res.json({
-      sessionToken: data.cashierSessionToken,
-      orderId
-    });
-
-  } catch (err) {
-    console.error("❌ Paytiko checkout error:", err);
-    res.status(500).json({ error: "Paytiko checkout error" });
-  }
-});
-
-
-/* ========================================
-   PAYPAL: CREATE ORDER (Atlas 2)
-======================================== */
-app.post("/api/paypal/create-order", async (req, res) => {
+app.post("/api/paypal/:priceKey/create-order", async (req, res) => {
   try {
-    const { amount } = req.body;
+    const { priceKey } = req.params;
+    const { billingDetails, currency = "USD" } = req.body;
 
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ error: "Invalid amount" });
+    const amount = PAYPAL_PRICES[priceKey];
+
+    if (!amount) {
+      return res.status(400).json({ error: "Invalid PayPal price key" });
     }
 
     const client = getPayPalClient();
@@ -225,12 +138,42 @@ app.post("/api/paypal/create-order", async (req, res) => {
       purchase_units: [
         {
           amount: {
-            currency_code: "USD",
-            value: amount.toFixed(2),
+            currency_code: currency,
+            value: amount,
           },
-          description: "Atlas 2 Purchase",
+          description: `Order ${priceKey}`,
+          shipping: billingDetails?.address
+            ? {
+                name: {
+                  full_name: billingDetails.name || "",
+                },
+                address: {
+                  address_line_1: billingDetails.address.line1 || "",
+                  admin_area_2: billingDetails.address.city || "",
+                  postal_code: billingDetails.address.postal_code || "",
+                  country_code: billingDetails.address.country || "US",
+                },
+              }
+            : undefined,
         },
       ],
+      payer: billingDetails
+        ? {
+            name: {
+              given_name: billingDetails.firstName || "",
+              surname: billingDetails.lastName || "",
+            },
+            email_address: billingDetails.email || "",
+            phone: billingDetails.phone
+              ? {
+                  phone_type: "MOBILE",
+                  phone_number: {
+                    national_number: billingDetails.phone.replace(/\D/g, "").slice(-15),
+                  },
+                }
+              : undefined,
+          }
+        : undefined,
     });
 
     const order = await client.execute(request);
@@ -242,9 +185,6 @@ app.post("/api/paypal/create-order", async (req, res) => {
   }
 });
 
-/* ========================================
-   PAYPAL: CAPTURE ORDER (Atlas 2)
-======================================== */
 app.post("/api/paypal/capture-order", async (req, res) => {
   try {
     const { orderID } = req.body;
@@ -261,7 +201,7 @@ app.post("/api/paypal/capture-order", async (req, res) => {
     const capture = await client.execute(request);
 
     if (capture.result.status !== "COMPLETED") {
-      throw new Error("Payment not completed");
+      return res.status(400).json({ error: "Payment not completed" });
     }
 
     res.json({
