@@ -264,8 +264,10 @@ method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p
         throw result.error;
       }
 
-        location.href =
-          'https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7';
+        const currentParams = new URLSearchParams(window.location.search);
+const baseUrl = 'https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7';
+const finalUrl = baseUrl + (baseUrl.includes('?') ? '&' : '?') + currentParams.toString();
+location.href = finalUrl;
       
     }catch(e){
       err.textContent=e.message;err.setAttribute('aria-hidden','false');
