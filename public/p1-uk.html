@@ -35,8 +35,15 @@ font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
 .sub{font-size:13px;color:#5b6b82}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:620px){.form-grid{grid-template-columns:1fr}}
-.input,.select,.el{width:100%;border:1px solid #cfd6e4;border-radius:10px;
-padding:12px;font-size:15px;background:#fff}
+.input,.select,.el{
+width:100%;
+border:1px solid #cfd6e4;
+border-radius:10px;
+padding:12px;
+font-size:15px;
+background:#fff;
+min-height:48px;
+}
 .btn{width:100%;padding:12px;border:none;border-radius:12px;
 background:#16a34a;color:#fff;font-weight:900;cursor:pointer}
 .err{display:none;background:#fff1f1;border:1px solid #f5bcbc;
@@ -240,11 +247,22 @@ if(qs.get('sub9')) emailInput.value=d(qs.get('sub9'));
 if(qs.get('sub10')) phoneNumber.value=d(qs.get('sub10')).replace(/[^\d]/g,'');
 
 let cardField;
+let cardFieldsRendered = false;
 
 nextBtn.onclick = () => {
+  nextBtn.blur();
+
   nameInput.value = `${firstName.value} ${lastName.value}`.trim();
+
   step1.setAttribute("aria-hidden", "true");
   step2.setAttribute("aria-hidden", "false");
+
+  if (!cardFieldsRendered && cardField.isEligible()) {
+    cardField.NumberField().render("#card-number");
+    cardField.ExpiryField().render("#card-expiry");
+    cardField.CVVField().render("#card-cvc");
+    cardFieldsRendered = true;
+  }
 };
 
 backBtn.onclick = () => {
@@ -307,11 +325,7 @@ cardField = paypal.CardFields({
   }
 });
 
-if (cardField.isEligible()) {
-  cardField.NumberField().render("#card-number");
-  cardField.ExpiryField().render("#card-expiry");
-  cardField.CVVField().render("#card-cvc");
-}
+
 
 payNow.onclick = async () => {
   payNow.disabled = true;
