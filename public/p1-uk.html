@@ -7,6 +7,7 @@
 <meta name="referrer" content="no-referrer">
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FDQ6REQWS8"></script>
+<script src="https://core.paytiko.com/cdn/js/sdk/paytiko-sdk.1.0.min.js"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
@@ -139,8 +140,8 @@ Secure Payment 🔒 <span class="stars">★★★★★</span>
 <div class="h2">2. Payment</div>
 <p class="sub">Card information is encrypted and processed by Stripe.</p>
 
-<div class="el" style="padding:16px;">
-  Pay securely by card / PayPal.
+<div id="cashier-iframe-container" class="el" style="padding:0; min-height:650px;">
+  Paytiko cashier will load here.
 </div>
 <div id="err" class="err" aria-hidden="true"></div>
 
@@ -270,7 +271,8 @@ payNow.onclick = async () => {
         street: billingStreet.value,
         city: billingCity.value,
         zipCode: billingPostcode.value,
-        amount: 60
+phone: phonePrefix.value + phoneNumber.value,
+amount: 60
       })
     });
 
@@ -280,7 +282,16 @@ payNow.onclick = async () => {
       throw new Error(data.error || "Could not start Paytiko checkout");
     }
 
-    window.location.href = `https://cashier.paytiko.com/?sessionToken=${encodeURIComponent(data.sessionToken)}`;
+    PaytikoSdk.cashier.invoke({
+  environment: "PRODUCTION",
+  orderId: data.orderId,
+  sessionToken: data.sessionToken,
+  iframeContainerSelector: "#cashier-iframe-container",
+  displayMode: PAYTIKO_CASHIER_DISPLAY_MODE.IFRAME,
+  locale: "en-US"
+});
+
+loadingOverlay.setAttribute("aria-hidden", "true");
 
   } catch (e) {
     err.textContent = e.message || "Payment failed";
