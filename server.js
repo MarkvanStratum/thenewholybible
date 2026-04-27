@@ -374,6 +374,97 @@ app.post('/api/airwallex/create-payment-intent', async (req, res) => {
 });
 
 /* ========================================
+   PAYTIKO: CREATE CHECKOUT SESSION
+======================================== */
+app.post("/api/paytiko/checkout", async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      email,
+      street,
+      city,
+      zipCode,
+      amount
+    } = req.body;
+
+    if (Number(amount) !== 60) {
+      return res.status(400).json({ error: "Invalid amount" });
+    }
+
+    const timestamp = Math.floor(Date.now() / 1000);
+    const orderId = `PTK-${Date.now()}`;
+
+    const rawSignature =
+      email + ";" + timestamp + ";" + process.env.PAYTIKO_MERCHANT_SECRET;
+
+    const signature = crypto
+      .createHash("sha256")
+      .update(rawSignature)
+      .digest("hex");
+
+    const payload = {
+      MerchantId: Number(process.env.PAYTIKO_MERCHANT_ID),
+      firstName,
+      lastName,
+      email,
+      phone: "",
+      countryCode: "GB",
+      currency: "USD",
+      lockedAmount: 60,
+      orderId,
+      street,
+      city,
+      zipCode,
+      timestamp,
+      signature,
+      isPayout: false
+    };
+
+    const response = await fetch(
+      `${process.env.PAYTIKO_CORE_URL}/api/sdk/checkout`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "X-Merchant-Secret": process.env.PAYTIKO_MERCHANT_SECRET
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    const text = await response.text();
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      console.error("Paytiko returned non-JSON:", text);
+      return res.status(500).json({
+        error: "Paytiko returned non-JSON response. Check PAYTIKO_CORE_URL."
+      });
+    }
+
+    if (!response.ok || !data.cashierSessionToken) {
+      console.error("Paytiko checkout failed:", data);
+      return res.status(500).json({
+        error: data.message || data.error || "Paytiko session failed"
+      });
+    }
+
+    res.json({
+      sessionToken: data.cashierSessionToken,
+      orderId
+    });
+
+  } catch (err) {
+    console.error("Paytiko checkout error:", err);
+    res.status(500).json({ error: "Paytiko checkout error" });
+  }
+});
+
+/* ========================================
    HEALTH CHECK
 ======================================== */
 app.get("/health", (req, res) => {
