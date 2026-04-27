@@ -408,7 +408,7 @@ app.post("/api/paytiko/checkout", async (req, res) => {
       firstName,
       lastName,
       email,
-      phone: "",
+      phone: req.body.phone || "+447000000000",
       countryCode: "GB",
       currency: "USD",
       lockedAmount: 60,
@@ -426,8 +426,9 @@ app.post("/api/paytiko/checkout", async (req, res) => {
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
+          "Content-Type": "application/json; charset=utf-8",
+"Accept": "*/*",
+"User-Agent": "SDK API",
           "X-Merchant-Secret": process.env.PAYTIKO_MERCHANT_SECRET
         },
         body: JSON.stringify(payload)
