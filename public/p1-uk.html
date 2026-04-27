@@ -139,14 +139,9 @@ Secure Payment 🔒 <span class="stars">★★★★★</span>
 <div class="h2">2. Payment</div>
 <p class="sub">Card information is encrypted and processed by Stripe.</p>
 
-<div>
-<div id="card-number" class="el"></div>
-<div class="form-grid">
-<div id="card-expiry" class="el"></div>
-<div id="card-cvc" class="el"></div>
+<div class="el" style="padding:16px;">
+  Pay securely by card / PayPal.
 </div>
-</div>
-
 <div id="err" class="err" aria-hidden="true"></div>
 
 <div style="display:flex;gap:10px;margin-top:12px">
@@ -203,8 +198,6 @@ Secure Payment 🔒 <span class="stars">★★★★★</span>
 </div>
 </div>
 
-<script src="https://www.paypal.com/sdk/js?client-id=BAAjQeVZJ2beAorZkX0N_BIAHdi042a8u2_RV1668fZNa4qc-024KtRb1Pi1MWYB7eD-9OlyfPgM2F7eKM&currency=USD&components=card-fields"></script>
-
 <script>
 window.addEventListener('DOMContentLoaded',()=>{
 
@@ -246,31 +239,12 @@ if(qs.get('sub7')) billingCity.value=d(qs.get('sub7'));
 if(qs.get('sub9')) emailInput.value=d(qs.get('sub9'));
 if(qs.get('sub10')) phoneNumber.value=d(qs.get('sub10')).replace(/[^\d]/g,'');
 
-let cardField;
-let cardFieldsRendered = false;
-
 nextBtn.onclick = () => {
   nextBtn.blur();
-
   nameInput.value = `${firstName.value} ${lastName.value}`.trim();
 
   step1.setAttribute("aria-hidden", "true");
   step2.setAttribute("aria-hidden", "false");
-
-  if (!cardFieldsRendered) {
-  console.log("PayPal Card Fields eligible:", cardField.isEligible());
-
-  if (!cardField.isEligible()) {
-    err.textContent = "PayPal card fields are not eligible for this account/client ID. Check that Advanced Credit and Debit Card Payments is enabled for this Live app.";
-    err.setAttribute("aria-hidden", "false");
-    return;
-  }
-
-  cardField.NumberField().render("#card-number");
-  cardField.ExpiryField().render("#card-expiry");
-  cardField.CVVField().render("#card-cvc");
-  cardFieldsRendered = true;
-}
 };
 
 backBtn.onclick = () => {
@@ -278,70 +252,36 @@ backBtn.onclick = () => {
   step1.setAttribute("aria-hidden", "false");
 };
 
-cardField = paypal.CardFields({
-  createOrder: async () => {
-    const r = await fetch("/api/paypal/one-time-59-95/create-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        currency: "USD",
-        billingDetails: {
-          name: nameInput.value,
-          email: emailInput.value,
-          phone: phonePrefix.value + phoneNumber.value,
-          address: {
-            line1: billingStreet.value,
-            city: billingCity.value,
-            postal_code: billingPostcode.value,
-            country: "GB"
-          }
-        }
-      })
-    });
-
-    const data = await r.json();
-
-    if (!data.id) {
-      throw new Error(data.error || "Could not create PayPal order");
-    }
-
-    return data.id;
-  },
-
-  onApprove: async (data) => {
-    const r = await fetch("/api/paypal/capture-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderID: data.orderID })
-    });
-
-    const result = await r.json();
-
-    if (result.status === "COMPLETED") {
-      window.location.href = "https://cudsr.bemobtrcks.com/go/abc281a7-e82a-411b-8b56-1a0228d7d2e7";
-      return;
-    }
-
-    throw new Error(result.error || "Payment not completed");
-  },
-
-  onError: (error) => {
-    err.textContent = error.message || "Payment failed";
-    err.setAttribute("aria-hidden", "false");
-    loadingOverlay.setAttribute("aria-hidden", "true");
-    payNow.disabled = false;
-  }
-});
-
-
-
 payNow.onclick = async () => {
   payNow.disabled = true;
   err.setAttribute("aria-hidden", "true");
   loadingOverlay.setAttribute("aria-hidden", "false");
 
   try {
-    await cardField.submit();
+    const response = await fetch("/api/paytiko/checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        firstName: firstName.value,
+        lastName: lastName.value,
+        email: emailInput.value,
+        street: billingStreet.value,
+        city: billingCity.value,
+        zipCode: billingPostcode.value,
+        amount: 60
+      })
+    });
+
+    const data = await response.json();
+
+    if (!data.sessionToken) {
+      throw new Error(data.error || "Could not start Paytiko checkout");
+    }
+
+    window.location.href = `https://cashier.paytiko.com/?sessionToken=${encodeURIComponent(data.sessionToken)}`;
+
   } catch (e) {
     err.textContent = e.message || "Payment failed";
     err.setAttribute("aria-hidden", "false");
@@ -349,7 +289,6 @@ payNow.onclick = async () => {
     payNow.disabled = false;
   }
 };
-
 });
 </script>
 
